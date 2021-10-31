@@ -1,0 +1,6 @@
+name: Analyse
+main: net.analyse.plugin.AnalysePlugin
+version: ${version}
+author: "Analyse"
+website: "https://analyse.net"
+description: "Understand your Minecraft audience and monetise your server better."

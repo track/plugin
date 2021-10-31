@@ -2,7 +2,7 @@ package net.analyse.plugin.listener;
 
 import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.json.PlayerSessionRequest;
-import net.analyse.plugin.json.object.PlayerStat;
+import net.analyse.plugin.json.object.PlayerStatistic;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -26,7 +26,7 @@ public class PlayerActivityListener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-
+        plugin.getActiveJoinMap().put(event.getPlayer().getUniqueId(), new Date());
     }
 
     @EventHandler
@@ -38,7 +38,7 @@ public class PlayerActivityListener {
                 player.getName(), // username
                 null, // get time they joined at
                 new Date(), // the time they quit at
-                Arrays.asList(new PlayerStat("magic", 32), new PlayerStat("kills", 300)) // their stats
+                Arrays.asList(new PlayerStatistic("magic", 32), new PlayerStatistic("kills", 300)) // their stats
         );
 
         HttpClient client = HttpClient.newHttpClient();

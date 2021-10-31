@@ -1,11 +1,11 @@
 package net.analyse.plugin.json.object;
 
-public class PlayerStat {
+public class PlayerStatistic {
 
     private final String key;
     private final Object value;
 
-    public PlayerStat(String key, Object value) {
+    public PlayerStatistic(String key, Object value) {
         this.key = key;
         this.value = value;
     }

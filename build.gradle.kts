@@ -29,6 +29,12 @@ version = "1.0.0"
 description = "Analyse"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
+tasks.withType<ProcessResources> {
+    filesMatching("**/plugin.yml") {
+        expand("version" to project.version)
+    }
+}
+
 //tasks.withType<ShadowJar> {
 //    relocate("com.codeitforyou.lib", "${project.group}.spoof.lib")
 //    relocate("net.jafama", "${project.group}.spoof.math")
