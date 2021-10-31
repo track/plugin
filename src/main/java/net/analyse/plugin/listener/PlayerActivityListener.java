@@ -36,10 +36,12 @@ public class PlayerActivityListener {
         PlayerSessionRequest playerSessionRequest = new PlayerSessionRequest(
                 player.getUniqueId(), // uuid
                 player.getName(), // username
-                null, // get time they joined at
+                plugin.getActiveJoinMap().getOrDefault(player.getUniqueId(), null), // get time they joined at
                 new Date(), // the time they quit at
                 Arrays.asList(new PlayerStatistic("magic", 32), new PlayerStatistic("kills", 300)) // their stats
         );
+
+        plugin.getActiveJoinMap().remove(player.getUniqueId());
 
         HttpClient client = HttpClient.newHttpClient();
 
