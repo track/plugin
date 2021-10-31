@@ -27,12 +27,22 @@ dependencies {
 group = "net.analyse"
 version = "1.0.0"
 description = "Analyse"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.sourceCompatibility = JavaVersion.VERSION_16
+
+val shadowJar: ShadowJar by tasks
+shadowJar.apply {
+    destinationDirectory.set(File("/Users/charlie/Documents/MCServer/plugins/"))
+}
 
 tasks.withType<ProcessResources> {
     filesMatching("**/plugin.yml") {
         expand("version" to project.version)
     }
+}
+
+tasks.register<Copy>("copyJarToServerPlugins") {
+    from(tasks.getByPath("shadowJar"))
+    into(layout.projectDirectory.dir("server/plugins"))
 }
 
 //tasks.withType<ShadowJar> {

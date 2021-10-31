@@ -6,6 +6,7 @@ import net.analyse.plugin.request.object.PlayerStatistic;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -14,21 +15,21 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
 
-public class PlayerActivityListener {
+public class PlayerActivityListener implements Listener {
 
     private final AnalysePlugin plugin;
 
     public PlayerActivityListener(AnalysePlugin plugin) {
         this.plugin = plugin;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        plugin.getLogger().info("Tracking " + event.getPlayer().getName() + " to current time");
         plugin.getActiveJoinMap().put(event.getPlayer().getUniqueId(), new Date());
     }
 
