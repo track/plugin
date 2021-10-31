@@ -1,4 +1,4 @@
-package net.analyse.plugin.json.object;
+package net.analyse.plugin.request.object;
 
 public class PlayerStatistic {
 

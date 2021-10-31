@@ -1,8 +1,8 @@
 package net.analyse.plugin.listener;
 
 import net.analyse.plugin.AnalysePlugin;
-import net.analyse.plugin.json.PlayerSessionRequest;
-import net.analyse.plugin.json.object.PlayerStatistic;
+import net.analyse.plugin.request.PlayerSessionRequest;
+import net.analyse.plugin.request.object.PlayerStatistic;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

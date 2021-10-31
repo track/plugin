@@ -1,0 +1,9 @@
+# Analyse - v${version}
+# Welcome to the configuration file.
+
+hooks:
+  placeholderapi: true
+
+enabled-stats:
+  - "total_memes"
+  - "total_kills"

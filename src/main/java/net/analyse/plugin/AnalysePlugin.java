@@ -10,11 +10,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public class AnalysePlugin extends JavaPlugin {
-
     private final Map<UUID, Date> activeJoinMap = new TCustomHashMap<>(new IdentityHashingStrategy<>());
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
+
         new PlayerActivityListener(this);
     }
 

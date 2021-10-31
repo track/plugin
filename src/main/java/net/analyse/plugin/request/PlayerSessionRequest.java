@@ -1,9 +1,9 @@
-package net.analyse.plugin.json;
+package net.analyse.plugin.request;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
-import net.analyse.plugin.json.object.PlayerStatistic;
+import net.analyse.plugin.request.object.PlayerStatistic;
 
 import java.util.Date;
 import java.util.List;
