@@ -16,6 +16,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class PlayerActivityListener {
 
@@ -34,13 +36,18 @@ public class PlayerActivityListener {
     public void onPlayerLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
+        List<String> enabledStats = plugin.getConfig().getStringList("enabled-stats");
+
+        // TODO: Make this dynamic.
+        List<PlayerStatistic> playerStatistics = enabledStats.stream().map(enabledStat -> new PlayerStatistic(enabledStat, Math.random() * 10)).toList();
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             PlayerSessionRequest playerSessionRequest = new PlayerSessionRequest(
                     player.getUniqueId(), // uuid
                     player.getName(), // username
                     plugin.getActiveJoinMap().getOrDefault(player.getUniqueId(), null), // get time they joined at
                     new Date(), // the time they quit at
-                    Arrays.asList(new PlayerStatistic("magic", 32), new PlayerStatistic("kills", 300)) // their stats
+                    playerStatistics // their stats
             );
 
             plugin.getActiveJoinMap().remove(player.getUniqueId());
