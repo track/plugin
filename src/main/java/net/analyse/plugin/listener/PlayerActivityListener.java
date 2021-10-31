@@ -3,6 +3,7 @@ package net.analyse.plugin.listener;
 import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.json.PlayerSessionRequest;
 import net.analyse.plugin.json.object.PlayerStatistic;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -33,34 +34,36 @@ public class PlayerActivityListener {
     public void onPlayerLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
-        PlayerSessionRequest playerSessionRequest = new PlayerSessionRequest(
-                player.getUniqueId(), // uuid
-                player.getName(), // username
-                plugin.getActiveJoinMap().getOrDefault(player.getUniqueId(), null), // get time they joined at
-                new Date(), // the time they quit at
-                Arrays.asList(new PlayerStatistic("magic", 32), new PlayerStatistic("kills", 300)) // their stats
-        );
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            PlayerSessionRequest playerSessionRequest = new PlayerSessionRequest(
+                    player.getUniqueId(), // uuid
+                    player.getName(), // username
+                    plugin.getActiveJoinMap().getOrDefault(player.getUniqueId(), null), // get time they joined at
+                    new Date(), // the time they quit at
+                    Arrays.asList(new PlayerStatistic("magic", 32), new PlayerStatistic("kills", 300)) // their stats
+            );
 
-        plugin.getActiveJoinMap().remove(player.getUniqueId());
+            plugin.getActiveJoinMap().remove(player.getUniqueId());
 
-        HttpClient client = HttpClient.newHttpClient();
+            HttpClient client = HttpClient.newHttpClient();
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://127.0.0.1:8000/api/test"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(playerSessionRequest.toJSON()))
-                .build();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://127.0.0.1:8000/api/test"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(playerSessionRequest.toJSON()))
+                    .build();
 
-        try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.body());
-        } catch (IOException e) {
-            // TODO: Handle this.
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            // TODO: Handle this.
-            e.printStackTrace();
-        }
+            try {
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                System.out.println(response.body());
+            } catch (IOException e) {
+                // TODO: Handle this.
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                // TODO: Handle this.
+                e.printStackTrace();
+            }
+        });
     }
 
 }
