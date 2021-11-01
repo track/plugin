@@ -1,6 +1,8 @@
 # Analyse - v${version}
 # Welcome to the configuration file.
 
+server-token: ""
+
 hooks:
   placeholderapi: true
 

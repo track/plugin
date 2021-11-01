@@ -20,13 +20,16 @@ public class PlayerSessionRequest {
     @SerializedName("quit_at")
     private final Date quitAt;
 
+    private final String domain;
+
     private final List<PlayerStatistic> stats;
 
-    public PlayerSessionRequest(UUID uuid, String username, Date joinedAt, Date quitAt, List<PlayerStatistic> stats) {
+    public PlayerSessionRequest(UUID uuid, String username, Date joinedAt, Date quitAt, String domain, List<PlayerStatistic> stats) {
         this.uuid = uuid;
         this.username = username;
         this.joinedAt = joinedAt;
         this.quitAt = quitAt;
+        this.domain = domain;
         this.stats = stats;
     }
 

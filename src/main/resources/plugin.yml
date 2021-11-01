@@ -4,3 +4,6 @@ version: ${version}
 author: "Analyse"
 website: "https://analyse.net"
 description: "Understand your Minecraft audience and monetise your server better."
+commands:
+  analyse:
+    description: Main command of the plugin
