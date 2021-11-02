@@ -3,12 +3,16 @@ package net.analyse.plugin.request;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import net.analyse.plugin.request.object.PlayerStatistic;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+@AllArgsConstructor @Builder
 public class PlayerSessionRequest {
 
     private final UUID uuid;
@@ -22,16 +26,7 @@ public class PlayerSessionRequest {
 
     private final String domain;
 
-    private final List<PlayerStatistic> stats;
-
-    public PlayerSessionRequest(UUID uuid, String username, Date joinedAt, Date quitAt, String domain, List<PlayerStatistic> stats) {
-        this.uuid = uuid;
-        this.username = username;
-        this.joinedAt = joinedAt;
-        this.quitAt = quitAt;
-        this.domain = domain;
-        this.stats = stats;
-    }
+    @Builder.Default private final List<PlayerStatistic> stats = new ArrayList<>();
 
     public String toJSON() {
         Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create();
