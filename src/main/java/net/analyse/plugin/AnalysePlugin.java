@@ -3,6 +3,7 @@ package net.analyse.plugin;
 import gnu.trove.map.hash.TCustomHashMap;
 import gnu.trove.strategy.IdentityHashingStrategy;
 import net.analyse.plugin.commands.AnalyseCommand;
+import net.analyse.plugin.event.ServerHeartBeatEvent;
 import net.analyse.plugin.listener.PlayerActivityListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,6 +18,7 @@ public class AnalysePlugin extends JavaPlugin {
     private final Map<UUID, String> playerDomainMap = new TCustomHashMap<>(new IdentityHashingStrategy<>());
 
     private boolean setup;
+    private ServerHeartBeatEvent serverHeartBeatEvent;
 
     @Override
     public void onEnable() {
@@ -28,9 +30,13 @@ public class AnalysePlugin extends JavaPlugin {
         getCommand("analyse").setExecutor(new AnalyseCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerActivityListener(this), this);
 
+        serverHeartBeatEvent = new ServerHeartBeatEvent(this);
+
         if(!setup) {
             getLogger().info("Hey! I'm not yet set-up, please run the following command:");
             getLogger().info("/analyse setup <server-token>");
+        } else {
+            Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> serverHeartBeatEvent.run(), 0, 1000 * 30);
         }
     }
 
