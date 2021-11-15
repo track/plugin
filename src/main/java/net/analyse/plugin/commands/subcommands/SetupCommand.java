@@ -31,12 +31,14 @@ public class SetupCommand extends SubCommand {
                 .header("X-ANALYSE-TOKEN", serverToken);
 
         HttpResponse<String> httpResponse = apiRequest.send();
+        System.out.println(httpResponse.body());
         JsonObject bodyJson = new Gson().fromJson(httpResponse.body(), JsonObject.class);
 
         if(httpResponse.statusCode() == 200) {
-            player.sendMessage(plugin.parse("&b[Analyse] &7Successfully linked to &b'" + bodyJson.get("name").getAsString() + "'&7."));
+            JsonObject serverJson = bodyJson.getAsJsonObject("server");
+            player.sendMessage(plugin.parse("&7Successfully setup server with token &b" + serverJson.get("name").getAsString() + "&7."));
             plugin.getConfig().set("server-token", serverToken);
-            plugin.getConfig().set("server-id", bodyJson.get("uuid").getAsString());
+            plugin.getConfig().set("server-id", serverJson.get("uuid").getAsString());
             plugin.saveConfig();
             plugin.setSetup(true);
         } else {

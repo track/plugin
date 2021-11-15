@@ -24,19 +24,17 @@ public class AnalysePlugin extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
-        // TODO: Send an api call after to check the token, and disable.
         setup = getConfig().getString("server-token") != null && !getConfig().getString("server-token").isEmpty();
 
         getCommand("analyse").setExecutor(new AnalyseCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerActivityListener(this), this);
 
         serverHeartBeatEvent = new ServerHeartBeatEvent(this);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> serverHeartBeatEvent.run(), 0, 20 * 10);
 
         if(!setup) {
             getLogger().info("Hey! I'm not yet set-up, please run the following command:");
             getLogger().info("/analyse setup <server-token>");
-        } else {
-            Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> serverHeartBeatEvent.run(), 0, 1000 * 30);
         }
     }
 

@@ -27,7 +27,7 @@ public class PlayerActivityListener implements Listener {
     public void onPlayerLogin(PlayerLoginEvent event) {
         if(!plugin.isSetup()) return;
 
-        System.out.println(event.getHostname());
+        plugin.getLogger().info("Player connecting via: " + event.getHostname());
         plugin.getPlayerDomainMap().put(event.getPlayer().getUniqueId(), event.getHostname());
     }
 

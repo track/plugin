@@ -22,17 +22,32 @@ public class ServerHeartBeatEvent implements Event {
 
     @Override
     public void run() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            ServerHeartbeatRequest serverHeartbeatRequest = new ServerHeartbeatRequest(Arrays.asList(new PlayerStatistic("online", Bukkit.getOnlinePlayers().size()), new PlayerStatistic("max", Bukkit.getMaxPlayers())));
+        if(!plugin.isSetup()) return;
 
-            PluginAPIRequest apiRequest = new PluginAPIRequest("server/heartbeat");
+        plugin.getLogger().info("Sending a heartbeat..");
 
-            apiRequest.getRequest()
-                    .header("Content-Type", "application/json")
-                    .header("X-ANALYSE-TOKEN", plugin.getConfig().getString("server-token"))
-                    .POST(HttpRequest.BodyPublishers.ofString(serverHeartbeatRequest.toJSON()));
+        ServerHeartbeatRequest serverHeartbeatRequest = new ServerHeartbeatRequest(
+                Arrays.asList(
+                        new PlayerStatistic("online", Bukkit.getOnlinePlayers().size()),
+                        new PlayerStatistic("max", Bukkit.getMaxPlayers())
+                )
+        );
 
-            HttpResponse<String> httpResponse = apiRequest.send();
-        });
+        PluginAPIRequest apiRequest = new PluginAPIRequest("server/heartbeat");
+
+        apiRequest.getRequest()
+                .header("Content-Type", "application/json")
+                .header("X-ANALYSE-TOKEN", plugin.getConfig().getString("server-token"))
+                .POST(HttpRequest.BodyPublishers.ofString(serverHeartbeatRequest.toJSON()));
+
+        HttpResponse<String> httpResponse = apiRequest.send();
+
+        if(httpResponse.statusCode() == 404) {
+            plugin.getLogger().severe("The server that was configured no longer exists!");
+            plugin.setSetup(false);
+            return;
+        }
+
+        System.out.println(httpResponse.body());
     }
 }

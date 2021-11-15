@@ -6,6 +6,7 @@ server-token: ""
 hooks:
   placeholderapi: true
 
-enabled-stats:
-  - "total_memes"
-  - "total_kills"
+stats:
+  player:
+    - "kills"
+    - "deaths"
