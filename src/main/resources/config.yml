@@ -6,6 +6,13 @@ server-token: ""
 hooks:
   placeholderapi: true
 
+excluded:
+  # Exclude players with their uuids.
+  players: []
+  # For example:
+  # players:
+  #  - "12345-12345-12345-12345"
+
 stats:
   player:
     - "kills"

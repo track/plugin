@@ -26,6 +26,7 @@ public class PlayerActivityListener implements Listener {
     @EventHandler
     public void onPlayerLogin(PlayerLoginEvent event) {
         if(!plugin.isSetup()) return;
+        if(plugin.getConfig().getStringList("excluded.players").contains(event.getPlayer().getUniqueId().toString())) return;
 
         plugin.getLogger().info("Player connecting via: " + event.getHostname());
         plugin.getPlayerDomainMap().put(event.getPlayer().getUniqueId(), event.getHostname());
@@ -34,6 +35,7 @@ public class PlayerActivityListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         if(!plugin.isSetup()) return;
+        if(plugin.getConfig().getStringList("excluded.players").contains(event.getPlayer().getUniqueId().toString())) return;
 
         plugin.getLogger().info("Tracking " + event.getPlayer().getName() + " to current time");
         plugin.getActiveJoinMap().put(event.getPlayer().getUniqueId(), new Date());
@@ -42,6 +44,7 @@ public class PlayerActivityListener implements Listener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
         if(!plugin.isSetup()) return;
+        if(plugin.getConfig().getStringList("excluded.players").contains(event.getPlayer().getUniqueId().toString())) return;
 
         Player player = event.getPlayer();
 
