@@ -26,6 +26,9 @@ public class PlayerSessionRequest {
 
     private final String domain;
 
+    @SerializedName("ip_address")
+    private String ipAddress;
+
     @Builder.Default private final List<PlayerStatistic> stats = new ArrayList<>();
 
     public String toJSON() {

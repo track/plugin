@@ -60,6 +60,7 @@ public class PlayerActivityListener implements Listener {
                     plugin.getActiveJoinMap().getOrDefault(player.getUniqueId(), null), // get time they joined at
                     new Date(), // the time they quit at
                     plugin.getPlayerDomainMap().getOrDefault(player.getUniqueId(), null), // get domain used
+                    player.getAddress().getHostString(), // player ip
                     playerStatistics // their stats
             );
 

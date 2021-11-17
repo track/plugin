@@ -1,7 +1,6 @@
 package net.analyse.plugin.event;
 
 import net.analyse.plugin.AnalysePlugin;
-import net.analyse.plugin.request.PlayerSessionRequest;
 import net.analyse.plugin.request.PluginAPIRequest;
 import net.analyse.plugin.request.ServerHeartbeatRequest;
 import net.analyse.plugin.request.object.PlayerStatistic;
@@ -10,7 +9,6 @@ import org.bukkit.Bukkit;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Arrays;
-import java.util.Date;
 
 public class ServerHeartBeatEvent implements Event {
 
