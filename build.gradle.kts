@@ -21,9 +21,10 @@ dependencies {
 //    implementation("redis.clients:jedis:3.6.0")
 //    implementation("net.jafama:jafama:2.3.2")
     implementation("net.sf.trove4j:trove4j:3.0.3")
+    implementation("com.maxmind.geoip2:geoip2:3.0.0")
     compileOnly("org.projectlombok:lombok:1.18.22")
     annotationProcessor("org.projectlombok:lombok:1.18.22")
-    compileOnly("org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT")
+    compileOnly("org.spigotmc:spigot-api:1.18-R0.1-SNAPSHOT")
     compileOnly("com.google.code.gson:gson:2.8.9")
 }
 
