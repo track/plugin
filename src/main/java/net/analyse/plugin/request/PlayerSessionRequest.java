@@ -29,6 +29,9 @@ public class PlayerSessionRequest {
     @SerializedName("ip_address")
     private String ipAddress;
 
+    @SerializedName("country")
+    private String country;
+
     @Builder.Default private final List<PlayerStatistic> stats = new ArrayList<>();
 
     public String toJSON() {

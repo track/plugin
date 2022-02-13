@@ -4,6 +4,8 @@ import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.request.PlayerSessionRequest;
 import net.analyse.plugin.request.PluginAPIRequest;
 import net.analyse.plugin.request.object.PlayerStatistic;
+import net.analyse.plugin.util.EncryptUtil;
+import net.analyse.plugin.util.LocationUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -53,16 +55,23 @@ public class PlayerActivityListener implements Listener {
         // TODO: Make this dynamic.
         List<PlayerStatistic> playerStatistics = enabledStats.stream().map(enabledStat -> new PlayerStatistic(enabledStat, Math.random() * 10)).toList();
 
+        String playerIp = player.getAddress().getHostString();
+        String ipCountry = LocationUtil.fromIp(playerIp);
+        String ipHashed = EncryptUtil.toSHA256(playerIp, plugin.getEncryptionKey().getBytes());
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             PlayerSessionRequest playerSessionRequest = new PlayerSessionRequest(
-                    player.getUniqueId(), // uuid
-                    player.getName(), // username
-                    plugin.getActiveJoinMap().getOrDefault(player.getUniqueId(), null), // get time they joined at
-                    new Date(), // the time they quit at
-                    plugin.getPlayerDomainMap().getOrDefault(player.getUniqueId(), null), // get domain used
-                    player.getAddress().getHostString(), // player ip
-                    playerStatistics // their stats
+                    player.getUniqueId(),
+                    player.getName(),
+                    plugin.getActiveJoinMap().getOrDefault(player.getUniqueId(), null),
+                    new Date(),
+                    plugin.getPlayerDomainMap().getOrDefault(player.getUniqueId(), null),
+                    ipHashed,
+                    ipCountry,
+                    playerStatistics
             );
+
+            System.out.println(playerSessionRequest.toJSON());
 
             plugin.getActiveJoinMap().remove(player.getUniqueId());
             plugin.getPlayerDomainMap().remove(player.getUniqueId());
