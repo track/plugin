@@ -5,19 +5,26 @@ import gnu.trove.strategy.IdentityHashingStrategy;
 import net.analyse.plugin.commands.AnalyseCommand;
 import net.analyse.plugin.event.ServerHeartBeatEvent;
 import net.analyse.plugin.listener.PlayerActivityListener;
+import net.analyse.plugin.util.EncryptUtil;
+import net.analyse.plugin.util.LocationUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
+
+import static net.analyse.plugin.util.EncryptUtil.generateEncryptionKey;
 
 public class AnalysePlugin extends JavaPlugin {
     private final Map<UUID, Date> activeJoinMap = new TCustomHashMap<>(new IdentityHashingStrategy<>());
     private final Map<UUID, String> playerDomainMap = new TCustomHashMap<>(new IdentityHashingStrategy<>());
 
     private boolean setup;
+    private String encryptionKey;
     private ServerHeartBeatEvent serverHeartBeatEvent;
 
     @Override
@@ -25,12 +32,20 @@ public class AnalysePlugin extends JavaPlugin {
         saveDefaultConfig();
 
         setup = getConfig().getString("server-token") != null && !getConfig().getString("server-token").isEmpty();
+        encryptionKey = getConfig().getString("encryption-key");
 
         getCommand("analyse").setExecutor(new AnalyseCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerActivityListener(this), this);
 
         serverHeartBeatEvent = new ServerHeartBeatEvent(this);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> serverHeartBeatEvent.run(), 0, 20 * 10);
+
+        if(encryptionKey == null || encryptionKey.isEmpty()) {
+            encryptionKey = generateEncryptionKey(64);
+            getConfig().set("encryption-key", encryptionKey);
+            getLogger().info("Generated encryption key.");
+            saveConfig();
+        }
 
         if(!setup) {
             getLogger().info("Hey! I'm not yet set-up, please run the following command:");
@@ -61,5 +76,9 @@ public class AnalysePlugin extends JavaPlugin {
 
     public String parse(String str) {
         return ChatColor.translateAlternateColorCodes('&', str);
+    }
+
+    public String getEncryptionKey() {
+        return encryptionKey;
     }
 }
