@@ -10,11 +10,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Arrays;
 
-public class ServerHeartBeatEvent implements Event {
+public class ServerHeartbeatEvent implements Event {
 
     private AnalysePlugin plugin;
 
-    public ServerHeartBeatEvent(AnalysePlugin plugin) {
+    public ServerHeartbeatEvent(AnalysePlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -24,18 +24,13 @@ public class ServerHeartBeatEvent implements Event {
 
         plugin.getLogger().info("Sending a heartbeat..");
 
-        ServerHeartbeatRequest serverHeartbeatRequest = new ServerHeartbeatRequest(
-                Arrays.asList(
-                        new PlayerStatistic("online", Bukkit.getOnlinePlayers().size()),
-                        new PlayerStatistic("max", Bukkit.getMaxPlayers())
-                )
-        );
+        ServerHeartbeatRequest serverHeartbeatRequest = new ServerHeartbeatRequest(Bukkit.getOnlinePlayers().size());
 
         PluginAPIRequest apiRequest = new PluginAPIRequest("server/heartbeat");
 
         apiRequest.getRequest()
                 .header("Content-Type", "application/json")
-                .header("X-ANALYSE-TOKEN", plugin.getConfig().getString("server-token"))
+                .header("X-SERVER-TOKEN", plugin.getConfig().getString("server-token"))
                 .POST(HttpRequest.BodyPublishers.ofString(serverHeartbeatRequest.toJSON()));
 
         HttpResponse<String> httpResponse = apiRequest.send();

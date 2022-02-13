@@ -28,14 +28,14 @@ public class SetupCommand extends SubCommand {
 
         apiRequest.getRequest()
                 .header("Content-Type", "application/json")
-                .header("X-ANALYSE-TOKEN", serverToken);
+                .header("X-SERVER-TOKEN", serverToken);
 
         HttpResponse<String> httpResponse = apiRequest.send();
         System.out.println(httpResponse.body());
         JsonObject bodyJson = new Gson().fromJson(httpResponse.body(), JsonObject.class);
 
         if(httpResponse.statusCode() == 200) {
-            JsonObject serverJson = bodyJson.getAsJsonObject("server");
+            JsonObject serverJson = bodyJson.getAsJsonObject("data");
             player.sendMessage(plugin.parse("&7Successfully setup server with token &b" + serverJson.get("name").getAsString() + "&7."));
             plugin.getConfig().set("server-token", serverToken);
             plugin.getConfig().set("server-id", serverJson.get("uuid").getAsString());

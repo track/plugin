@@ -3,18 +3,15 @@ package net.analyse.plugin;
 import gnu.trove.map.hash.TCustomHashMap;
 import gnu.trove.strategy.IdentityHashingStrategy;
 import net.analyse.plugin.commands.AnalyseCommand;
-import net.analyse.plugin.event.ServerHeartBeatEvent;
+import net.analyse.plugin.event.ServerHeartbeatEvent;
 import net.analyse.plugin.listener.PlayerActivityListener;
-import net.analyse.plugin.util.EncryptUtil;
 import net.analyse.plugin.util.LocationUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
 import static net.analyse.plugin.util.EncryptUtil.generateEncryptionKey;
@@ -25,7 +22,7 @@ public class AnalysePlugin extends JavaPlugin {
 
     private boolean setup;
     private String encryptionKey;
-    private ServerHeartBeatEvent serverHeartBeatEvent;
+    private ServerHeartbeatEvent serverHeartBeatEvent;
 
     @Override
     public void onEnable() {
@@ -37,7 +34,7 @@ public class AnalysePlugin extends JavaPlugin {
         getCommand("analyse").setExecutor(new AnalyseCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerActivityListener(this), this);
 
-        serverHeartBeatEvent = new ServerHeartBeatEvent(this);
+        serverHeartBeatEvent = new ServerHeartbeatEvent(this);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> serverHeartBeatEvent.run(), 0, 20 * 10);
 
         if(encryptionKey == null || encryptionKey.isEmpty()) {

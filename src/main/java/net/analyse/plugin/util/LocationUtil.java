@@ -17,7 +17,7 @@ public class LocationUtil {
         try {
             DatabaseReader dbReader = new DatabaseReader.Builder(database).build();
 
-            return dbReader.country(InetAddress.getByName(ip)).getCountry().getName();
+            return dbReader.country(InetAddress.getByName(ip)).getCountry().getIsoCode();
         } catch (IOException | GeoIp2Exception e) {
             return null;
         }

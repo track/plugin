@@ -14,11 +14,10 @@ import java.util.UUID;
 
 @AllArgsConstructor @Builder
 public class ServerHeartbeatRequest {
-
-    @Builder.Default private final List<PlayerStatistic> stats = new ArrayList<>();
+    private int players;
 
     public String toJSON() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
     }
 }
