@@ -7,7 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class PluginAPIRequest {
-    private final String BASE_URL = "http://app.analyse.net.test/api/v1/";
+    private final String BASE_URL = "https://app.analyse.net/api/v1/";
     private final HttpClient client = HttpClient.newHttpClient();
     private final HttpRequest.Builder request;
 
