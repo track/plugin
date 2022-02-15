@@ -22,8 +22,6 @@ public class ServerHeartbeatEvent implements Event {
     public void run() {
         if(!plugin.isSetup()) return;
 
-//        plugin.getLogger().info("Sending a heartbeat..");
-
         ServerHeartbeatRequest serverHeartbeatRequest = new ServerHeartbeatRequest(Bukkit.getOnlinePlayers().size());
 
         PluginAPIRequest apiRequest = new PluginAPIRequest("server/heartbeat");
@@ -39,7 +37,5 @@ public class ServerHeartbeatEvent implements Event {
             plugin.setSetup(false);
             return;
         }
-
-//        System.out.println(httpResponse.body());
     }
 }
