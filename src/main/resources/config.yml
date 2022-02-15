@@ -1,19 +1,31 @@
-# Analyse - v${version}
-# Welcome to the configuration file.
+#
+#      Analyse
+# Version - {version}
+#
 
-server-token: ""
+server-token: ''
 
 hooks:
-  placeholderapi: true
+  papi: true
 
 excluded:
-  # Exclude players with their uuids.
+  # Exclude players by their UUID.
   players: []
-  # For example:
+  # Example:
   # players:
-  #  - "12345-12345-12345-12345"
+  #   - 'ed6daf33-575b-460b-a2f3-e208a1004c10'
 
-stats:
-  player:
-    - "kills"
-    - "deaths"
+enabled-stats:
+  - 'kills'
+  - 'deaths'
+
+#
+# *** DO NOT MODIFY OR SHARE THIS KEY ***
+#
+# The below key is automatically generated for your server.
+# It is used to encrypt sensitive information, such as player IP addresses
+# which can then ONLY be decrypted by this server.
+#
+# *** DO NOT MODIFY OR SHARE THIS KEY ***
+#
+encryption-key: ''

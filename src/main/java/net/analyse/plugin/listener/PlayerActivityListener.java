@@ -1,5 +1,6 @@
 package net.analyse.plugin.listener;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.request.PlayerSessionRequest;
 import net.analyse.plugin.request.PluginAPIRequest;
@@ -14,6 +15,7 @@ import org.bukkit.event.player.*;
 
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -52,12 +54,21 @@ public class PlayerActivityListener implements Listener {
 
         List<String> enabledStats = plugin.getConfig().getStringList("enabled-stats");
 
-        // TODO: Make this dynamic.
-        List<PlayerStatistic> playerStatistics = enabledStats.stream().map(enabledStat -> new PlayerStatistic(enabledStat, Math.random() * 10)).toList();
+        List<PlayerStatistic> playerStatistics = new ArrayList<>();
 
         String playerIp = player.getAddress().getHostString();
         String ipCountry = LocationUtil.fromIp(playerIp);
         String ipHashed = EncryptUtil.toSHA256(playerIp, plugin.getEncryptionKey().getBytes());
+
+        if(plugin.isPapiHooked()) {
+            for (String placeholder : enabledStats) {
+                String resolvedPlaceholder = PlaceholderAPI.setPlaceholders(player, "%" + placeholder + "%");
+
+                if(!resolvedPlaceholder.equalsIgnoreCase("%" + placeholder + "%")) {
+                    playerStatistics.add(new PlayerStatistic(placeholder, resolvedPlaceholder));
+                }
+            }
+        }
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             PlayerSessionRequest playerSessionRequest = new PlayerSessionRequest(
@@ -79,8 +90,7 @@ public class PlayerActivityListener implements Listener {
             PluginAPIRequest apiRequest = new PluginAPIRequest("server/sessions");
 
             apiRequest.getRequest()
-                    .header("Content-Type", "application/json")
-                    .header("X-ANALYSE-TOKEN", plugin.getConfig().getString("server-token"))
+                    .header("X-SERVER-TOKEN", plugin.getConfig().getString("server.token"))
                     .POST(HttpRequest.BodyPublishers.ofString(playerSessionRequest.toJSON()));
 
             HttpResponse<String> httpResponse = apiRequest.send();

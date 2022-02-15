@@ -23,13 +23,16 @@ public class AnalysePlugin extends JavaPlugin {
     private boolean setup;
     private String encryptionKey;
     private ServerHeartbeatEvent serverHeartBeatEvent;
+    private boolean papiHooked;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
 
-        setup = getConfig().getString("server-token") != null && !getConfig().getString("server-token").isEmpty();
+        setup = getConfig().getString("server.token") != null && !getConfig().getString("server.token").isEmpty();
         encryptionKey = getConfig().getString("encryption-key");
+
+        papiHooked = getServer().getPluginManager().isPluginEnabled("PlaceholderAPI");
 
         getCommand("analyse").setExecutor(new AnalyseCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerActivityListener(this), this);
@@ -77,5 +80,9 @@ public class AnalysePlugin extends JavaPlugin {
 
     public String getEncryptionKey() {
         return encryptionKey;
+    }
+
+    public boolean isPapiHooked() {
+        return papiHooked;
     }
 }

@@ -37,8 +37,8 @@ public class SetupCommand extends SubCommand {
         if(httpResponse.statusCode() == 200) {
             JsonObject serverJson = bodyJson.getAsJsonObject("data");
             player.sendMessage(plugin.parse("&7Successfully setup server with token &b" + serverJson.get("name").getAsString() + "&7."));
-            plugin.getConfig().set("server-token", serverToken);
-            plugin.getConfig().set("server-id", serverJson.get("uuid").getAsString());
+            plugin.getConfig().set("server.token", serverToken);
+            plugin.getConfig().set("server.id", serverJson.get("uuid").getAsString());
             plugin.saveConfig();
             plugin.setSetup(true);
         } else {

@@ -16,7 +16,7 @@ import java.util.UUID;
 public class PlayerSessionRequest {
 
     private final UUID uuid;
-    private final String username;
+    private final String name;
 
     @SerializedName("joined_at")
     private final Date joinedAt;

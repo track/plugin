@@ -29,8 +29,7 @@ public class ServerHeartbeatEvent implements Event {
         PluginAPIRequest apiRequest = new PluginAPIRequest("server/heartbeat");
 
         apiRequest.getRequest()
-                .header("Content-Type", "application/json")
-                .header("X-SERVER-TOKEN", plugin.getConfig().getString("server-token"))
+                .header("X-SERVER-TOKEN", plugin.getConfig().getString("server.token"))
                 .POST(HttpRequest.BodyPublishers.ofString(serverHeartbeatRequest.toJSON()));
 
         HttpResponse<String> httpResponse = apiRequest.send();

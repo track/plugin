@@ -13,6 +13,7 @@ public class PluginAPIRequest {
 
     public PluginAPIRequest(String url) {
         this.request = HttpRequest.newBuilder()
+                .header("Content-Type", "application/json")
                 .uri(URI.create(BASE_URL + url));
     }
 
