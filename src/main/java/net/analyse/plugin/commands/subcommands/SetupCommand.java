@@ -32,7 +32,7 @@ public class SetupCommand extends SubCommand {
                 .header("X-SERVER-TOKEN", serverToken);
 
         HttpResponse<String> httpResponse = apiRequest.send();
-        System.out.println(httpResponse.body());
+//        System.out.println(httpResponse.body());
         JsonObject bodyJson = new Gson().fromJson(httpResponse.body(), JsonObject.class);
 
         if(httpResponse.statusCode() == 200) {

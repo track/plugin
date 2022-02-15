@@ -22,7 +22,7 @@ public class ServerHeartbeatEvent implements Event {
     public void run() {
         if(!plugin.isSetup()) return;
 
-        plugin.getLogger().info("Sending a heartbeat..");
+//        plugin.getLogger().info("Sending a heartbeat..");
 
         ServerHeartbeatRequest serverHeartbeatRequest = new ServerHeartbeatRequest(Bukkit.getOnlinePlayers().size());
 
@@ -40,6 +40,6 @@ public class ServerHeartbeatEvent implements Event {
             return;
         }
 
-        System.out.println(httpResponse.body());
+//        System.out.println(httpResponse.body());
     }
 }
