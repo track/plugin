@@ -82,8 +82,6 @@ public class PlayerActivityListener implements Listener {
                     playerStatistics
             );
 
-            System.out.println(playerSessionRequest.toJSON());
-
             plugin.getActiveJoinMap().remove(player.getUniqueId());
             plugin.getPlayerDomainMap().remove(player.getUniqueId());
 
@@ -94,8 +92,6 @@ public class PlayerActivityListener implements Listener {
                     .POST(HttpRequest.BodyPublishers.ofString(playerSessionRequest.toJSON()));
 
             HttpResponse<String> httpResponse = apiRequest.send();
-
-            System.out.println(httpResponse.body());
         });
     }
 
