@@ -36,7 +36,7 @@ java.sourceCompatibility = JavaVersion.VERSION_16
 
 val shadowJar: ShadowJar by tasks
 shadowJar.apply {
-    destinationDirectory.set(File("/Users/charlie/Documents/MCServer/plugins/"))
+    destinationDirectory.set(File("/target/"))
 }
 
 tasks.withType<ProcessResources> {

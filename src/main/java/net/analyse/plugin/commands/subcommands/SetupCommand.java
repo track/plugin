@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.commands.SubCommand;
 import net.analyse.plugin.request.PluginAPIRequest;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.net.http.HttpResponse;
@@ -16,9 +17,9 @@ public class SetupCommand extends SubCommand {
     }
 
     @Override
-    public void execute(Player player, String[] args) {
+    public void execute(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            player.sendMessage(plugin.parse("&cYou must specify a server token."));
+            sender.sendMessage(plugin.parse("&cYou must specify a server token."));
             return;
         }
 
@@ -36,13 +37,13 @@ public class SetupCommand extends SubCommand {
 
         if(httpResponse.statusCode() == 200) {
             JsonObject serverJson = bodyJson.getAsJsonObject("data");
-            player.sendMessage(plugin.parse("&7Successfully setup server with token &b" + serverJson.get("name").getAsString() + "&7."));
+            sender.sendMessage(plugin.parse("&7Successfully setup server with token &b" + serverJson.get("name").getAsString() + "&7."));
             plugin.getConfig().set("server.token", serverToken);
             plugin.getConfig().set("server.id", serverJson.get("uuid").getAsString());
             plugin.saveConfig();
             plugin.setSetup(true);
         } else {
-            player.sendMessage(plugin.parse("&b[Analyse] &7Sorry, but that server token isn't valid."));
+            sender.sendMessage(plugin.parse("&b[Analyse] &7Sorry, but that server token isn't valid."));
         }
     }
 

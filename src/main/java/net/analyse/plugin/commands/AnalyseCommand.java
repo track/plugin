@@ -26,9 +26,6 @@ public class AnalyseCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player))
-            return true;
-
         if (args.length == 0 || !commands.containsKey(args[0].toLowerCase())) {
             sender.sendMessage(plugin.parse("&b[Analyse] &7Running on &bv" + plugin.getDescription().getVersion() + "&7."));
             return true;
@@ -40,8 +37,7 @@ public class AnalyseCommand implements CommandExecutor {
             return true;
         }
 
-        subCommand.execute((Player) sender, Arrays.copyOfRange(args, 1, args.length));
+        subCommand.execute(sender, Arrays.copyOfRange(args, 1, args.length));
         return true;
     }
-
 }
