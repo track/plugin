@@ -16,6 +16,7 @@ repositories {
 dependencies {
     implementation("net.sf.trove4j:trove4j:3.0.3")
     implementation("com.maxmind.geoip2:geoip2:3.0.0")
+
     compileOnly("org.projectlombok:lombok:1.18.22")
     compileOnly("me.clip:placeholderapi:2.11.1")
     annotationProcessor("org.projectlombok:lombok:1.18.22")
