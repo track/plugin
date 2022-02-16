@@ -3,7 +3,9 @@
 # Version - {version}
 #
 
-server-token: ''
+server:
+  id: ''
+  token: ''
 
 hooks:
   papi: true
