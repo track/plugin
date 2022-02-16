@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 public class ServerHeartbeatEvent implements Event {
 
-    private AnalysePlugin plugin;
+    private final AnalysePlugin plugin;
 
     public ServerHeartbeatEvent(AnalysePlugin plugin) {
         this.plugin = plugin;
