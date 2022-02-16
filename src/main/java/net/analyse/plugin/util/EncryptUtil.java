@@ -27,12 +27,12 @@ public class EncryptUtil {
 
         int n = alphabet.length(); // 10
 
-        String result = "";
+        StringBuilder result = new StringBuilder();
         Random r = new Random(); // 11
 
         for (int i=0; i<length; i++) // 12
-            result = result + alphabet.charAt(r.nextInt(n)); //13
+            result.append(alphabet.charAt(r.nextInt(n))); //13
 
-        return result;
+        return result.toString();
     }
 }
