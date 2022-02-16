@@ -7,7 +7,6 @@ import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.commands.SubCommand;
 import net.analyse.plugin.request.PluginAPIRequest;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.net.http.HttpResponse;
 
