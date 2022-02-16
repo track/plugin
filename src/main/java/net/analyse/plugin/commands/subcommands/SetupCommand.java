@@ -34,7 +34,6 @@ public class SetupCommand extends SubCommand {
                     .header("X-SERVER-TOKEN", serverToken);
 
             HttpResponse<String> httpResponse = apiRequest.send();
-//        System.out.println(httpResponse.body());
             try {
                 JsonObject bodyJson = new Gson().fromJson(httpResponse.body(), JsonObject.class);
 
