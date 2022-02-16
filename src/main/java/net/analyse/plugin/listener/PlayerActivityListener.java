@@ -92,7 +92,7 @@ public class PlayerActivityListener implements Listener {
                     .header("X-SERVER-TOKEN", plugin.getConfig().getString("server.token"))
                     .POST(HttpRequest.BodyPublishers.ofString(playerSessionRequest.toJSON()));
 
-            HttpResponse<String> httpResponse = apiRequest.send();
+            apiRequest.send();
         });
     }
 
