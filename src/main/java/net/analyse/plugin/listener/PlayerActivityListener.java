@@ -33,7 +33,10 @@ public class PlayerActivityListener implements Listener {
         if(!plugin.isSetup()) return;
         if(plugin.getConfig().getStringList("excluded.players").contains(event.getPlayer().getUniqueId().toString())) return;
 
-        plugin.getLogger().info("Player connecting via: " + event.getHostname());
+        if(plugin.getConfig().getBoolean("debug", false)) {
+            plugin.getLogger().info("Player connecting via: " + event.getHostname());
+        }
+
         plugin.getPlayerDomainMap().put(event.getPlayer().getUniqueId(), event.getHostname());
     }
 
@@ -42,7 +45,9 @@ public class PlayerActivityListener implements Listener {
         if(!plugin.isSetup()) return;
         if(plugin.getConfig().getStringList("excluded.players").contains(event.getPlayer().getUniqueId().toString())) return;
 
-        plugin.getLogger().info("Tracking " + event.getPlayer().getName() + " to current time");
+        if(plugin.getConfig().getBoolean("debug", false)) {
+            plugin.getLogger().info("Tracking " + event.getPlayer().getName() + " to current time");
+        }
         plugin.getActiveJoinMap().put(event.getPlayer().getUniqueId(), new Date());
     }
 
