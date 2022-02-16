@@ -36,7 +36,7 @@ URL: `server/sessions`
 
 Type: `POST`
 
-Payload:
+Example Payload:
 
 ```json
 {
@@ -52,6 +52,22 @@ Payload:
       "value": "100"
     }
   ]
+}
+```
+
+---
+
+**Server Heartbeat**
+
+URL: `server/heartbeat`
+
+Type: `POST`
+
+Example Payload:
+
+```json
+{
+  "players": 300
 }
 ```
 
