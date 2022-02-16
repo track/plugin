@@ -24,10 +24,7 @@ public class PluginAPIRequest {
     public HttpResponse<String> send() {
         try {
             return client.send(request.build(), HttpResponse.BodyHandlers.ofString());
-        } catch (IOException e) {
-            // TODO: Handle this.
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             // TODO: Handle this.
             e.printStackTrace();
         }
