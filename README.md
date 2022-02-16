@@ -40,31 +40,15 @@ Payload:
 
 ```json
 {
-  // Username
   "name": "User",
-  
-  // UUID
   "uuid": "3234-2324-3232-32323",
-  
-  // The join time
   "joined_at": "2021-12-29 16:58:24.436228",
-  
-  // The quit time
   "quit_at": "2021-12-29 19:58:24.436228",
-  
-  // Hashed IP
   "ip_address": "017386cd32f983e735db582718f11ffbc9b1233b06f16383f13f6d23823da0e3",
-  
-  // Country code
   "country": "GB",
-  
-  // Player stats
   "stats": [
     {
-      // The stat key
       "key": "player_kills",
-      
-      // The stat value (Numbers/Decimals only)
       "value": "100"
     }
   ]
