@@ -1,11 +1,10 @@
 package net.analyse.plugin.commands;
 
-import net.analyse.plugin.commands.subcommands.*;
 import net.analyse.plugin.AnalysePlugin;
+import net.analyse.plugin.commands.subcommands.SetupCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
