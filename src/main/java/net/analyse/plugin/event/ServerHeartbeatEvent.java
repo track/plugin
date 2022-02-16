@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 public class ServerHeartbeatEvent implements Event {
 
-    private AnalysePlugin plugin;
+    private final AnalysePlugin plugin;
 
     public ServerHeartbeatEvent(AnalysePlugin plugin) {
         this.plugin = plugin;
@@ -35,7 +35,6 @@ public class ServerHeartbeatEvent implements Event {
         if(httpResponse.statusCode() == 404) {
             plugin.getLogger().severe("The server that was configured no longer exists!");
             plugin.setSetup(false);
-            return;
         }
     }
 }

@@ -18,6 +18,7 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class PlayerActivityListener implements Listener {
 
@@ -56,7 +57,7 @@ public class PlayerActivityListener implements Listener {
 
         List<PlayerStatistic> playerStatistics = new ArrayList<>();
 
-        String playerIp = player.getAddress().getHostString();
+        String playerIp = Objects.requireNonNull(player.getAddress()).getHostString();
         String ipCountry = LocationUtil.fromIp(playerIp);
         String ipHashed = EncryptUtil.toSHA256(playerIp, plugin.getEncryptionKey().getBytes());
 
@@ -91,7 +92,7 @@ public class PlayerActivityListener implements Listener {
                     .header("X-SERVER-TOKEN", plugin.getConfig().getString("server.token"))
                     .POST(HttpRequest.BodyPublishers.ofString(playerSessionRequest.toJSON()));
 
-            HttpResponse<String> httpResponse = apiRequest.send();
+            apiRequest.send();
         });
     }
 

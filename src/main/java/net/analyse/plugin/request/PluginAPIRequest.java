@@ -7,7 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class PluginAPIRequest {
-    private final String BASE_URL = "https://app.analyse.net/api/v1/";
+    private static final String BASE_URL = "https://app.analyse.net/api/v1/";
     private final HttpClient client = HttpClient.newHttpClient();
     private final HttpRequest.Builder request;
 
@@ -24,10 +24,7 @@ public class PluginAPIRequest {
     public HttpResponse<String> send() {
         try {
             return client.send(request.build(), HttpResponse.BodyHandlers.ofString());
-        } catch (IOException e) {
-            // TODO: Handle this.
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             // TODO: Handle this.
             e.printStackTrace();
         }
