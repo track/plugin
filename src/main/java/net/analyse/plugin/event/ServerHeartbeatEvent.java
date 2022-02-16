@@ -35,7 +35,6 @@ public class ServerHeartbeatEvent implements Event {
         if(httpResponse.statusCode() == 404) {
             plugin.getLogger().severe("The server that was configured no longer exists!");
             plugin.setSetup(false);
-            return;
         }
     }
 }
