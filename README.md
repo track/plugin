@@ -11,10 +11,67 @@ This is the official plugin version of Analyse, for usage with tracking communit
 
 You're ready to go!
 
+---
+
 ### Custom Implementations
 We welcome any custom community implementations, this plugin simply sends requests to our backend API and endpoints are documented below.
 
 Base URL: `https://app.analyse.net/api/v1/`
+
+_All requests require the `X-SERVER-TOKEN` header with the token provided._
+
+---
+
+**Server Information**
+
+URL: `server`
+
+Type: `GET`
+
+---
+
+**Player Sessions**
+
+URL: `server/sessions`
+
+Type: `POST`
+
+Payload:
+
+```json
+{
+  // Username
+  "name": "User",
+  
+  // UUID
+  "uuid": "3234-2324-3232-32323",
+  
+  // The join time
+  "joined_at": "2021-12-29 16:58:24.436228",
+  
+  // The quit time
+  "quit_at": "2021-12-29 19:58:24.436228",
+  
+  // Hashed IP
+  "ip_address": "017386cd32f983e735db582718f11ffbc9b1233b06f16383f13f6d23823da0e3",
+  
+  // Country code
+  "country": "GB",
+  
+  // Player stats
+  "stats": [
+    {
+      // The stat key
+      "key": "player_kills",
+      
+      // The stat value (Numbers/Decimals only)
+      "value": "100"
+    }
+  ]
+}
+```
+
+---
 
 ### Compiling
 1. Git clone this repository.
