@@ -11,30 +11,25 @@ This is the official spigot adapter for Analyse - the Minecraft Server Analytics
 
 You're ready to go!
 
-## Custom Implementations
-We welcome any custom community implementations, this plugin simply sends requests to our backend API and endpoints are documented below.
+## API Requests
+Below we have documented the api requests that this plugin performs, we allow for any custom server implementations to be written. We have listed the endpoints and required payloads for this below.
 
 Base URL: `https://app.analyse.net/api/v1/`
 
 _All requests require the `X-SERVER-TOKEN` header with the token provided._
 
----
-
 **Server Information**
-
-URL: `server`
-
-Type: `GET`
+ - URL: `server`
+ - Type: `GET`
 
 ---
 
 **Player Sessions**
 
-URL: `server/sessions`
+ - URL: `server/sessions`
+ - Type: `POST`
 
-Type: `POST`
-
-Example Payload:
+_Example Payload_
 
 ```json
 {
@@ -61,8 +56,7 @@ URL: `server/heartbeat`
 
 Type: `POST`
 
-Example Payload:
-
+_Example Payload_
 ```json
 {
   "players": 300
