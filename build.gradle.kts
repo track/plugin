@@ -27,6 +27,7 @@ dependencies {
 group = "net.analyse"
 version = "1.0.3"
 description = "Analyse"
+java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 val shadowJar: ShadowJar by tasks
 
