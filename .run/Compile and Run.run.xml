@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Compile and Run" type="CompoundRunConfigurationType">
+    <toRun name="AnalysePlugin [shadowJar]" type="GradleRunConfiguration" />
+    <toRun name="Spigot Server" type="JarApplication" />
+    <method v="2" />
+  </configuration>
+</component>
