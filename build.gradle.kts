@@ -15,7 +15,8 @@ repositories {
 
 dependencies {
     implementation("net.sf.trove4j:trove4j:3.0.3")
-    implementation("com.maxmind.geoip2:geoip2:3.0.0")
+    implementation("com.maxmind.geoip2:geoip2:2.16.1")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
 
     compileOnly("me.clip:placeholderapi:2.11.1")
     compileOnly("org.spigotmc:spigot-api:1.18-R0.1-SNAPSHOT")
@@ -24,9 +25,8 @@ dependencies {
 }
 
 group = "net.analyse"
-version = "1.0.2"
+version = "1.0.3"
 description = "Analyse"
-java.sourceCompatibility = JavaVersion.VERSION_16
 
 val shadowJar: ShadowJar by tasks
 
