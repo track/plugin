@@ -1,16 +1,14 @@
 package net.analyse.plugin.request;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import net.analyse.plugin.request.object.PlayerStatistic;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-public class PlayerSessionRequest {
+public class PlayerSessionRequest extends AnalyseRequest {
 
     private final UUID uuid;
     private final String name;
@@ -29,9 +27,18 @@ public class PlayerSessionRequest {
     @SerializedName("country")
     private String country;
 
-    private List<PlayerStatistic> stats = new ArrayList<>();
+    private List<PlayerStatistic> stats;
 
-    public PlayerSessionRequest(UUID uuid, String name, Date joinedAt, Date quitAt, String domain, String ipAddress, String country, List<PlayerStatistic> stats) {
+    public PlayerSessionRequest(
+            final @NotNull UUID uuid,
+            final @NotNull String name,
+            final @NotNull Date joinedAt,
+            final @NotNull Date quitAt,
+            final @NotNull String domain,
+            final @NotNull String ipAddress,
+            final @NotNull String country,
+            final @NotNull List<PlayerStatistic> stats
+    ) {
         this.uuid = uuid;
         this.name = name;
         this.joinedAt = joinedAt;
@@ -42,10 +49,4 @@ public class PlayerSessionRequest {
         this.stats = stats;
     }
 
-
-
-    public String toJSON() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create();
-        return gson.toJson(this);
-    }
 }

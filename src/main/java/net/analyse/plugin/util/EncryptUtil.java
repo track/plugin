@@ -6,6 +6,7 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 public class EncryptUtil {
+
     public static String toSHA256(String password, byte[] salt) {
         String generatedPassword = null;
         try {
@@ -32,7 +33,7 @@ public class EncryptUtil {
         StringBuilder result = new StringBuilder();
         Random r = new SecureRandom(); // 11
 
-        for (int i=0; i<length; i++) // 12
+        for (int i = 0; i < length; i++) // 12
             result.append(alphabet.charAt(r.nextInt(n))); //13
 
         return result.toString();

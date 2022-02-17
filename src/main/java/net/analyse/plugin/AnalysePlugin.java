@@ -1,5 +1,7 @@
 package net.analyse.plugin;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import gnu.trove.map.hash.TCustomHashMap;
 import gnu.trove.strategy.IdentityHashingStrategy;
 import net.analyse.plugin.commands.AnalyseCommand;
@@ -24,6 +26,9 @@ public class AnalysePlugin extends JavaPlugin {
     private String encryptionKey;
     private ServerHeartbeatEvent serverHeartBeatEvent;
     private boolean papiHooked;
+    private LocationUtil locationUtil;
+
+    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     @Override
     public void onEnable() {
@@ -34,20 +39,22 @@ public class AnalysePlugin extends JavaPlugin {
 
         papiHooked = getServer().getPluginManager().isPluginEnabled("PlaceholderAPI");
 
+        locationUtil = new LocationUtil(this);
+
         getCommand("analyse").setExecutor(new AnalyseCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerActivityListener(this), this);
 
         serverHeartBeatEvent = new ServerHeartbeatEvent(this);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> serverHeartBeatEvent.run(), 0, 20 * 10);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, serverHeartBeatEvent::run, 0, 20 * 10);
 
-        if(encryptionKey == null || encryptionKey.isEmpty()) {
+        if (encryptionKey == null || encryptionKey.isEmpty()) {
             encryptionKey = generateEncryptionKey(64);
             getConfig().set("encryption-key", encryptionKey);
             getLogger().info("Generated encryption key.");
             saveConfig();
         }
 
-        if(!setup) {
+        if (!setup) {
             getLogger().info("Hey! I'm not yet set-up, please run the following command:");
             getLogger().info("/analyse setup <server-token>");
         }
@@ -84,5 +91,9 @@ public class AnalysePlugin extends JavaPlugin {
 
     public boolean isPapiHooked() {
         return papiHooked;
+    }
+
+    public LocationUtil locationUtil() {
+        return locationUtil;
     }
 }

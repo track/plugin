@@ -5,16 +5,16 @@ import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.request.PlayerSessionRequest;
 import net.analyse.plugin.request.PluginAPIRequest;
 import net.analyse.plugin.request.object.PlayerStatistic;
+import net.analyse.plugin.util.Config;
 import net.analyse.plugin.util.EncryptUtil;
-import net.analyse.plugin.util.LocationUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,16 +24,21 @@ public class PlayerActivityListener implements Listener {
 
     private final AnalysePlugin plugin;
 
-    public PlayerActivityListener(AnalysePlugin plugin) {
+    public PlayerActivityListener(final @NotNull AnalysePlugin plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler
-    public void onPlayerLogin(PlayerLoginEvent event) {
-        if(!plugin.isSetup()) return;
-        if(plugin.getConfig().getStringList("excluded.players").contains(event.getPlayer().getUniqueId().toString())) return;
+    public void onPlayerLogin(final @NotNull PlayerLoginEvent event) {
+        if (!plugin.isSetup()) {
+            return;
+        }
 
-        if(plugin.getConfig().getBoolean("debug", false)) {
+        if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) {
+            return;
+        }
+
+        if (Config.DEBUG) {
             plugin.getLogger().info("Player connecting via: " + event.getHostname());
         }
 
@@ -42,35 +47,44 @@ public class PlayerActivityListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if(!plugin.isSetup()) return;
-        if(plugin.getConfig().getStringList("excluded.players").contains(event.getPlayer().getUniqueId().toString())) return;
+        if (!plugin.isSetup()) {
+            return;
+        }
 
-        if(plugin.getConfig().getBoolean("debug", false)) {
+        if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) {
+            return;
+        }
+
+        if (Config.DEBUG) {
             plugin.getLogger().info("Tracking " + event.getPlayer().getName() + " to current time");
         }
+
         plugin.getActiveJoinMap().put(event.getPlayer().getUniqueId(), new Date());
     }
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
-        if(!plugin.isSetup()) return;
-        if(plugin.getConfig().getStringList("excluded.players").contains(event.getPlayer().getUniqueId().toString())) return;
+        if (!plugin.isSetup()) {
+            return;
+        }
 
-        Player player = event.getPlayer();
+        if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) {
+            return;
+        }
 
-        List<String> enabledStats = plugin.getConfig().getStringList("enabled-stats");
+        final Player player = event.getPlayer();
 
-        List<PlayerStatistic> playerStatistics = new ArrayList<>();
+        final List<PlayerStatistic> playerStatistics = new ArrayList<>();
 
-        String playerIp = Objects.requireNonNull(player.getAddress()).getHostString();
-        String ipCountry = LocationUtil.fromIp(playerIp);
-        String ipHashed = EncryptUtil.toSHA256(playerIp, plugin.getEncryptionKey().getBytes());
+        final String playerIp = Objects.requireNonNull(player.getAddress()).getHostString();
+        final String ipCountry = plugin.locationUtil().fromIp(playerIp);
+        final String ipHashed = EncryptUtil.toSHA256(playerIp, plugin.getEncryptionKey().getBytes());
 
-        if(plugin.isPapiHooked()) {
-            for (String placeholder : enabledStats) {
+        if (plugin.isPapiHooked()) {
+            for (String placeholder : Config.ENABLED_STATS) {
                 String resolvedPlaceholder = PlaceholderAPI.setPlaceholders(player, "%" + placeholder + "%");
 
-                if(!resolvedPlaceholder.equalsIgnoreCase("%" + placeholder + "%")) {
+                if (!resolvedPlaceholder.equalsIgnoreCase("%" + placeholder + "%")) {
                     playerStatistics.add(new PlayerStatistic(placeholder, resolvedPlaceholder));
                 }
             }
@@ -91,11 +105,11 @@ public class PlayerActivityListener implements Listener {
             plugin.getActiveJoinMap().remove(player.getUniqueId());
             plugin.getPlayerDomainMap().remove(player.getUniqueId());
 
-            PluginAPIRequest apiRequest = new PluginAPIRequest("server/sessions");
+            final PluginAPIRequest apiRequest = new PluginAPIRequest("server/sessions");
 
             apiRequest.getRequest()
                     .header("X-SERVER-TOKEN", plugin.getConfig().getString("server.token"))
-                    .POST(HttpRequest.BodyPublishers.ofString(playerSessionRequest.toJSON()));
+                    .POST(HttpRequest.BodyPublishers.ofString(playerSessionRequest.toJson()));
 
             apiRequest.send();
         });
