@@ -11,10 +11,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.http.HttpRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -105,13 +106,10 @@ public class PlayerActivityListener implements Listener {
             plugin.getActiveJoinMap().remove(player.getUniqueId());
             plugin.getPlayerDomainMap().remove(player.getUniqueId());
 
-            final PluginAPIRequest apiRequest = new PluginAPIRequest("server/sessions");
-
-            apiRequest.getRequest()
-                    .header("X-SERVER-TOKEN", plugin.getConfig().getString("server.token"))
-                    .POST(HttpRequest.BodyPublishers.ofString(playerSessionRequest.toJson()));
-
-            apiRequest.send();
+            new PluginAPIRequest("server/sessions")
+                    .withPayload(playerSessionRequest.toJson())
+                    .withServerToken(plugin.getConfig().getString("server.token"))
+                    .send();
         });
     }
 

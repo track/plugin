@@ -1,37 +1,45 @@
 package net.analyse.plugin.request;
 
+import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 
 public class PluginAPIRequest {
 
-    private static final String BASE_URL = "https://app.analyse.net/api/v1/";
-    private final HttpClient client = HttpClient.newHttpClient();
-    private final HttpRequest.Builder request;
+    private static final String BASE_URL = "http://app.analyse.net.test/api/v1/";
+    public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+
+    private final OkHttpClient client = new OkHttpClient();
+    private final Request.Builder request;
 
     public PluginAPIRequest(final @NotNull String url) {
-        this.request = HttpRequest.newBuilder()
-                .header("Content-Type", "application/json")
-                .uri(URI.create(BASE_URL + url));
+        this.request = new Request.Builder().url(BASE_URL + url);
     }
 
-    public HttpRequest.Builder getRequest() {
+    public PluginAPIRequest withPayload(final @NotNull String payload) {
+        request.post(RequestBody.create(payload, JSON));
+
+        return this;
+    }
+
+    public PluginAPIRequest withServerToken(final @NotNull String token) {
+        request.header("X-SERVER-TOKEN", token);
+
+        return this;
+    }
+
+    public Request.Builder getRequest() {
         return request;
     }
 
-    public HttpResponse<String> send() {
+    public Response send() {
         try {
-            return client.send(request.build(), HttpResponse.BodyHandlers.ofString());
-        } catch (IOException | InterruptedException e) {
+            return client.newCall(request.build()).execute();
+        } catch (IOException e) {
             // TODO: Handle this.
             e.printStackTrace();
+            return null;
         }
-
-        return null;
     }
 }
