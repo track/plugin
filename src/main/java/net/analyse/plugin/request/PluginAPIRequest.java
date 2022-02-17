@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class PluginAPIRequest {
 
-    private static final String BASE_URL = "http://app.analyse.net.test/api/v1/";
+    private static final String BASE_URL = "https://app.analyse.net/api/v1/";
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     private final OkHttpClient client = new OkHttpClient();
