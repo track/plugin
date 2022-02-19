@@ -7,6 +7,8 @@ import net.analyse.plugin.request.PluginAPIRequest;
 import net.analyse.plugin.request.object.PlayerStatistic;
 import net.analyse.plugin.util.Config;
 import net.analyse.plugin.util.EncryptUtil;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -106,10 +108,12 @@ public class PlayerActivityListener implements Listener {
             plugin.getActiveJoinMap().remove(player.getUniqueId());
             plugin.getPlayerDomainMap().remove(player.getUniqueId());
 
-            new PluginAPIRequest("server/sessions")
+            Response response = new PluginAPIRequest("server/sessions")
                     .withPayload(playerSessionRequest.toJson())
                     .withServerToken(plugin.getConfig().getString("server.token"))
                     .send();
+
+            response.close();
         });
     }
 

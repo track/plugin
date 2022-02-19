@@ -32,5 +32,7 @@ public class ServerHeartbeatEvent implements Runnable {
             plugin.getLogger().severe("The server that was configured no longer exists!");
             plugin.setSetup(false);
         }
+
+        response.close();
     }
 }

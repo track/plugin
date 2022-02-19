@@ -25,7 +25,7 @@ dependencies {
 }
 
 group = "net.analyse"
-version = "1.0.3"
+version = "1.0.4"
 description = "Analyse"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
