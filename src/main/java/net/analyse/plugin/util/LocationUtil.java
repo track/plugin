@@ -10,18 +10,21 @@ import java.io.InputStream;
 import java.net.InetAddress;
 
 public class LocationUtil {
-
-    private final @NotNull AnalysePlugin plugin;
+    private DatabaseReader databaseReader;
 
     public LocationUtil(final @NotNull AnalysePlugin plugin) {
-        this.plugin = plugin;
+        final InputStream database = plugin.getResource("GeoLite2-Country.mmdb");
+        try {
+            this.databaseReader = new DatabaseReader.Builder(database).build();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public String fromIp(final @NotNull String ip) {
-        final InputStream database = plugin.getResource("GeoLite2-Country.mmdb");
 
         try {
-            return new DatabaseReader.Builder(database).build()
+            return this.databaseReader
                     .country(InetAddress.getByName(ip))
                     .getCountry()
                     .getIsoCode();
