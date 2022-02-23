@@ -2,12 +2,11 @@ package net.analyse.plugin.listener;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.analyse.plugin.AnalysePlugin;
-import net.analyse.plugin.request.PlayerSessionRequest;
+import net.analyse.plugin.request.impl.PlayerSessionRequest;
 import net.analyse.plugin.request.PluginAPIRequest;
 import net.analyse.plugin.request.object.PlayerStatistic;
 import net.analyse.plugin.util.Config;
 import net.analyse.plugin.util.EncryptUtil;
-import okhttp3.Request;
 import okhttp3.Response;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

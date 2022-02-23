@@ -2,7 +2,7 @@ package net.analyse.plugin.event;
 
 import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.request.PluginAPIRequest;
-import net.analyse.plugin.request.ServerHeartbeatRequest;
+import net.analyse.plugin.request.impl.ServerHeartbeatRequest;
 import okhttp3.Response;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;

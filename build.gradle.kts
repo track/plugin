@@ -15,7 +15,6 @@ repositories {
 
 dependencies {
     implementation("net.sf.trove4j:trove4j:3.0.3")
-    implementation("com.maxmind.geoip2:geoip2:2.16.1")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
 
     compileOnly("me.clip:placeholderapi:2.11.1")
@@ -25,7 +24,7 @@ dependencies {
 }
 
 group = "net.analyse"
-version = "1.0.4"
+version = "1.0.5"
 description = "Analyse"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
