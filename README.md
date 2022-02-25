@@ -14,8 +14,6 @@ You're ready to go!
 ## Custom Integration
 This project utilises our official [SDK](https://github.com/track/sdk), which is an official wrapper around our [API](https://docs.analyse.net/page/api-endpoints).
 
----
-
 ## Compiling
 1. Clone this repo (`git clone git@github.com:track/plugin.git`).
 1. Clone our sdk (`git clone git@github.com:track/sdk.git`).
