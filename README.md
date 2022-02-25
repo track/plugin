@@ -1,4 +1,4 @@
-![Banner](.github/banner.png?raw=true)
+![Banner](https://raw.githubusercontent.com/track/sdk/main/.github/banner.png)
 
 # Analyse (Spigot Plugin)
 
