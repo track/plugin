@@ -1,13 +1,13 @@
 package net.analyse.plugin;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import gnu.trove.map.hash.TCustomHashMap;
 import gnu.trove.strategy.IdentityHashingStrategy;
 import net.analyse.plugin.commands.AnalyseCommand;
 import net.analyse.plugin.event.ServerHeartbeatEvent;
 import net.analyse.plugin.listener.PlayerActivityListener;
-import net.analyse.plugin.util.LocationUtil;
+import net.analyse.plugin.util.Config;
+import net.analyse.sdk.AnalyseSDK;
+import net.analyse.sdk.exception.ServerNotFoundException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -22,24 +22,26 @@ public class AnalysePlugin extends JavaPlugin {
     private final Map<UUID, Date> activeJoinMap = new TCustomHashMap<>(new IdentityHashingStrategy<>());
     private final Map<UUID, String> playerDomainMap = new TCustomHashMap<>(new IdentityHashingStrategy<>());
 
-    private boolean setup;
-    private String encryptionKey;
-    private ServerHeartbeatEvent serverHeartBeatEvent;
-    private boolean papiHooked;
-    private LocationUtil locationUtil;
+    private AnalyseSDK core = null;
 
-    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private boolean setup;
+    private boolean papiHooked;
+
+    private String serverToken;
+    private String encryptionKey;
+
+    private ServerHeartbeatEvent serverHeartBeatEvent;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
 
-        setup = getConfig().getString("server.token") != null && !getConfig().getString("server.token").isEmpty();
+        serverToken = getConfig().getString("server.token");
         encryptionKey = getConfig().getString("encryption-key");
 
-        papiHooked = getServer().getPluginManager().isPluginEnabled("PlaceholderAPI");
+        setup = serverToken != null && !serverToken.isEmpty();
 
-        locationUtil = new LocationUtil(this);
+        papiHooked = getServer().getPluginManager().isPluginEnabled("PlaceholderAPI");
 
         getCommand("analyse").setExecutor(new AnalyseCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerActivityListener(this), this);
@@ -57,12 +59,20 @@ public class AnalysePlugin extends JavaPlugin {
         if (!setup) {
             getLogger().info("Hey! I'm not yet set-up, please run the following command:");
             getLogger().info("/analyse setup <server-token>");
+        } else {
+            core = new AnalyseSDK(serverToken, encryptionKey);
+            try {
+                getLogger().info("Linked Analyse to " + core.getServer().getName() + ".");
+            } catch (ServerNotFoundException e) {
+                getLogger().warning("The server linked no longer exists.");
+            }
         }
     }
 
     @Override
     public void onDisable() {
         activeJoinMap.clear();
+        playerDomainMap.clear();
     }
 
     public Map<UUID, Date> getActiveJoinMap() {
@@ -93,7 +103,17 @@ public class AnalysePlugin extends JavaPlugin {
         return papiHooked;
     }
 
-    public LocationUtil locationUtil() {
-        return locationUtil;
+    public AnalyseSDK getCore() {
+        return core;
+    }
+
+    public AnalyseSDK setup(String token) {
+        core = new AnalyseSDK(token, encryptionKey);
+
+        return core;
+    }
+
+    public void debug(String message) {
+        if(Config.DEBUG) getLogger().info("DEBUG: " + message);
     }
 }

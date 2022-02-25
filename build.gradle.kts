@@ -15,16 +15,16 @@ repositories {
 
 dependencies {
     implementation("net.sf.trove4j:trove4j:3.0.3")
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+
+    implementation("net.analyse:sdk:1.0.0")
 
     compileOnly("me.clip:placeholderapi:2.11.1")
     compileOnly("org.spigotmc:spigot-api:1.18-R0.1-SNAPSHOT")
-    compileOnly("com.google.code.gson:gson:2.8.9")
     compileOnly("org.jetbrains:annotations:16.0.2")
 }
 
 group = "net.analyse"
-version = "1.0.5"
+version = "1.0.6"
 description = "Analyse"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 

@@ -1,15 +1,12 @@
 package net.analyse.plugin.commands.subcommands;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.commands.SubCommand;
-import net.analyse.plugin.request.PluginAPIRequest;
-import okhttp3.Response;
+import net.analyse.sdk.AnalyseSDK;
+import net.analyse.sdk.exception.ServerNotFoundException;
+import net.analyse.sdk.response.GetServerResponse;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
 
 public class SetupCommand extends SubCommand {
 
@@ -19,36 +16,31 @@ public class SetupCommand extends SubCommand {
 
     @Override
     public void execute(final CommandSender sender, final String[] args) {
+        if(plugin.isSetup()) {
+            sender.sendMessage(plugin.parse("&b[Analyse] &7This server has already been setup."));
+            return;
+        }
+
         if (args.length == 0) {
-            sender.sendMessage(plugin.parse("&cYou must specify a server token."));
+            sender.sendMessage(plugin.parse("&b[Analyse] &7You must specify a server token."));
             return;
         }
 
         final String serverToken = args[0];
 
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
-
-            Response response = new PluginAPIRequest("server")
-                    .withServerToken(serverToken)
-                    .send();
+            AnalyseSDK analyseSDK = plugin.setup(serverToken);
 
             try {
-                final JsonObject bodyJson = AnalysePlugin.GSON.fromJson(response.body().string(), JsonObject.class);
+                GetServerResponse server = analyseSDK.getServer();
+                sender.sendMessage(plugin.parse("&b[Analyse] &7Successfully setup server with token &b" + server.getName() + "&7."));
 
-                if (response.code() == 200) {
-                    final JsonObject serverJson = bodyJson.getAsJsonObject("data");
-                    sender.sendMessage(plugin.parse("&7Successfully setup server with token &b" + serverJson.get("name").getAsString() + "&7."));
-                    plugin.getConfig().set("server.token", serverToken);
-                    plugin.getConfig().set("server.id", serverJson.get("uuid").getAsString());
-                    plugin.saveConfig();
-                    plugin.setSetup(true);
-                } else {
-                    sender.sendMessage(plugin.parse("&b[Analyse] &7Sorry, but that server token isn't valid."));
-                }
-            } catch (JsonSyntaxException e) {
+                plugin.getConfig().set("server.token", serverToken);
+                plugin.getConfig().set("server.id", server.getUuid());
+                plugin.saveConfig();
+                plugin.setSetup(true);
+            } catch (ServerNotFoundException e) {
                 sender.sendMessage(plugin.parse("&b[Analyse] &7Sorry, but that server token isn't valid."));
-            } catch (IOException e) {
-                sender.sendMessage(plugin.parse("&b[Analyse] &7Sorry, an error occurred when setting up."));
             }
         });
     }

@@ -2,12 +2,9 @@ package net.analyse.plugin.listener;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.analyse.plugin.AnalysePlugin;
-import net.analyse.plugin.request.impl.PlayerSessionRequest;
-import net.analyse.plugin.request.PluginAPIRequest;
-import net.analyse.plugin.request.object.PlayerStatistic;
 import net.analyse.plugin.util.Config;
-import net.analyse.plugin.util.EncryptUtil;
-import okhttp3.Response;
+import net.analyse.sdk.exception.ServerNotFoundException;
+import net.analyse.sdk.request.object.PlayerStatistic;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,10 +14,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class PlayerActivityListener implements Listener {
 
@@ -32,55 +26,36 @@ public class PlayerActivityListener implements Listener {
 
     @EventHandler
     public void onPlayerLogin(final @NotNull PlayerLoginEvent event) {
-        if (!plugin.isSetup()) {
-            return;
-        }
+        if (!plugin.isSetup()) return;
 
-        if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) {
-            return;
-        }
+        if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) return;
 
-        if (Config.DEBUG) {
-            plugin.getLogger().info("Player connecting via: " + event.getHostname());
-        }
+        plugin.debug("Player connecting via: " + event.getHostname());
 
         plugin.getPlayerDomainMap().put(event.getPlayer().getUniqueId(), event.getHostname());
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!plugin.isSetup()) {
-            return;
-        }
+        if (!plugin.isSetup()) return;
 
-        if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) {
-            return;
-        }
+        if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) return;
 
-        if (Config.DEBUG) {
-            plugin.getLogger().info("Tracking " + event.getPlayer().getName() + " to current time");
-        }
+        plugin.debug("Tracking " + event.getPlayer().getName() + " to current time");
 
         plugin.getActiveJoinMap().put(event.getPlayer().getUniqueId(), new Date());
     }
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
-        if (!plugin.isSetup()) {
-            return;
-        }
+        if (!plugin.isSetup()) return;
 
-        if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) {
-            return;
-        }
+        if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) return;
 
         final Player player = event.getPlayer();
 
         final List<PlayerStatistic> playerStatistics = new ArrayList<>();
 
-        final String playerIp = Objects.requireNonNull(player.getAddress()).getHostString();
-        final String ipCountry = plugin.locationUtil().fromIp(playerIp);
-        final String ipHashed = EncryptUtil.toSHA256(playerIp, plugin.getEncryptionKey().getBytes());
 
         if (plugin.isPapiHooked()) {
             for (String placeholder : Config.ENABLED_STATS) {
@@ -93,26 +68,22 @@ public class PlayerActivityListener implements Listener {
         }
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            PlayerSessionRequest playerSessionRequest = new PlayerSessionRequest(
-                    player.getUniqueId(),
-                    player.getName(),
-                    plugin.getActiveJoinMap().getOrDefault(player.getUniqueId(), null),
-                    new Date(),
-                    plugin.getPlayerDomainMap().getOrDefault(player.getUniqueId(), null),
-                    ipHashed,
-                    ipCountry,
-                    playerStatistics
-            );
+            final UUID playerUuid = player.getUniqueId();
+            final String playerName = player.getName();
+            final Date joinedAt = plugin.getActiveJoinMap().getOrDefault(playerUuid, null);
+            final String domainConnected = plugin.getPlayerDomainMap().getOrDefault(playerUuid, null);
+            final String playerIp = Objects.requireNonNull(player.getAddress()).getHostString();
+
+            try {
+                plugin.getCore().sendPlayerSession(playerUuid, playerName, joinedAt, domainConnected, playerIp, playerStatistics);
+                plugin.debug(String.format("%s (%s) disconnected, who joined at %s and connected %s with IP of %s", playerName, playerUuid, joinedAt, (domainConnected != null ? "via " + domainConnected : "directly"), playerIp));
+            } catch (ServerNotFoundException e) {
+                plugin.setSetup(false);
+                plugin.getLogger().warning("The server specified no longer exists.");
+            }
 
             plugin.getActiveJoinMap().remove(player.getUniqueId());
             plugin.getPlayerDomainMap().remove(player.getUniqueId());
-
-            Response response = new PluginAPIRequest("server/sessions")
-                    .withPayload(playerSessionRequest.toJson())
-                    .withServerToken(plugin.getConfig().getString("server.token"))
-                    .send();
-
-            response.close();
         });
     }
 

@@ -1,9 +1,7 @@
 package net.analyse.plugin.event;
 
 import net.analyse.plugin.AnalysePlugin;
-import net.analyse.plugin.request.PluginAPIRequest;
-import net.analyse.plugin.request.impl.ServerHeartbeatRequest;
-import okhttp3.Response;
+import net.analyse.sdk.exception.ServerNotFoundException;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,22 +15,13 @@ public class ServerHeartbeatEvent implements Runnable {
 
     @Override
     public void run() {
-        if (!plugin.isSetup()) {
-            return;
-        }
+        if (!plugin.isSetup()) return;
 
-        ServerHeartbeatRequest serverHeartbeatRequest = new ServerHeartbeatRequest(Bukkit.getOnlinePlayers().size());
-
-        Response response = new PluginAPIRequest("server/heartbeat")
-                .withPayload(serverHeartbeatRequest.toJson())
-                .withServerToken(plugin.getConfig().getString("server.token"))
-                .send();
-
-        if (response.code() == 404) {
-            plugin.getLogger().severe("The server that was configured no longer exists!");
+        try {
+            plugin.getCore().sendHeartbeat(Bukkit.getOnlinePlayers().size());
+        } catch (ServerNotFoundException e) {
             plugin.setSetup(false);
+            plugin.getLogger().warning("The server specified no longer exists.");
         }
-
-        response.close();
     }
 }

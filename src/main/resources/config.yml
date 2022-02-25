@@ -2,6 +2,7 @@
 #      Analyse
 # Version - {version}
 #
+# Use https://docs.analyse.net for plugin documentation.
 
 server:
   id: ''
@@ -20,6 +21,9 @@ excluded:
 enabled-stats:
   - 'kills'
   - 'deaths'
+
+# You can enable this (when testing) to get extra insights.
+debug: false
 
 #
 # *** DO NOT MODIFY OR SHARE THIS KEY ***
