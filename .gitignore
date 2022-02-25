@@ -21,3 +21,5 @@ gradle-app.setting
 .run
 
 server/
+
+.DS_Store
