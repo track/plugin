@@ -15,8 +15,7 @@ repositories {
 
 dependencies {
     implementation("net.sf.trove4j:trove4j:3.0.3")
-
-    implementation("net.analyse:sdk:1.0.0")
+    implementation("net.analyse:sdk:1.0.1")
 
     compileOnly("me.clip:placeholderapi:2.11.1")
     compileOnly("org.spigotmc:spigot-api:1.18-R0.1-SNAPSHOT")
@@ -24,11 +23,18 @@ dependencies {
 }
 
 group = "net.analyse"
-version = "1.0.7"
+version = "1.0.8"
 description = "Analyse"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 val shadowJar: ShadowJar by tasks
+
+task<com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation>("relocateShadowJar") {
+    target = tasks.shadowJar.get()
+    prefix = "net.analyse.plugin.libs"
+}
+
+tasks.shadowJar.get().dependsOn(tasks.getByName("relocateShadowJar"))
 
 tasks.withType<ProcessResources> {
     filesMatching("**/plugin.yml") {
