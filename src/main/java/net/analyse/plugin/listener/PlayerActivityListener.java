@@ -76,7 +76,7 @@ public class PlayerActivityListener implements Listener {
             final Date quitAt = new Date();
             long seconds = (quitAt.getTime()-joinedAt.getTime()) / 1000;
 
-            if(seconds > Config.MIN_SESSION_DURATION) {
+            if(seconds >= Config.MIN_SESSION_DURATION) {
                 try {
                     plugin.getCore().sendPlayerSession(playerUuid, playerName, joinedAt, domainConnected, playerIp, playerStatistics);
                     plugin.debug(String.format("%s (%s) disconnected, who joined at %s and connected %s with IP of %s", playerName, playerUuid, joinedAt, (domainConnected != null ? "via " + domainConnected : "directly"), playerIp));
