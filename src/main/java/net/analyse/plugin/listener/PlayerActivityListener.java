@@ -73,13 +73,17 @@ public class PlayerActivityListener implements Listener {
             final Date joinedAt = plugin.getActiveJoinMap().getOrDefault(playerUuid, null);
             final String domainConnected = plugin.getPlayerDomainMap().getOrDefault(playerUuid, null);
             final String playerIp = Objects.requireNonNull(player.getAddress()).getHostString();
+            final Date quitAt = new Date();
+            long seconds = (quitAt.getTime()-joinedAt.getTime()) / 1000;
 
-            try {
-                plugin.getCore().sendPlayerSession(playerUuid, playerName, joinedAt, domainConnected, playerIp, playerStatistics);
-                plugin.debug(String.format("%s (%s) disconnected, who joined at %s and connected %s with IP of %s", playerName, playerUuid, joinedAt, (domainConnected != null ? "via " + domainConnected : "directly"), playerIp));
-            } catch (ServerNotFoundException e) {
-                plugin.setSetup(false);
-                plugin.getLogger().warning("The server specified no longer exists.");
+            if(seconds > Config.MIN_SESSION_DURATION) {
+                try {
+                    plugin.getCore().sendPlayerSession(playerUuid, playerName, joinedAt, domainConnected, playerIp, playerStatistics);
+                    plugin.debug(String.format("%s (%s) disconnected, who joined at %s and connected %s with IP of %s", playerName, playerUuid, joinedAt, (domainConnected != null ? "via " + domainConnected : "directly"), playerIp));
+                } catch (ServerNotFoundException e) {
+                    plugin.setSetup(false);
+                    plugin.getLogger().warning("The server specified no longer exists.");
+                }
             }
 
             plugin.getActiveJoinMap().remove(player.getUniqueId());

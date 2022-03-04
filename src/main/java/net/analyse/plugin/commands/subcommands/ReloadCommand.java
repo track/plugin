@@ -22,6 +22,7 @@ public class ReloadCommand extends SubCommand {
         Config.DEBUG = config.getBoolean("debug", false);
         Config.EXCLUDED_PLAYERS = config.getStringList("excluded-players");
         Config.ENABLED_STATS = config.getStringList("enabled-stats");
+        Config.MIN_SESSION_DURATION = config.getInt("minimum-session-duration", 0);
 
         sender.sendMessage(plugin.parse("&b[Analyse] &7Reloaded configuration file."));
     }

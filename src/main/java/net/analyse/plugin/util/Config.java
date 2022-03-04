@@ -15,4 +15,6 @@ public class Config {
     public static List<String> EXCLUDED_PLAYERS = config.getStringList("excluded-players");
 
     public static List<String> ENABLED_STATS = config.getStringList("enabled-stats");
+
+    public static int MIN_SESSION_DURATION = config.getInt("minimum-session-duration", 0);
 }

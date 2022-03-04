@@ -25,6 +25,11 @@ enabled-stats:
 # You can enable this (when testing) to get extra insights.
 debug: false
 
+# The minimum duration (seconds) that a player must play for
+# in order to be counted. This is useful to prevent players logging
+# in and out (e.g. a hub) being treated as a player.
+minimum-session-duration: 30
+
 #
 # *** DO NOT MODIFY OR SHARE THIS KEY ***
 #
