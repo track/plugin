@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
-import static net.analyse.plugin.util.EncryptUtil.generateEncryptionKey;
+import static net.analyse.sdk.util.EncryptUtil.generateEncryptionKey;
 
 public class AnalysePlugin extends JavaPlugin {
     private final Map<UUID, Date> activeJoinMap = new TCustomHashMap<>(new IdentityHashingStrategy<>());
@@ -27,16 +27,13 @@ public class AnalysePlugin extends JavaPlugin {
     private boolean setup;
     private boolean papiHooked;
 
-    private String serverToken;
     private String encryptionKey;
-
-    private ServerHeartbeatEvent serverHeartBeatEvent;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
 
-        serverToken = getConfig().getString("server.token");
+        String serverToken = getConfig().getString("server.token");
         encryptionKey = getConfig().getString("encryption-key");
 
         setup = serverToken != null && !serverToken.isEmpty();
@@ -46,8 +43,8 @@ public class AnalysePlugin extends JavaPlugin {
         getCommand("analyse").setExecutor(new AnalyseCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerActivityListener(this), this);
 
-        serverHeartBeatEvent = new ServerHeartbeatEvent(this);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, serverHeartBeatEvent::run, 0, 20 * 10);
+        ServerHeartbeatEvent serverHeartBeatEvent = new ServerHeartbeatEvent(this);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, serverHeartBeatEvent, 0, 20 * 10);
 
         if (encryptionKey == null || encryptionKey.isEmpty()) {
             encryptionKey = generateEncryptionKey(64);
