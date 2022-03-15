@@ -14,7 +14,10 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 public class PlayerActivityListener implements Listener {
 
@@ -72,7 +75,7 @@ public class PlayerActivityListener implements Listener {
             final String playerName = player.getName();
             final Date joinedAt = plugin.getActiveJoinMap().getOrDefault(playerUuid, null);
             final String domainConnected = plugin.getPlayerDomainMap().getOrDefault(playerUuid, null);
-            final String playerIp = Objects.requireNonNull(player.getAddress()).getHostString();
+            final String playerIp = player.getAddress().getAddress().getHostAddress();
             final Date quitAt = new Date();
             long seconds = (quitAt.getTime()-joinedAt.getTime()) / 1000;
 
