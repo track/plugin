@@ -25,5 +25,11 @@ public class ReloadCommand extends SubCommand {
         Config.MIN_SESSION_DURATION = config.getInt("minimum-session-duration", 0);
 
         sender.sendMessage(plugin.parse("&b[Analyse] &7Reloaded configuration file."));
+
+        plugin.debug("Successfully reloaded!");
+        plugin.debug("- Debug Enabled.");
+        plugin.debug("- Enabled Stats: " + String.join(", ", Config.ENABLED_STATS));
+        plugin.debug("- Excluded Players: " + String.join(", ", Config.EXCLUDED_PLAYERS));
+        plugin.debug("- Min Session: " + Config.MIN_SESSION_DURATION);
     }
 }

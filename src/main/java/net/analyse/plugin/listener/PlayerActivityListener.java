@@ -63,6 +63,9 @@ public class PlayerActivityListener implements Listener {
 
                 if (!resolvedPlaceholder.equalsIgnoreCase("%" + placeholder + "%")) {
                     playerStatistics.add(new PlayerStatistic(placeholder, resolvedPlaceholder));
+                    plugin.debug("Sending %" + placeholder + "% to Analyse with value: " + resolvedPlaceholder);
+                } else {
+                    plugin.debug("Skipping sending %" + placeholder + "% to Analyse as it has no value.");
                 }
             }
         }
@@ -84,6 +87,9 @@ public class PlayerActivityListener implements Listener {
                     plugin.setSetup(false);
                     plugin.getLogger().warning("The server specified no longer exists.");
                 }
+            } else {
+                plugin.debug("Skipping sending " + playerName + "'s data as they haven't played for long enough.");
+                plugin.debug("This applies to the 'minimum-session-duration' in your config file (Currently " + Config.MIN_SESSION_DURATION + "s).");
             }
 
             plugin.getActiveJoinMap().remove(player.getUniqueId());

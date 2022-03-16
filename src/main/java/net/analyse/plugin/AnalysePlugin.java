@@ -67,6 +67,14 @@ public class AnalysePlugin extends JavaPlugin {
                 getLogger().warning("The server linked no longer exists.");
             }
         }
+
+
+
+        debug("Successfully booted!");
+        debug("- Debug Enabled.");
+        debug("- Enabled Stats: " + String.join(", ", Config.ENABLED_STATS));
+        debug("- Excluded Players: " + String.join(", ", Config.EXCLUDED_PLAYERS));
+        debug("- Min Session: " + Config.MIN_SESSION_DURATION);
     }
 
     @Override
