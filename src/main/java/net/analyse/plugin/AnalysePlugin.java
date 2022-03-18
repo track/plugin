@@ -68,8 +68,6 @@ public class AnalysePlugin extends JavaPlugin {
             }
         }
 
-
-
         debug("Successfully booted!");
         debug("- Debug Enabled.");
         debug("- Enabled Stats: " + String.join(", ", Config.ENABLED_STATS));
@@ -117,7 +115,6 @@ public class AnalysePlugin extends JavaPlugin {
 
     public AnalyseSDK setup(String token) {
         core = new AnalyseSDK(token, encryptionKey);
-
         return core;
     }
 

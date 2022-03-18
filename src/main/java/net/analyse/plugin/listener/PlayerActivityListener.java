@@ -37,12 +37,9 @@ public class PlayerActivityListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!plugin.isSetup()) return;
-
         if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) return;
 
         plugin.debug("Tracking " + event.getPlayer().getName() + " to current time");
-
         plugin.getActiveJoinMap().put(event.getPlayer().getUniqueId(), new Date());
     }
 
@@ -55,7 +52,6 @@ public class PlayerActivityListener implements Listener {
         final Player player = event.getPlayer();
 
         final List<PlayerStatistic> playerStatistics = new ArrayList<>();
-
 
         if (plugin.isPapiHooked()) {
             for (String placeholder : Config.ENABLED_STATS) {

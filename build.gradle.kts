@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     implementation("net.sf.trove4j:trove4j:3.0.3")
-    implementation("net.analyse:sdk:1.0.1")
+    implementation("net.analyse:sdk:1.0.3")
 
     compileOnly("me.clip:placeholderapi:2.11.1")
     compileOnly("org.spigotmc:spigot-api:1.18-R0.1-SNAPSHOT")
@@ -23,7 +23,7 @@ dependencies {
 }
 
 group = "net.analyse"
-version = "1.0.10"
+version = "1.0.11"
 description = "Analyse"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
