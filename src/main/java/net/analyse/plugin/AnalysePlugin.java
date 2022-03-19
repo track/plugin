@@ -27,14 +27,13 @@ public class AnalysePlugin extends JavaPlugin {
     private boolean setup;
     private boolean papiHooked;
 
-    private String serverToken;
     private String encryptionKey;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
 
-        serverToken = getConfig().getString("server.token");
+        final String serverToken = getConfig().getString("server.token");
         encryptionKey = getConfig().getString("encryption-key");
 
         setup = serverToken != null && !serverToken.isEmpty();
