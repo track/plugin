@@ -10,11 +10,11 @@ public class Config {
 
     private static final @NotNull Configuration config = AnalysePlugin.getPlugin(AnalysePlugin.class).getConfig();
 
-    public static boolean DEBUG = config.getBoolean("debug", false);
+    public static boolean debug = config.getBoolean("debug", false);
 
-    public static List<String> EXCLUDED_PLAYERS = config.getStringList("excluded-players");
+    public static List<String> excludedPlayers = config.getStringList("excluded-players");
 
-    public static List<String> ENABLED_STATS = config.getStringList("enabled-stats");
+    public static List<String> enabledStats = config.getStringList("enabled-stats");
 
-    public static int MIN_SESSION_DURATION = config.getInt("minimum-session-duration", 0);
+    public static int minSessionDuration = config.getInt("minimum-session-duration", 0);
 }

@@ -28,7 +28,7 @@ public class PlayerActivityListener implements Listener {
     public void onPlayerLogin(final @NotNull PlayerLoginEvent event) {
         if (!plugin.isSetup()) return;
 
-        if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) return;
+        if (Config.excludedPlayers.contains(event.getPlayer().getUniqueId().toString())) return;
 
         plugin.debug("Player connecting via: " + event.getHostname());
 
@@ -37,7 +37,7 @@ public class PlayerActivityListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) return;
+        if (Config.excludedPlayers.contains(event.getPlayer().getUniqueId().toString())) return;
 
         plugin.debug("Tracking " + event.getPlayer().getName() + " to current time");
         plugin.getActiveJoinMap().put(event.getPlayer().getUniqueId(), new Date());
@@ -47,14 +47,14 @@ public class PlayerActivityListener implements Listener {
     public void onPlayerLeave(PlayerQuitEvent event) {
         if (!plugin.isSetup()) return;
 
-        if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) return;
+        if (Config.excludedPlayers.contains(event.getPlayer().getUniqueId().toString())) return;
 
         final Player player = event.getPlayer();
 
         final List<PlayerStatistic> playerStatistics = new ArrayList<>();
 
         if (plugin.isPapiHooked()) {
-            for (String placeholder : Config.ENABLED_STATS) {
+            for (String placeholder : Config.enabledStats) {
                 String resolvedPlaceholder = PlaceholderAPI.setPlaceholders(player, "%" + placeholder + "%");
 
                 if (!resolvedPlaceholder.equalsIgnoreCase("%" + placeholder + "%")) {
@@ -75,7 +75,7 @@ public class PlayerActivityListener implements Listener {
             final Date quitAt = new Date();
             long seconds = (quitAt.getTime()-joinedAt.getTime()) / 1000;
 
-            if(seconds >= Config.MIN_SESSION_DURATION) {
+            if(seconds >= Config.minSessionDuration) {
                 try {
                     plugin.getCore().sendPlayerSession(playerUuid, playerName, joinedAt, domainConnected, playerIp, playerStatistics);
                     plugin.debug(String.format("%s (%s) disconnected, who joined at %s and connected %s with IP of %s", playerName, playerUuid, joinedAt, (domainConnected != null ? "via " + domainConnected : "directly"), playerIp));
@@ -85,7 +85,7 @@ public class PlayerActivityListener implements Listener {
                 }
             } else {
                 plugin.debug("Skipping sending " + playerName + "'s data as they haven't played for long enough.");
-                plugin.debug("This applies to the 'minimum-session-duration' in your config file (Currently " + Config.MIN_SESSION_DURATION + "s).");
+                plugin.debug("This applies to the 'minimum-session-duration' in your config file (Currently " + Config.minSessionDuration + "s).");
             }
 
             plugin.getActiveJoinMap().remove(player.getUniqueId());

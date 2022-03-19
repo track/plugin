@@ -16,7 +16,7 @@ public class SetupCommand extends SubCommand {
 
     @Override
     public void execute(final CommandSender sender, final String[] args) {
-        if(plugin.isSetup()) {
+        if (plugin.isSetup()) {
             sender.sendMessage(plugin.parse("&b[Analyse] &7This server has already been setup."));
             return;
         }

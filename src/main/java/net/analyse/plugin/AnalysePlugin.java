@@ -30,8 +30,6 @@ public class AnalysePlugin extends JavaPlugin {
     private String serverToken;
     private String encryptionKey;
 
-    private ServerHeartbeatEvent serverHeartBeatEvent;
-
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -46,8 +44,8 @@ public class AnalysePlugin extends JavaPlugin {
         getCommand("analyse").setExecutor(new AnalyseCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerActivityListener(this), this);
 
-        serverHeartBeatEvent = new ServerHeartbeatEvent(this);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, serverHeartBeatEvent::run, 0, 20 * 10);
+        final ServerHeartbeatEvent serverHeartBeatEvent = new ServerHeartbeatEvent(this);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, serverHeartBeatEvent, 0, 20 * 10);
 
         if (encryptionKey == null || encryptionKey.isEmpty()) {
             encryptionKey = generateEncryptionKey(64);
@@ -61,6 +59,7 @@ public class AnalysePlugin extends JavaPlugin {
             getLogger().info("/analyse setup <server-token>");
         } else {
             core = new AnalyseSDK(serverToken, encryptionKey);
+
             try {
                 getLogger().info("Linked Analyse to " + core.getServer().getName() + ".");
             } catch (ServerNotFoundException e) {
@@ -70,9 +69,9 @@ public class AnalysePlugin extends JavaPlugin {
 
         debug("Successfully booted!");
         debug("- Debug Enabled.");
-        debug("- Enabled Stats: " + String.join(", ", Config.ENABLED_STATS));
-        debug("- Excluded Players: " + String.join(", ", Config.EXCLUDED_PLAYERS));
-        debug("- Min Session: " + Config.MIN_SESSION_DURATION);
+        debug("- Enabled Stats: " + String.join(", ", Config.enabledStats));
+        debug("- Excluded Players: " + String.join(", ", Config.excludedPlayers));
+        debug("- Min Session: " + Config.minSessionDuration);
     }
 
     @Override
@@ -114,11 +113,12 @@ public class AnalysePlugin extends JavaPlugin {
     }
 
     public AnalyseSDK setup(String token) {
-        core = new AnalyseSDK(token, encryptionKey);
-        return core;
+        return core = new AnalyseSDK(token, encryptionKey);
     }
 
     public void debug(String message) {
-        if(Config.DEBUG) getLogger().info("DEBUG: " + message);
+        if (Config.debug) {
+            getLogger().info("DEBUG: " + message);
+        }
     }
 }
