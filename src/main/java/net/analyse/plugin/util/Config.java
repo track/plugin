@@ -17,4 +17,8 @@ public class Config {
     public static List<String> ENABLED_STATS = config.getStringList("enabled-stats");
 
     public static int MIN_SESSION_DURATION = config.getInt("minimum-session-duration", 0);
+
+    public static boolean ADVANCED_MODE = config.getBoolean("advanced.enabled", false);
+    public static String REDIS_HOST = config.getString("advanced.redis.host", "127.0.0.1");
+    public static int REDIS_PORT = config.getInt("advanced.redis.port", 6379);
 }

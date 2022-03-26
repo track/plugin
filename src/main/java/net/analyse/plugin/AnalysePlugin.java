@@ -11,6 +11,7 @@ import net.analyse.sdk.exception.ServerNotFoundException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
+import redis.clients.jedis.Jedis;
 
 import java.util.Date;
 import java.util.Map;
@@ -29,8 +30,7 @@ public class AnalysePlugin extends JavaPlugin {
 
     private String serverToken;
     private String encryptionKey;
-
-    private ServerHeartbeatEvent serverHeartBeatEvent;
+    private Jedis redis = null;
 
     @Override
     public void onEnable() {
@@ -46,8 +46,12 @@ public class AnalysePlugin extends JavaPlugin {
         getCommand("analyse").setExecutor(new AnalyseCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerActivityListener(this), this);
 
-        serverHeartBeatEvent = new ServerHeartbeatEvent(this);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, serverHeartBeatEvent::run, 0, 20 * 10);
+        ServerHeartbeatEvent serverHeartBeatEvent = new ServerHeartbeatEvent(this);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, serverHeartBeatEvent, 0, 20 * 10);
+
+        if (Config.ADVANCED_MODE) {
+            Bukkit.getScheduler().runTaskAsynchronously(this, () -> this.redis = new Jedis(Config.REDIS_HOST, Config.REDIS_PORT));
+        }
 
         if (encryptionKey == null || encryptionKey.isEmpty()) {
             encryptionKey = generateEncryptionKey(64);
@@ -73,6 +77,7 @@ public class AnalysePlugin extends JavaPlugin {
         debug("- Enabled Stats: " + String.join(", ", Config.ENABLED_STATS));
         debug("- Excluded Players: " + String.join(", ", Config.EXCLUDED_PLAYERS));
         debug("- Min Session: " + Config.MIN_SESSION_DURATION);
+        debug("- Advanced Mode: " + Config.ADVANCED_MODE);
     }
 
     @Override
@@ -116,6 +121,10 @@ public class AnalysePlugin extends JavaPlugin {
     public AnalyseSDK setup(String token) {
         core = new AnalyseSDK(token, encryptionKey);
         return core;
+    }
+
+    public Jedis getRedis() {
+        return redis;
     }
 
     public void debug(String message) {

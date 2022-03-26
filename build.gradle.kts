@@ -1,4 +1,4 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar;
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     java
@@ -15,23 +15,29 @@ repositories {
 
 dependencies {
     implementation("net.sf.trove4j:trove4j:3.0.3")
-    implementation("net.analyse:sdk:1.0.3")
+    implementation("net.analyse:sdk:1.0.4")
+    implementation("redis.clients:jedis:4.2.0")
 
     compileOnly("me.clip:placeholderapi:2.11.1")
     compileOnly("org.spigotmc:spigot-api:1.18-R0.1-SNAPSHOT")
-    compileOnly("org.jetbrains:annotations:16.0.2")
+    compileOnly("org.jetbrains:annotations:23.0.0")
 }
 
 group = "net.analyse"
-version = "1.0.11"
+version = "1.0.12"
 description = "Analyse"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 val shadowJar: ShadowJar by tasks
 
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
 task<com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation>("relocateShadowJar") {
     target = tasks.shadowJar.get()
     prefix = "net.analyse.plugin.libs"
+    shadowJar.minimize()
 }
 
 tasks.shadowJar.get().dependsOn(tasks.getByName("relocateShadowJar"))
@@ -45,8 +51,4 @@ tasks.withType<ProcessResources> {
 tasks.register<Copy>("copyJarToServerPlugins") {
     from(tasks.getByPath("shadowJar"))
     into(layout.projectDirectory.dir("server/plugins"))
-}
-
-tasks.withType<JavaCompile>() {
-    options.encoding = "UTF-8"
 }

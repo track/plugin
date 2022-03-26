@@ -30,8 +30,9 @@ public class PlayerActivityListener implements Listener {
 
         if (Config.EXCLUDED_PLAYERS.contains(event.getPlayer().getUniqueId().toString())) return;
 
-        plugin.debug("Player connecting via: " + event.getHostname());
+        if (Config.ADVANCED_MODE) return;
 
+        plugin.debug("Player connecting via: " + event.getHostname());
         plugin.getPlayerDomainMap().put(event.getPlayer().getUniqueId(), event.getHostname());
     }
 
@@ -70,10 +71,18 @@ public class PlayerActivityListener implements Listener {
             final UUID playerUuid = player.getUniqueId();
             final String playerName = player.getName();
             final Date joinedAt = plugin.getActiveJoinMap().getOrDefault(playerUuid, null);
-            final String domainConnected = plugin.getPlayerDomainMap().getOrDefault(playerUuid, null);
             final String playerIp = Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress();
             final Date quitAt = new Date();
-            long seconds = (quitAt.getTime()-joinedAt.getTime()) / 1000;
+            final long seconds = (quitAt.getTime()-joinedAt.getTime()) / 1000;
+            final String domainConnected;
+
+            if(Config.ADVANCED_MODE && plugin.getRedis() != null) {
+                domainConnected = plugin.getRedis().get("analyse:connected_via:" + playerName);
+                plugin.debug(playerName + " connected from '" + domainConnected + "' (from Redis).");
+            } else {
+                domainConnected = plugin.getPlayerDomainMap().getOrDefault(playerUuid, null);
+                plugin.debug(playerName + " connected from '" + domainConnected + "' (from Cache).");
+            }
 
             if(seconds >= Config.MIN_SESSION_DURATION) {
                 try {
@@ -85,7 +94,7 @@ public class PlayerActivityListener implements Listener {
                 }
             } else {
                 plugin.debug("Skipping sending " + playerName + "'s data as they haven't played for long enough.");
-                plugin.debug("This applies to the 'minimum-session-duration' in your config file (Currently " + Config.MIN_SESSION_DURATION + "s).");
+                plugin.debug("Your current threshold is set to " + Config.MIN_SESSION_DURATION + " " + (Config.MIN_SESSION_DURATION == 1 ? "second" : "seconds") + " minimum.");
             }
 
             plugin.getActiveJoinMap().remove(player.getUniqueId());

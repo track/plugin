@@ -11,7 +11,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AnalyseCommand implements CommandExecutor {
 
@@ -29,6 +31,11 @@ public class AnalyseCommand implements CommandExecutor {
     @Override
     public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final String[] args) {
         if (args.length == 0 || !commands.containsKey(args[0].toLowerCase())) {
+            if (!sender.hasPermission("analyse.admin")) {
+                sender.sendMessage(plugin.parse("&b[Analyse] &7You do not have access to that command."));
+                return true;
+            }
+
             sender.sendMessage(" ");
             sender.sendMessage(plugin.parse("&b[Analyse] &7Plugin Information:"));
             sender.sendMessage(plugin.parse(String.format(" &b- &7Version: &bv%s&7.", plugin.getDescription().getVersion())));
