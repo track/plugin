@@ -11,7 +11,7 @@ import net.analyse.sdk.exception.ServerNotFoundException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
-import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPooled;
 
 import java.util.Date;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class AnalysePlugin extends JavaPlugin {
 
     private String serverToken;
     private String encryptionKey;
-    private Jedis redis = null;
+    private JedisPooled redis = null;
 
     @Override
     public void onEnable() {
@@ -50,7 +50,7 @@ public class AnalysePlugin extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, serverHeartBeatEvent, 0, 20 * 10);
 
         if (Config.ADVANCED_MODE) {
-            Bukkit.getScheduler().runTaskAsynchronously(this, () -> this.redis = new Jedis(Config.REDIS_HOST, Config.REDIS_PORT));
+            Bukkit.getScheduler().runTaskAsynchronously(this, () -> this.redis = new JedisPooled(Config.REDIS_HOST, Config.REDIS_PORT));
         }
 
         if (encryptionKey == null || encryptionKey.isEmpty()) {
@@ -123,7 +123,7 @@ public class AnalysePlugin extends JavaPlugin {
         return core;
     }
 
-    public Jedis getRedis() {
+    public JedisPooled getRedis() {
         return redis;
     }
 
