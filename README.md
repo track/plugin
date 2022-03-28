@@ -1,22 +1,18 @@
 ![Banner](https://raw.githubusercontent.com/track/sdk/main/.github/banner.png)
 
-# Analyse (Spigot Plugin)
+# Analyse
 
-This is the official spigot adapter for Analyse - the Minecraft Server Analytics platform that tracks community performance.
+This is the official adapters for Analyse - the Minecraft Server & Player Analytics platform for tracking your community performance.
 
 ## Installation
-1. Download this plugin (Latest from Releases).
-2. Head to Analyse Dashboard, and copy the server command.
-3. Start your server, and run the setup command.
+1. You can download the latest version from our releases page.
+2. Copy your setup command from [our dashboard](https://app.analyse.net).
+3. Finally start your server and run the setup command (ideally from console).
 
 You're ready to go!
 
-## Custom Integration
-This project utilises our official [SDK](https://github.com/track/sdk), which is an official wrapper around our [API](https://docs.analyse.net/page/api-endpoints).
-
 ## Compiling
 1. Clone this repo (`git clone git@github.com:track/plugin.git`).
-1. Clone our sdk (`git clone git@github.com:track/sdk.git`).
-1. Install our sdk using `./gradlew pushToMavenLocal`.
-2. Make any needed changes.
-3. Then use `./gradlew shadowjar` to build.
+2. Compile using `./gradlew`.
+3. Make any needed changes.
+4. Then use `./gradlew` to build.
