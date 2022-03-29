@@ -50,10 +50,6 @@ public class AnalysePlugin extends JavaPlugin {
         ServerHeartbeatEvent serverHeartBeatEvent = new ServerHeartbeatEvent(this);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, serverHeartBeatEvent, 0, 20 * 10);
 
-        if (Config.ADVANCED_MODE) {
-            Bukkit.getScheduler().runTaskAsynchronously(this, () -> this.redis = new JedisPooled(Config.REDIS_HOST, Config.REDIS_PORT));
-        }
-
         if (encryptionKey == null || encryptionKey.isEmpty()) {
             encryptionKey = generateEncryptionKey(64);
             getConfig().set("encryption-key", encryptionKey);
@@ -71,6 +67,11 @@ public class AnalysePlugin extends JavaPlugin {
             } catch (ServerNotFoundException e) {
                 getLogger().warning("The server linked no longer exists.");
             }
+        }
+
+        if (Config.ADVANCED_MODE) {
+            Bukkit.getScheduler().runTaskAsynchronously(this, () -> this.redis = new JedisPooled(Config.REDIS_HOST, Config.REDIS_PORT));
+            getLogger().info("Advanced mode is enabled.");
         }
 
         debug("Successfully booted!");
