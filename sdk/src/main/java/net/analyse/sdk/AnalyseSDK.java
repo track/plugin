@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -30,16 +31,28 @@ public class AnalyseSDK {
     private final String encryptionKey;
     private final String baseUrl;
 
+    private List<UUID> excludedPlayers = new ArrayList<>();
+
     public AnalyseSDK(String token, String encryptionKey) {
         this.token = token;
         this.encryptionKey = encryptionKey;
         this.baseUrl = "https://app.analyse.net/api/v1/";
+        AnalyseCore.setCore(this);
     }
 
     public AnalyseSDK(String token, String encryptionKey, String baseUrl) {
         this.token = token;
         this.encryptionKey = encryptionKey;
         this.baseUrl = baseUrl;
+        AnalyseCore.setCore(this);
+    }
+
+    public List<UUID> getExcludedPlayers() {
+        return excludedPlayers;
+    }
+
+    public String getToken() {
+        return token;
     }
 
     public String getBaseUrl() {

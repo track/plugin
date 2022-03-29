@@ -7,6 +7,7 @@ import net.analyse.plugin.bukkit.commands.AnalyseCommand;
 import net.analyse.plugin.bukkit.event.ServerHeartbeatEvent;
 import net.analyse.plugin.bukkit.listener.PlayerActivityListener;
 import net.analyse.plugin.bukkit.util.Config;
+import net.analyse.sdk.AnalyseCore;
 import net.analyse.sdk.AnalyseSDK;
 import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.request.object.PlayerStatistic;
@@ -17,6 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import redis.clients.jedis.JedisPooled;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.analyse.plugin.bukkit.util.EncryptUtil.generateEncryptionKey;
 
@@ -74,10 +76,15 @@ public class AnalysePlugin extends JavaPlugin {
             getLogger().info("Advanced mode is enabled.");
         }
 
+        List<UUID> excludedPlayers = core.getExcludedPlayers();
+        getConfig().getStringList("excluded.players").forEach(player -> {
+            excludedPlayers.add(UUID.fromString(player));
+        });
+
         debug("Successfully booted!");
         debug("- Debug Enabled.");
         debug("- Enabled Stats: " + String.join(", ", Config.ENABLED_STATS));
-        debug("- Excluded Players: " + String.join(", ", Config.EXCLUDED_PLAYERS));
+        debug("- Excluded Players: " + excludedPlayers.stream().map(UUID::toString).collect(Collectors.joining(", ")));
         debug("- Min Session: " + Config.MIN_SESSION_DURATION);
         debug("- Advanced Mode: " + Config.ADVANCED_MODE);
     }
