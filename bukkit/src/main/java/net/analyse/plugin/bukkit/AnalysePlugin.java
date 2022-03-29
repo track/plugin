@@ -2,20 +2,21 @@ package net.analyse.plugin.bukkit;
 
 import gnu.trove.map.hash.TCustomHashMap;
 import gnu.trove.strategy.IdentityHashingStrategy;
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.analyse.plugin.bukkit.commands.AnalyseCommand;
 import net.analyse.plugin.bukkit.event.ServerHeartbeatEvent;
 import net.analyse.plugin.bukkit.listener.PlayerActivityListener;
 import net.analyse.plugin.bukkit.util.Config;
 import net.analyse.sdk.AnalyseSDK;
 import net.analyse.sdk.exception.ServerNotFoundException;
+import net.analyse.sdk.request.object.PlayerStatistic;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import redis.clients.jedis.JedisPooled;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static net.analyse.plugin.bukkit.util.EncryptUtil.generateEncryptionKey;
 
@@ -82,8 +83,9 @@ public class AnalysePlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        activeJoinMap.clear();
-        playerDomainMap.clear();
+        for(Player player : Bukkit.getOnlinePlayers()) {
+            sendPlayerSessionInformation(player);
+        }
     }
 
     public Map<UUID, Date> getActiveJoinMap() {
@@ -129,5 +131,58 @@ public class AnalysePlugin extends JavaPlugin {
 
     public void debug(String message) {
         if(Config.DEBUG) getLogger().info("DEBUG: " + message);
+    }
+
+    public void sendPlayerSessionInformation(Player player) {
+        if (Config.EXCLUDED_PLAYERS.contains(player.getUniqueId().toString())) return;
+
+        final List<PlayerStatistic> playerStatistics = new ArrayList<>();
+
+        if (isPapiHooked()) {
+            for (String placeholder : Config.ENABLED_STATS) {
+                String resolvedPlaceholder = PlaceholderAPI.setPlaceholders(player, "%" + placeholder + "%");
+
+                if (!resolvedPlaceholder.equalsIgnoreCase("%" + placeholder + "%")) {
+                    playerStatistics.add(new PlayerStatistic(placeholder, resolvedPlaceholder));
+                    debug("Sending %" + placeholder + "% to Analyse with value: " + resolvedPlaceholder);
+                } else {
+                    debug("Skipping sending %" + placeholder + "% to Analyse as it has no value.");
+                }
+            }
+        }
+
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            final UUID playerUuid = player.getUniqueId();
+            final String playerName = player.getName();
+            final Date joinedAt = getActiveJoinMap().getOrDefault(playerUuid, null);
+            final String playerIp = Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress();
+            final Date quitAt = new Date();
+            final long seconds = (quitAt.getTime()-joinedAt.getTime()) / 1000;
+            final String domainConnected;
+
+            if(Config.ADVANCED_MODE && getRedis() != null) {
+                domainConnected = getRedis().get("analyse:connected_via:" + playerName);
+                debug(playerName + " connected from '" + domainConnected + "' (from Redis).");
+            } else {
+                domainConnected = getPlayerDomainMap().getOrDefault(playerUuid, null);
+                debug(playerName + " connected from '" + domainConnected + "' (from Cache).");
+            }
+
+            if(seconds >= Config.MIN_SESSION_DURATION) {
+                try {
+                    getCore().sendPlayerSession(playerUuid, playerName, joinedAt, domainConnected, playerIp, playerStatistics);
+                    debug(String.format("%s (%s) disconnected, who joined at %s and connected %s with IP of %s", playerName, playerUuid, joinedAt, (domainConnected != null ? "via " + domainConnected : "directly"), playerIp));
+                } catch (ServerNotFoundException e) {
+                    setSetup(false);
+                    getLogger().warning("The server specified no longer exists.");
+                }
+            } else {
+                debug("Skipping sending " + playerName + "'s data as they haven't played for long enough.");
+                debug("Your current threshold is set to " + Config.MIN_SESSION_DURATION + " " + (Config.MIN_SESSION_DURATION == 1 ? "second" : "seconds") + " minimum.");
+            }
+
+            getActiveJoinMap().remove(player.getUniqueId());
+            getPlayerDomainMap().remove(player.getUniqueId());
+        });
     }
 }
