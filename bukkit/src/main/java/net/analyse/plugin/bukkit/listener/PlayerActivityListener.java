@@ -47,7 +47,7 @@ public class PlayerActivityListener implements Listener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
         if (!plugin.isSetup()) return;
-        plugin.sendPlayerSessionInformation(event.getPlayer());
+        plugin.sendPlayerSessionInformation(event.getPlayer(), false);
     }
 
 }

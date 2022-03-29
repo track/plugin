@@ -84,7 +84,7 @@ public class AnalysePlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         for(Player player : Bukkit.getOnlinePlayers()) {
-            sendPlayerSessionInformation(player);
+            sendPlayerSessionInformation(player, true);
         }
     }
 
@@ -133,9 +133,20 @@ public class AnalysePlugin extends JavaPlugin {
         if(Config.DEBUG) getLogger().info("DEBUG: " + message);
     }
 
-    public void sendPlayerSessionInformation(Player player) {
+    public void sendPlayerSessionInformation(Player player, Boolean performingShutdown) {
         if (Config.EXCLUDED_PLAYERS.contains(player.getUniqueId().toString())) return;
 
+        if(performingShutdown) {
+            sendData(player);
+            return;
+        }
+
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+           sendData(player);
+        });
+    }
+
+    private void sendData(Player player) {
         final List<PlayerStatistic> playerStatistics = new ArrayList<>();
 
         if (isPapiHooked()) {
@@ -151,38 +162,36 @@ public class AnalysePlugin extends JavaPlugin {
             }
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            final UUID playerUuid = player.getUniqueId();
-            final String playerName = player.getName();
-            final Date joinedAt = getActiveJoinMap().getOrDefault(playerUuid, null);
-            final String playerIp = Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress();
-            final Date quitAt = new Date();
-            final long seconds = (quitAt.getTime()-joinedAt.getTime()) / 1000;
-            final String domainConnected;
+        final UUID playerUuid = player.getUniqueId();
+        final String playerName = player.getName();
+        final Date joinedAt = getActiveJoinMap().getOrDefault(playerUuid, null);
+        final String playerIp = Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress();
+        final Date quitAt = new Date();
+        final long seconds = (quitAt.getTime()-joinedAt.getTime()) / 1000;
+        final String domainConnected;
 
-            if(Config.ADVANCED_MODE && getRedis() != null) {
-                domainConnected = getRedis().get("analyse:connected_via:" + playerName);
-                debug(playerName + " connected from '" + domainConnected + "' (from Redis).");
-            } else {
-                domainConnected = getPlayerDomainMap().getOrDefault(playerUuid, null);
-                debug(playerName + " connected from '" + domainConnected + "' (from Cache).");
+        if(Config.ADVANCED_MODE && getRedis() != null) {
+            domainConnected = getRedis().get("analyse:connected_via:" + playerName);
+            debug(playerName + " connected from '" + domainConnected + "' (from Redis).");
+        } else {
+            domainConnected = getPlayerDomainMap().getOrDefault(playerUuid, null);
+            debug(playerName + " connected from '" + domainConnected + "' (from Cache).");
+        }
+
+        if(seconds >= Config.MIN_SESSION_DURATION) {
+            try {
+                getCore().sendPlayerSession(playerUuid, playerName, joinedAt, domainConnected, playerIp, playerStatistics);
+                debug(String.format("%s (%s) disconnected, who joined at %s and connected %s with IP of %s", playerName, playerUuid, joinedAt, (domainConnected != null ? "via " + domainConnected : "directly"), playerIp));
+            } catch (ServerNotFoundException e) {
+                setSetup(false);
+                getLogger().warning("The server specified no longer exists.");
             }
+        } else {
+            debug("Skipping sending " + playerName + "'s data as they haven't played for long enough.");
+            debug("Your current threshold is set to " + Config.MIN_SESSION_DURATION + " " + (Config.MIN_SESSION_DURATION == 1 ? "second" : "seconds") + " minimum.");
+        }
 
-            if(seconds >= Config.MIN_SESSION_DURATION) {
-                try {
-                    getCore().sendPlayerSession(playerUuid, playerName, joinedAt, domainConnected, playerIp, playerStatistics);
-                    debug(String.format("%s (%s) disconnected, who joined at %s and connected %s with IP of %s", playerName, playerUuid, joinedAt, (domainConnected != null ? "via " + domainConnected : "directly"), playerIp));
-                } catch (ServerNotFoundException e) {
-                    setSetup(false);
-                    getLogger().warning("The server specified no longer exists.");
-                }
-            } else {
-                debug("Skipping sending " + playerName + "'s data as they haven't played for long enough.");
-                debug("Your current threshold is set to " + Config.MIN_SESSION_DURATION + " " + (Config.MIN_SESSION_DURATION == 1 ? "second" : "seconds") + " minimum.");
-            }
-
-            getActiveJoinMap().remove(player.getUniqueId());
-            getPlayerDomainMap().remove(player.getUniqueId());
-        });
+        getActiveJoinMap().remove(player.getUniqueId());
+        getPlayerDomainMap().remove(player.getUniqueId());
     }
 }
