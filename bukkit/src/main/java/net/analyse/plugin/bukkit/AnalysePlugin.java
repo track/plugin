@@ -7,7 +7,6 @@ import net.analyse.plugin.bukkit.commands.AnalyseCommand;
 import net.analyse.plugin.bukkit.event.ServerHeartbeatEvent;
 import net.analyse.plugin.bukkit.listener.PlayerActivityListener;
 import net.analyse.plugin.bukkit.util.Config;
-import net.analyse.sdk.AnalyseCore;
 import net.analyse.sdk.AnalyseSDK;
 import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.request.object.PlayerStatistic;
@@ -214,8 +213,12 @@ public class AnalysePlugin extends JavaPlugin {
         }
         debug(" ");
 
-        getActiveJoinMap().remove(player.getUniqueId());
-        getPlayerDomainMap().remove(player.getUniqueId());
-        core.getPlayerStatistics().remove(player.getUniqueId());
+        clearPlayerCache(playerUuid);
+    }
+
+    private void clearPlayerCache(UUID playerUuid) {
+        getPlayerDomainMap().remove(playerUuid);
+        getActiveJoinMap().remove(playerUuid);
+        core.getExcludedPlayers().remove(playerUuid);
     }
 }

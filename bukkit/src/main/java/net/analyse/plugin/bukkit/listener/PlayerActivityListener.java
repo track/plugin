@@ -1,12 +1,7 @@
 package net.analyse.plugin.bukkit.listener;
 
-import me.clip.placeholderapi.PlaceholderAPI;
 import net.analyse.plugin.bukkit.AnalysePlugin;
 import net.analyse.plugin.bukkit.util.Config;
-import net.analyse.sdk.exception.ServerNotFoundException;
-import net.analyse.sdk.request.object.PlayerStatistic;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -14,7 +9,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Date;
 
 public class PlayerActivityListener implements Listener {
 
@@ -49,5 +44,4 @@ public class PlayerActivityListener implements Listener {
         if (!plugin.isSetup()) return;
         plugin.sendPlayerSessionInformation(event.getPlayer(), false);
     }
-
 }
