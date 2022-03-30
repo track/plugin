@@ -76,17 +76,19 @@ public class AnalysePlugin extends JavaPlugin {
             getLogger().info("Advanced mode is enabled.");
         }
 
-        List<UUID> excludedPlayers = core.getExcludedPlayers();
-        getConfig().getStringList("excluded.players").forEach(player -> {
-            excludedPlayers.add(UUID.fromString(player));
-        });
+        if(core != null) {
+            List<UUID> excludedPlayers = core.getExcludedPlayers();
+            getConfig().getStringList("excluded.players").forEach(player -> {
+                excludedPlayers.add(UUID.fromString(player));
+            });
 
-        debug("Successfully booted!");
-        debug("- Debug Enabled.");
-        debug("- Enabled Stats: " + String.join(", ", Config.ENABLED_STATS));
-        debug("- Excluded Players: " + excludedPlayers.stream().map(UUID::toString).collect(Collectors.joining(", ")));
-        debug("- Min Session: " + Config.MIN_SESSION_DURATION);
-        debug("- Advanced Mode: " + Config.ADVANCED_MODE);
+            debug("Successfully booted!");
+            debug("- Debug Enabled.");
+            debug("- Enabled Stats: " + String.join(", ", Config.ENABLED_STATS));
+            debug("- Excluded Players: " + excludedPlayers.stream().map(UUID::toString).collect(Collectors.joining(", ")));
+            debug("- Min Session: " + Config.MIN_SESSION_DURATION);
+            debug("- Advanced Mode: " + Config.ADVANCED_MODE);
+        }
     }
 
     @Override
@@ -155,21 +157,6 @@ public class AnalysePlugin extends JavaPlugin {
     }
 
     private void sendData(Player player) {
-        final List<PlayerStatistic> playerStatistics = new ArrayList<>();
-
-        if (isPapiHooked()) {
-            for (String placeholder : Config.ENABLED_STATS) {
-                String resolvedPlaceholder = PlaceholderAPI.setPlaceholders(player, "%" + placeholder + "%");
-
-                if (!resolvedPlaceholder.equalsIgnoreCase("%" + placeholder + "%")) {
-                    playerStatistics.add(new PlayerStatistic(placeholder, resolvedPlaceholder));
-                    debug("Sending %" + placeholder + "% to Analyse with value: " + resolvedPlaceholder);
-                } else {
-                    debug("Skipping sending %" + placeholder + "% to Analyse as it has no value.");
-                }
-            }
-        }
-
         final UUID playerUuid = player.getUniqueId();
         final String playerName = player.getName();
         final Date joinedAt = getActiveJoinMap().getOrDefault(playerUuid, null);
@@ -178,28 +165,57 @@ public class AnalysePlugin extends JavaPlugin {
         final long seconds = (quitAt.getTime()-joinedAt.getTime()) / 1000;
         final String domainConnected;
 
+        debug(" ");
+        debug("Preparing analytics for " + playerName + " (" + playerUuid + ")..");
+
         if(Config.ADVANCED_MODE && getRedis() != null) {
             domainConnected = getRedis().get("analyse:connected_via:" + playerName);
-            debug(playerName + " connected from '" + domainConnected + "' (from Redis).");
+            debug(" - Connected from: '" + domainConnected + "' (Redis).");
         } else {
             domainConnected = getPlayerDomainMap().getOrDefault(playerUuid, null);
-            debug(playerName + " connected from '" + domainConnected + "' (from Cache).");
+            debug(" - Connected from: '" + domainConnected + "' (Cache).");
+        }
+        debug(" - Joined at: " + joinedAt);
+        debug(" - Player IP: " + playerIp);
+        debug(" ");
+
+        final List<PlayerStatistic> playerStatistics = core.getPlayerStatistics(player.getUniqueId());
+
+        debug(" - Loaded stats: " + playerStatistics.size());
+        for (PlayerStatistic playerStatistic : playerStatistics) {
+            debug(" > Custom statistic %" + playerStatistic.getKey() + "% with value: " + playerStatistic.getValue());
         }
 
+        if (isPapiHooked()) {
+            for (String placeholder : Config.ENABLED_STATS) {
+                String resolvedPlaceholder = PlaceholderAPI.setPlaceholders(player, "%" + placeholder + "%");
+
+                if (!resolvedPlaceholder.equalsIgnoreCase("%" + placeholder + "%")) {
+                    playerStatistics.add(new PlayerStatistic(placeholder, resolvedPlaceholder));
+                    debug(" > PlaceholderAPI statistic %" + placeholder + "% with value: " + resolvedPlaceholder);
+                } else {
+                    debug(" > Skipping sending PlaceholderAPI statistic %" + placeholder + "% as it has no value.");
+                }
+            }
+        }
+
+        debug(" ");
         if(seconds >= Config.MIN_SESSION_DURATION) {
             try {
                 getCore().sendPlayerSession(playerUuid, playerName, joinedAt, domainConnected, playerIp, playerStatistics);
-                debug(String.format("%s (%s) disconnected, who joined at %s and connected %s with IP of %s", playerName, playerUuid, joinedAt, (domainConnected != null ? "via " + domainConnected : "directly"), playerIp));
+                debug("Sent player session data to Analyse!");
             } catch (ServerNotFoundException e) {
                 setSetup(false);
                 getLogger().warning("The server specified no longer exists.");
             }
         } else {
-            debug("Skipping sending " + playerName + "'s data as they haven't played for long enough.");
-            debug("Your current threshold is set to " + Config.MIN_SESSION_DURATION + " " + (Config.MIN_SESSION_DURATION == 1 ? "second" : "seconds") + " minimum.");
+            debug("Skipping data as they haven't played for long enough (" + Config.MIN_SESSION_DURATION + " " + (Config.MIN_SESSION_DURATION == 1 ? "second" : "seconds") + " minimum).");
+            debug("You can change this in the config.yml.");
         }
+        debug(" ");
 
         getActiveJoinMap().remove(player.getUniqueId());
         getPlayerDomainMap().remove(player.getUniqueId());
+        core.getPlayerStatistics().remove(player.getUniqueId());
     }
 }

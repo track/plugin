@@ -11,4 +11,20 @@ public class PlayerStatistic {
         this.key = key;
         this.value = value;
     }
+
+    public String getKey() {
+        return key;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return "PlayerStatistic{" +
+                "key='" + key + '\'' +
+                ", value=" + value +
+                '}';
+    }
 }

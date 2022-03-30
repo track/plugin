@@ -18,10 +18,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class AnalyseSDK {
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").create();
@@ -31,8 +28,13 @@ public class AnalyseSDK {
     private final String encryptionKey;
     private final String baseUrl;
 
-    private List<UUID> excludedPlayers = new ArrayList<>();
+    private final List<UUID> excludedPlayers = new ArrayList<>();
+    private final Map<UUID, List<PlayerStatistic>> playerStatistics = new HashMap<>();
 
+    /**
+     * @param token The token of the server.
+     * @param encryptionKey The encryption key of the server.
+     */
     public AnalyseSDK(String token, String encryptionKey) {
         this.token = token;
         this.encryptionKey = encryptionKey;
@@ -40,6 +42,11 @@ public class AnalyseSDK {
         AnalyseCore.setCore(this);
     }
 
+    /**
+     * @param token The token of the server.
+     * @param encryptionKey The encryption key of the server.
+     * @param baseUrl The base url of the api endpoint.
+     */
     public AnalyseSDK(String token, String encryptionKey, String baseUrl) {
         this.token = token;
         this.encryptionKey = encryptionKey;
@@ -47,18 +54,49 @@ public class AnalyseSDK {
         AnalyseCore.setCore(this);
     }
 
+    /**
+     * @return The excluded players.
+     */
     public List<UUID> getExcludedPlayers() {
         return excludedPlayers;
     }
 
+    /**
+     * @return The player statistics.
+     */
+    public Map<UUID, List<PlayerStatistic>> getPlayerStatistics() {
+        return playerStatistics;
+    }
+
+    /**
+     * @param player The player to get the statistics for.
+     * @return The player statistics.
+     */
+    public List<PlayerStatistic> getPlayerStatistics(UUID player) {
+        if (!playerStatistics.containsKey(player)) {
+            playerStatistics.put(player, new ArrayList<>());
+        }
+        return playerStatistics.get(player);
+    }
+
+    /**
+     * @return The server token.
+     */
     public String getToken() {
         return token;
     }
 
+    /**
+     * @return The api base url.
+     */
     public String getBaseUrl() {
         return baseUrl;
     }
 
+    /**
+     * @return The server information.
+     * @throws ServerNotFoundException
+     */
     public GetServerResponse getServer() throws ServerNotFoundException {
         Response response = new APIRequest(baseUrl + "server", HTTP_CLIENT)
                 .withServerToken(this.token)
@@ -81,7 +119,6 @@ public class AnalyseSDK {
                     Instant.parse(serverJson.get("created_at").getAsString()),
                     teamQuotaJson.get("current").getAsInt(),
                     teamQuotaJson.get("limit").getAsInt()
-
             );
         } catch (IOException e) {
             // TODO: Handle this.
@@ -93,6 +130,10 @@ public class AnalyseSDK {
         return getServerResponse;
     }
 
+    /**
+     * @param players The total players.
+     * @throws ServerNotFoundException
+     */
     public void sendHeartbeat(int players) throws ServerNotFoundException {
         ServerHeartbeatRequest serverHeartbeatRequest = new ServerHeartbeatRequest(players);
 
@@ -108,6 +149,12 @@ public class AnalyseSDK {
         }
     }
 
+    /**
+     * @param ipAddress The ip address of the player.
+     * @return The player country.
+     * @throws ServerNotFoundException
+     * @throws InvalidIPAddressException
+     */
     public String getLocationFromIP(String ipAddress) throws ServerNotFoundException, InvalidIPAddressException {
         Response response = new APIRequest(baseUrl + "ip/" + ipAddress, HTTP_CLIENT)
                 .withServerToken(this.token)
@@ -121,7 +168,7 @@ public class AnalyseSDK {
         String countryCode = null;
         try {
             JsonObject bodyJson = GSON.fromJson(response.body().string(), JsonObject.class);
-            Boolean successful = bodyJson.get("success").getAsBoolean();
+            boolean successful = bodyJson.get("success").getAsBoolean();
 
             if(! successful)
             {
@@ -139,6 +186,15 @@ public class AnalyseSDK {
         return countryCode;
     }
 
+    /**
+     * @param uuid The uuid of the player.
+     * @param username The username of the player.
+     * @param joinedAt The time the player joined the server.
+     * @param domain The domain the player joined from.
+     * @param ipAddress The ip address of the player.
+     * @param playerStatistics The player statistics.
+     * @throws ServerNotFoundException
+     */
     public void sendPlayerSession(@NotNull UUID uuid, @NotNull String username, @NotNull Date joinedAt, String domain, String ipAddress, List<PlayerStatistic> playerStatistics) throws ServerNotFoundException {
         String ipCountry;
 
@@ -167,6 +223,10 @@ public class AnalyseSDK {
         response.close();
     }
 
+    /**
+     * @param ipAddress The ip address of the player.
+     * @return The hashed ip address.
+     */
     public String hashIp(@NotNull String ipAddress) {
         String generatedPassword = null;
 

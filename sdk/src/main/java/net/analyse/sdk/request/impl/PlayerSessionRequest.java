@@ -36,8 +36,8 @@ public class PlayerSessionRequest extends AnalyseRequest {
             final @NotNull Date joinedAt,
             final @NotNull Date quitAt,
             final @NotNull String domain,
-            final @NotNull String ipAddress,
-            final @NotNull String country,
+            final String ipAddress,
+            final String country,
             final @NotNull List<PlayerStatistic> stats
     ) {
         this.uuid = uuid;

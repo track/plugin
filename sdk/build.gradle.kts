@@ -10,6 +10,24 @@ task<com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation>
 
 tasks.shadowJar.get().dependsOn(tasks.getByName("relocateShadowJar"))
 
+plugins {
+    `maven-publish`
+}
+
+
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "net.analyse"
+            artifactId = "sdk"
+            version = this.version
+
+            from(components["java"])
+        }
+    }
+}
+
 repositories {
     mavenLocal()
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
