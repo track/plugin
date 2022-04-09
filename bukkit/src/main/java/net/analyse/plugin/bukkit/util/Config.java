@@ -21,4 +21,6 @@ public class Config {
     public static boolean ADVANCED_MODE = config.getBoolean("advanced.enabled", false);
     public static String REDIS_HOST = config.getString("advanced.redis.host", "127.0.0.1");
     public static int REDIS_PORT = config.getInt("advanced.redis.port", 6379);
+    public static String REDIS_USERNAME = config.getString("advanced.redis.username");
+    public static String REDIS_PASSWORD = config.getString("advanced.redis.password");
 }

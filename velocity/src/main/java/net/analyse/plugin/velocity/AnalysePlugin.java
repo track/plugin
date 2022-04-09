@@ -127,10 +127,9 @@ public class AnalysePlugin {
         return file;
     }
 
-    public JedisPooled loadRedis() {
+    public void loadRedis() {
         logger.info("Connecting to Redis under " + this.config.getHost() + ":" + config.getPort() + "..");
-        redis = new JedisPooled(config.getHost(), config.getPort());
-        return redis;
+        redis = new JedisPooled(config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
     }
 
     PluginDescription getDescription() {

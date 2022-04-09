@@ -71,7 +71,7 @@ public class AnalysePlugin extends JavaPlugin {
         }
 
         if (Config.ADVANCED_MODE) {
-            Bukkit.getScheduler().runTaskAsynchronously(this, () -> this.redis = new JedisPooled(Config.REDIS_HOST, Config.REDIS_PORT));
+            Bukkit.getScheduler().runTaskAsynchronously(this, () -> this.redis = new JedisPooled(Config.REDIS_HOST, Config.REDIS_PORT, Config.REDIS_USERNAME, Config.REDIS_PASSWORD));
             getLogger().info("Advanced mode is enabled.");
         }
 
