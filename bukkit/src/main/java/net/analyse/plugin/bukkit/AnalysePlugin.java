@@ -10,6 +10,7 @@ import net.analyse.plugin.bukkit.util.Config;
 import net.analyse.sdk.AnalyseSDK;
 import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.request.object.PlayerStatistic;
+import net.analyse.sdk.response.GetPluginResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -33,6 +34,8 @@ public class AnalysePlugin extends JavaPlugin {
     private String serverToken;
     private String encryptionKey;
     private JedisPooled redis = null;
+
+    private int incrementalVersion = Integer.parseInt(getDescription().getVersion().replace(".", ""));
 
     @Override
     public void onEnable() {
@@ -87,7 +90,14 @@ public class AnalysePlugin extends JavaPlugin {
             debug("- Excluded Players: " + excludedPlayers.stream().map(UUID::toString).collect(Collectors.joining(", ")));
             debug("- Min Session: " + Config.MIN_SESSION_DURATION);
             debug("- Advanced Mode: " + Config.ADVANCED_MODE);
+
+            GetPluginResponse corePluginVersion = core.getPluginVersion();
+            if(corePluginVersion.getVersionNumber() > incrementalVersion) {
+                getLogger().info(String.format("This server is running v%s, an outdated version of Analyse.", getDescription().getVersion()));
+                getLogger().info(String.format("Download v%s at: %s", corePluginVersion.getVersionName(), corePluginVersion.getBukkitDownload()));
+            }
         }
+
     }
 
     @Override

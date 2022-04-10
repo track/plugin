@@ -9,6 +9,7 @@ import net.analyse.sdk.request.APIRequest;
 import net.analyse.sdk.request.impl.PlayerSessionRequest;
 import net.analyse.sdk.request.impl.ServerHeartbeatRequest;
 import net.analyse.sdk.request.object.PlayerStatistic;
+import net.analyse.sdk.response.GetPluginResponse;
 import net.analyse.sdk.response.GetServerResponse;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
@@ -128,6 +129,36 @@ public class AnalyseSDK {
         response.close();
 
         return getServerResponse;
+    }
+
+    /**
+     * @return The plugin information.
+     */
+    public GetPluginResponse getPluginVersion() {
+        Response response = new APIRequest(baseUrl + "plugin", HTTP_CLIENT)
+                .send();
+
+        GetPluginResponse getPluginResponse = null;
+        try {
+            JsonObject bodyJson = GSON.fromJson(response.body().string(), JsonObject.class);
+            final JsonObject versionData = bodyJson.getAsJsonObject("version");
+            final JsonObject assetData = bodyJson.getAsJsonObject("assets");
+
+            getPluginResponse =new GetPluginResponse(
+                    versionData.get("name").getAsString(),
+                    versionData.get("incremental").getAsInt(),
+                    assetData.get("bukkit").getAsString(),
+                    assetData.get("bungee").getAsString(),
+                    assetData.get("velocity").getAsString()
+            );
+        } catch (IOException e) {
+            // TODO: Handle this.
+            e.printStackTrace();
+        }
+
+        response.close();
+
+        return getPluginResponse;
     }
 
     /**
