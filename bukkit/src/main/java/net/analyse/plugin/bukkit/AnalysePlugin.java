@@ -230,5 +230,6 @@ public class AnalysePlugin extends JavaPlugin {
         getPlayerDomainMap().remove(playerUuid);
         getActiveJoinMap().remove(playerUuid);
         core.getExcludedPlayers().remove(playerUuid);
+        core.getPlayerStatistics(playerUuid).clear();
     }
 }

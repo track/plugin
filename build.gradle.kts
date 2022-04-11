@@ -16,7 +16,7 @@ subprojects {
     }
 
     group = "net.analyse.plugin"
-    version = "1.1.4"
+    version = "1.1.5"
 
     tasks {
         compileJava {
