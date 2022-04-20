@@ -30,6 +30,12 @@ debug: false
 # in and out (e.g. a hub) being treated as a player.
 minimum-session-duration: 30
 
+# Should we use the date the player first joined your server,
+# when adding them to Analyse? This is useful for tracking new joins
+# when first adding the plugin. However, if you reset your world yearly
+# I wouldn't advise enabling it.
+use-server-first-join-date: false
+
 # These options are for our Velocity integration, which would allow you
 # to get the domain they connected with (from the proxy). This is flagged
 # as advanced as most wouldn't touch this section.

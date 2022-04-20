@@ -86,6 +86,7 @@ public class AnalysePlugin extends JavaPlugin {
 
             debug("Successfully booted!");
             debug("- Debug Enabled.");
+            debug("- Use Server First Join Date: " + Config.USE_SERVER_FIRST_JOIN_DATE);
             debug("- Enabled Stats: " + String.join(", ", Config.ENABLED_STATS));
             debug("- Excluded Players: " + excludedPlayers.stream().map(UUID::toString).collect(Collectors.joining(", ")));
             debug("- Min Session: " + Config.MIN_SESSION_DURATION);
@@ -211,7 +212,7 @@ public class AnalysePlugin extends JavaPlugin {
         debug(" ");
         if(seconds >= Config.MIN_SESSION_DURATION) {
             try {
-                getCore().sendPlayerSession(playerUuid, playerName, joinedAt, domainConnected, playerIp, playerStatistics);
+                getCore().sendPlayerSession(playerUuid, playerName, joinedAt, domainConnected, playerIp, Config.USE_SERVER_FIRST_JOIN_DATE ? new Date(player.getFirstPlayed()) : null, playerStatistics);
                 debug("Sent player session data to Analyse!");
             } catch (ServerNotFoundException e) {
                 setSetup(false);

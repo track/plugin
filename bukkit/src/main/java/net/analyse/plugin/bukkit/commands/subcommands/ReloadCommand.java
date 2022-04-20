@@ -24,6 +24,7 @@ public class ReloadCommand extends SubCommand {
         FileConfiguration config = getPlugin().getConfig();
 
         Config.DEBUG = config.getBoolean("debug", false);
+        Config.USE_SERVER_FIRST_JOIN_DATE = config.getBoolean("use-server-first-join-date", false);
         Config.ENABLED_STATS = config.getStringList("enabled-stats");
         Config.MIN_SESSION_DURATION = config.getInt("minimum-session-duration", 0);
 
@@ -38,6 +39,7 @@ public class ReloadCommand extends SubCommand {
 
         plugin.debug("Successfully reloaded!");
         plugin.debug("- Debug Enabled.");
+        plugin.debug("- Use Server First Join Date: " + Config.USE_SERVER_FIRST_JOIN_DATE);
         plugin.debug("- Enabled Stats: " + String.join(", ", Config.ENABLED_STATS));
         plugin.debug("- Excluded Players: " + excludedPlayers.stream().map(UUID::toString).collect(Collectors.joining(", ")));
         plugin.debug("- Min Session: " + Config.MIN_SESSION_DURATION);

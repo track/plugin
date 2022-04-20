@@ -12,6 +12,8 @@ public class Config {
 
     public static boolean DEBUG = config.getBoolean("debug", false);
 
+    public static boolean USE_SERVER_FIRST_JOIN_DATE = config.getBoolean("use-server-first-join-date", false);
+
     public static List<String> EXCLUDED_PLAYERS = config.getStringList("excluded-players");
 
     public static List<String> ENABLED_STATS = config.getStringList("enabled-stats");

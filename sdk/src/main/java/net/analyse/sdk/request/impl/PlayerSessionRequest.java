@@ -28,6 +28,9 @@ public class PlayerSessionRequest extends AnalyseRequest {
     @SerializedName("country")
     private String country;
 
+    @SerializedName("first_joined_at")
+    private final Date firstJoinedAt;
+
     private List<PlayerStatistic> stats;
 
     public PlayerSessionRequest(
@@ -38,6 +41,7 @@ public class PlayerSessionRequest extends AnalyseRequest {
             final @NotNull String domain,
             final String ipAddress,
             final String country,
+            final Date firstJoinedAt,
             final @NotNull List<PlayerStatistic> stats
     ) {
         this.uuid = uuid;
@@ -47,6 +51,7 @@ public class PlayerSessionRequest extends AnalyseRequest {
         this.domain = domain;
         this.ipAddress = ipAddress;
         this.country = country;
+        this.firstJoinedAt = firstJoinedAt;
         this.stats = stats;
     }
 

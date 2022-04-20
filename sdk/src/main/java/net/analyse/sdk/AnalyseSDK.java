@@ -223,10 +223,11 @@ public class AnalyseSDK {
      * @param joinedAt The time the player joined the server.
      * @param domain The domain the player joined from.
      * @param ipAddress The ip address of the player.
+     * @param firstJoinDate The first date the player joined (if any).
      * @param playerStatistics The player statistics.
      * @throws ServerNotFoundException
      */
-    public void sendPlayerSession(@NotNull UUID uuid, @NotNull String username, @NotNull Date joinedAt, String domain, String ipAddress, List<PlayerStatistic> playerStatistics) throws ServerNotFoundException {
+    public void sendPlayerSession(@NotNull UUID uuid, @NotNull String username, @NotNull Date joinedAt, String domain, String ipAddress, Date firstJoinDate, List<PlayerStatistic> playerStatistics) throws ServerNotFoundException {
         String ipCountry;
 
         try {
@@ -243,6 +244,7 @@ public class AnalyseSDK {
                 domain,
                 ipCountry != null ? hashIp(ipAddress) : null,
                 ipCountry,
+                firstJoinDate,
                 playerStatistics
         );
 
