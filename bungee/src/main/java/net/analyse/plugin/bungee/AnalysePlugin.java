@@ -1,12 +1,14 @@
 package net.analyse.plugin.bungee;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ProxyReloadEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
+import net.md_5.bungee.event.EventPriority;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
@@ -40,11 +42,16 @@ public class AnalysePlugin extends Plugin implements Listener {
     }
 
     @EventHandler
-    public void onJoin(PreLoginEvent event) {
+    public void onJoin(LoginEvent event) {
         InetSocketAddress virtualDomain = event.getConnection().getVirtualHost();
 
         if (virtualDomain != null) {
-            redis.set("analyse:connected_via:" + event.getConnection().getName(), virtualDomain.getHostName());
+            String hostName = virtualDomain.getHostName();
+            if(hostName.contains("._minecraft._tcp.")) {
+                hostName = hostName.split("._minecraft._tcp.", 2)[1];
+            }
+
+            redis.set("analyse:connected_via:" + event.getConnection().getName(), hostName);
         }
     }
 
