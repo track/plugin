@@ -55,6 +55,16 @@ public class AnalyseSDK {
         AnalyseCore.setCore(this);
     }
 
+    private String apiHeader = "Analyse";
+
+    public void setApiHeader(String apiHeader) {
+        this.apiHeader = apiHeader;
+    }
+
+    public String getApiHeader() {
+        return apiHeader;
+    }
+
     /**
      * @return The excluded players.
      */
@@ -99,7 +109,7 @@ public class AnalyseSDK {
      * @throws ServerNotFoundException
      */
     public GetServerResponse getServer() throws ServerNotFoundException {
-        Response response = new APIRequest(baseUrl + "server", HTTP_CLIENT)
+        Response response = new APIRequest(baseUrl + "server", HTTP_CLIENT, apiHeader)
                 .withServerToken(this.token)
                 .send();
 
@@ -135,7 +145,7 @@ public class AnalyseSDK {
      * @return The plugin information.
      */
     public GetPluginResponse getPluginVersion() {
-        Response response = new APIRequest(baseUrl + "plugin", HTTP_CLIENT)
+        Response response = new APIRequest(baseUrl + "plugin", HTTP_CLIENT, apiHeader)
                 .send();
 
         GetPluginResponse getPluginResponse = null;
@@ -168,7 +178,7 @@ public class AnalyseSDK {
     public void sendHeartbeat(int players) throws ServerNotFoundException {
         ServerHeartbeatRequest serverHeartbeatRequest = new ServerHeartbeatRequest(players);
 
-        Response response = new APIRequest(baseUrl + "server/heartbeat", HTTP_CLIENT)
+        Response response = new APIRequest(baseUrl + "server/heartbeat", HTTP_CLIENT, apiHeader)
                 .withServerToken(this.token)
                 .withPayload(serverHeartbeatRequest.toJson())
                 .send();
@@ -187,7 +197,7 @@ public class AnalyseSDK {
      * @throws InvalidIPAddressException
      */
     public String getLocationFromIP(String ipAddress) throws ServerNotFoundException, InvalidIPAddressException {
-        Response response = new APIRequest(baseUrl + "ip/" + ipAddress, HTTP_CLIENT)
+        Response response = new APIRequest(baseUrl + "ip/" + ipAddress, HTTP_CLIENT, apiHeader)
                 .withServerToken(this.token)
                 .send();
 
@@ -248,7 +258,7 @@ public class AnalyseSDK {
                 playerStatistics
         );
 
-        Response response = new APIRequest(baseUrl + "server/sessions", HTTP_CLIENT)
+        Response response = new APIRequest(baseUrl + "server/sessions", HTTP_CLIENT, apiHeader)
                 .withPayload(playerSessionRequest.toJson())
                 .withServerToken(this.token)
                 .send();

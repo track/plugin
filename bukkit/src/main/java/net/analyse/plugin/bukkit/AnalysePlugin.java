@@ -36,6 +36,9 @@ public class AnalysePlugin extends JavaPlugin {
     private String encryptionKey;
     private JedisPooled redis = null;
 
+    private final String API_HEADER = "Analyse v" + getDescription().getVersion() + " / " + Bukkit.getServer().getName() + " " + getServer().getVersion();
+
+
     private int incrementalVersion = Integer.parseInt(getDescription().getVersion().replace(".", ""));
 
     @Override
@@ -67,6 +70,8 @@ public class AnalysePlugin extends JavaPlugin {
             getLogger().info("/analyse setup <server-token>");
         } else {
             core = new AnalyseSDK(serverToken, encryptionKey);
+            core.setApiHeader(API_HEADER);
+
             try {
                 getLogger().info("Linked Analyse to " + core.getServer().getName() + ".");
             } catch (ServerNotFoundException e) {
@@ -95,8 +100,8 @@ public class AnalysePlugin extends JavaPlugin {
 
             GetPluginResponse corePluginVersion = core.getPluginVersion();
             if(corePluginVersion.getVersionNumber() > incrementalVersion) {
-                getLogger().info(String.format("This server is running v%s, an outdated version of Analyse.", getDescription().getVersion()));
-                getLogger().info(String.format("Download v%s at: %s", corePluginVersion.getVersionName(), corePluginVersion.getBukkitDownload()));
+                getLogger().warning(String.format("This server is running v%s, an outdated version of Analyse.", getDescription().getVersion()));
+                getLogger().warning(String.format("Download v%s at: %s", corePluginVersion.getVersionName(), corePluginVersion.getBukkitDownload()));
             }
         }
 
@@ -143,6 +148,7 @@ public class AnalysePlugin extends JavaPlugin {
 
     public AnalyseSDK setup(String token) {
         core = new AnalyseSDK(token, encryptionKey);
+        core.setApiHeader(API_HEADER);
         return core;
     }
 
@@ -196,8 +202,6 @@ public class AnalysePlugin extends JavaPlugin {
         for (PlayerStatistic playerStatistic : playerStatistics) {
             debug(" > Custom statistic %" + playerStatistic.getKey() + "% with value: " + playerStatistic.getValue());
         }
-
-        AnalyseCore.setRequestHeader("Analyse v" + getDescription().getVersion() + " / " + Bukkit.getServer().getName() + " " + getServer().getVersion());
 
         if (isPapiHooked()) {
             for (String placeholder : Config.ENABLED_STATS) {

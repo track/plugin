@@ -13,8 +13,8 @@ public class APIRequest {
     private final OkHttpClient client;
     private final Request.Builder request;
 
-    public APIRequest(final @NotNull String url, final @NotNull OkHttpClient client) {
-        this.request = new Request.Builder().url(url).header("User-Agent", AnalyseCore.getRequestHeader());
+    public APIRequest(final @NotNull String url, final @NotNull OkHttpClient client, final @NotNull String apiHeader) {
+        this.request = new Request.Builder().url(url).header("User-Agent", apiHeader);
         this.client = client;
     }
 
