@@ -1,5 +1,6 @@
 package net.analyse.sdk.request;
 
+import net.analyse.sdk.AnalyseCore;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +14,7 @@ public class APIRequest {
     private final Request.Builder request;
 
     public APIRequest(final @NotNull String url, final @NotNull OkHttpClient client) {
-        this.request = new Request.Builder().url(url);
+        this.request = new Request.Builder().url(url).header("User-Agent", AnalyseCore.getRequestHeader());
         this.client = client;
     }
 

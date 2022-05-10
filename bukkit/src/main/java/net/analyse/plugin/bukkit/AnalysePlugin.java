@@ -7,6 +7,7 @@ import net.analyse.plugin.bukkit.commands.AnalyseCommand;
 import net.analyse.plugin.bukkit.event.ServerHeartbeatEvent;
 import net.analyse.plugin.bukkit.listener.PlayerActivityListener;
 import net.analyse.plugin.bukkit.util.Config;
+import net.analyse.sdk.AnalyseCore;
 import net.analyse.sdk.AnalyseSDK;
 import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.request.object.PlayerStatistic;
@@ -195,6 +196,8 @@ public class AnalysePlugin extends JavaPlugin {
         for (PlayerStatistic playerStatistic : playerStatistics) {
             debug(" > Custom statistic %" + playerStatistic.getKey() + "% with value: " + playerStatistic.getValue());
         }
+
+        AnalyseCore.setRequestHeader("Analyse v" + getDescription().getVersion() + " / " + Bukkit.getServer().getName() + " " + getServer().getVersion());
 
         if (isPapiHooked()) {
             for (String placeholder : Config.ENABLED_STATS) {
