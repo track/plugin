@@ -19,6 +19,9 @@ subprojects {
     version = "1.1.9"
 
     tasks {
+        shadowJar {
+            archiveFileName.set("${project.name}-analyse-${project.version}.jar")
+        }
         compileJava {
             options.encoding = "UTF-8"
         }
