@@ -111,7 +111,12 @@ public class AnalysePlugin extends Plugin implements Listener {
     }
 
     public void loadRedis() {
-        getLogger().info("Connecting to Redis under " + config.getHost() + ":" + config.getPort() + "..");
-        redis = new JedisPooled(config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
+        if(config.getUri() != null) {
+            getLogger().info("Connecting to Redis under " + config.getUri() + "..");
+            redis = new JedisPooled(config.getUri());
+        } else {
+            getLogger().info("Connecting to Redis under " + config.getHost() + ":" + config.getPort() + "..");
+            redis = new JedisPooled(config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
+        }
     }
 }

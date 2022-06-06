@@ -7,7 +7,6 @@ import net.analyse.plugin.bukkit.commands.AnalyseCommand;
 import net.analyse.plugin.bukkit.event.ServerHeartbeatEvent;
 import net.analyse.plugin.bukkit.listener.PlayerActivityListener;
 import net.analyse.plugin.bukkit.util.Config;
-import net.analyse.sdk.AnalyseCore;
 import net.analyse.sdk.AnalyseSDK;
 import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.request.object.PlayerStatistic;
@@ -80,7 +79,12 @@ public class AnalysePlugin extends JavaPlugin {
         }
 
         if (Config.ADVANCED_MODE) {
-            Bukkit.getScheduler().runTaskAsynchronously(this, () -> this.redis = new JedisPooled(Config.REDIS_HOST, Config.REDIS_PORT, Config.REDIS_USERNAME, Config.REDIS_PASSWORD));
+            if(Config.REDIS_URI != null) {
+                Bukkit.getScheduler().runTaskAsynchronously(this, () -> this.redis = new JedisPooled(Config.REDIS_URI));
+            } else {
+                Bukkit.getScheduler().runTaskAsynchronously(this, () -> this.redis = new JedisPooled(Config.REDIS_HOST, Config.REDIS_PORT, Config.REDIS_USERNAME, Config.REDIS_PASSWORD));
+            }
+
             getLogger().info("Advanced mode is enabled.");
         }
 
@@ -104,7 +108,6 @@ public class AnalysePlugin extends JavaPlugin {
                 getLogger().warning(String.format("Download v%s at: %s", corePluginVersion.getVersionName(), corePluginVersion.getBukkitDownload()));
             }
         }
-
     }
 
     @Override

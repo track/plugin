@@ -7,6 +7,7 @@ public class AnalyseConfig {
     private Integer port;
     private String username;
     private String password;
+    private String uri;
 
     public AnalyseConfig(ConfigurationNode config) {
         ConfigurationNode redis = config.getNode("redis");
@@ -15,6 +16,7 @@ public class AnalyseConfig {
         this.port = redis.getNode("port").getInt(6379);
         this.username = redis.getNode("username").getString();
         this.password = redis.getNode("password").getString();
+        this.uri = redis.getNode("uri").getString();
     }
 
     public String getHost() {
@@ -31,5 +33,9 @@ public class AnalyseConfig {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getUri() {
+        return uri;
     }
 }

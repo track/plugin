@@ -128,8 +128,13 @@ public class AnalysePlugin {
     }
 
     public void loadRedis() {
-        logger.info("Connecting to Redis under " + this.config.getHost() + ":" + config.getPort() + "..");
-        redis = new JedisPooled(config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
+        if(config.getUri() != null) {
+            logger.info("Connecting to Redis under " + config.getUri() + "..");
+            redis = new JedisPooled(config.getUri());
+        } else {
+            logger.info("Connecting to Redis under " + config.getHost() + ":" + config.getPort() + "..");
+            redis = new JedisPooled(config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
+        }
     }
 
     PluginDescription getDescription() {
