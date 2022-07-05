@@ -37,7 +37,6 @@ public class AnalysePlugin extends JavaPlugin {
 
     private final String API_HEADER = "Analyse v" + getDescription().getVersion() + " / " + Bukkit.getServer().getName() + " " + getServer().getVersion();
 
-
     private int incrementalVersion = Integer.parseInt(getDescription().getVersion().replace(".", ""));
 
     @Override
@@ -179,6 +178,11 @@ public class AnalysePlugin extends JavaPlugin {
     private void sendData(Player player) {
         final UUID playerUuid = player.getUniqueId();
         final String playerName = player.getName();
+
+        if(! getActiveJoinMap().containsKey(player.getUniqueId())) {
+            return;
+        }
+
         final Date joinedAt = getActiveJoinMap().getOrDefault(playerUuid, null);
         final String playerIp = Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress();
         final Date quitAt = new Date();
