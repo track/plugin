@@ -51,6 +51,10 @@ public class AnalysePlugin extends Plugin implements Listener {
                 hostName = hostName.split("._minecraft._tcp.", 2)[1];
             }
 
+            if(hostName.endsWith(".")) {
+                hostName = hostName.substring(0, hostName.length() - 1);
+            }
+
             redis.set("analyse:connected_via:" + event.getConnection().getName(), hostName);
         }
     }
