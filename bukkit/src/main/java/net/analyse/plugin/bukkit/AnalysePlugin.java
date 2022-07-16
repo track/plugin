@@ -13,8 +13,11 @@ import net.analyse.sdk.request.object.PlayerStatistic;
 import net.analyse.sdk.response.GetPluginResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
+
 import redis.clients.jedis.JedisPooled;
 
 import java.util.*;
@@ -50,7 +53,11 @@ public class AnalysePlugin extends JavaPlugin {
 
         papiHooked = getServer().getPluginManager().isPluginEnabled("PlaceholderAPI");
 
-        getCommand("analyse").setExecutor(new AnalyseCommand(this));
+        AnalyseCommand analyseCommand = new AnalyseCommand(this);
+        PluginCommand analysePluginCommand = getCommand("analyse");
+        analysePluginCommand.setExecutor(analyseCommand);
+        analysePluginCommand.setTabCompleter(analyseCommand);
+
         Bukkit.getPluginManager().registerEvents(new PlayerActivityListener(this), this);
 
         ServerHeartbeatEvent serverHeartBeatEvent = new ServerHeartbeatEvent(this);
@@ -171,7 +178,7 @@ public class AnalysePlugin extends JavaPlugin {
         }
 
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-           sendData(player);
+            sendData(player);
         });
     }
 
