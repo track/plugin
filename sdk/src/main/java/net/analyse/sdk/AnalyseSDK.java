@@ -122,14 +122,11 @@ public class AnalyseSDK {
         try {
             JsonObject bodyJson = GSON.fromJson(response.body().string(), JsonObject.class);
             final JsonObject serverJson = bodyJson.getAsJsonObject("data");
-            final JsonObject teamQuotaJson = serverJson.getAsJsonObject("team_quota");
 
             getServerResponse = new GetServerResponse(
                     serverJson.get("name").getAsString(),
                     serverJson.get("uuid").getAsString(),
-                    Instant.parse(serverJson.get("created_at").getAsString()),
-                    teamQuotaJson.get("current").getAsInt(),
-                    teamQuotaJson.get("limit").getAsInt()
+                    Instant.parse(serverJson.get("created_at").getAsString())
             );
         } catch (IOException e) {
             // TODO: Handle this.

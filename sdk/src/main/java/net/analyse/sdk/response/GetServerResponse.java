@@ -8,15 +8,11 @@ public class GetServerResponse {
     private String name;
     private String uuid;
     private Instant createdAt;
-    private Integer currentTeamQuota;
-    private Integer teamQuotaLimit;
 
-    public GetServerResponse(@NotNull String name, @NotNull String uuid, @NotNull Instant createdAt, @NotNull Integer currentTeamQuota, @NotNull Integer teamQuotaLimit) {
+    public GetServerResponse(@NotNull String name, @NotNull String uuid, @NotNull Instant createdAt) {
         this.name = name;
         this.uuid = uuid;
         this.createdAt = createdAt;
-        this.currentTeamQuota = currentTeamQuota;
-        this.teamQuotaLimit = teamQuotaLimit;
     }
 
     public String getName() {
@@ -29,13 +25,5 @@ public class GetServerResponse {
 
     public Instant getCreatedAt() {
         return createdAt;
-    }
-
-    public Integer getCurrentTeamQuota() {
-        return currentTeamQuota;
-    }
-
-    public Integer getTeamQuotaLimit() {
-        return teamQuotaLimit;
     }
 }

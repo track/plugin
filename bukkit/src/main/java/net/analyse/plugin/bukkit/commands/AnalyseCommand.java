@@ -45,7 +45,6 @@ public class AnalyseCommand implements CommandExecutor {
                 try {
                     server = plugin.getCore().getServer();
                     sender.sendMessage(plugin.parse(String.format(" &b- &7Linked to: &b%s&7.", server.getName())));
-                    sender.sendMessage(plugin.parse(String.format(" &b- &7You've used &b%s &7of your &b%s &7quota limit.", server.getCurrentTeamQuota(), server.getTeamQuotaLimit())));
                 } catch (ServerNotFoundException e) {
                     sender.sendMessage("&b[Analyse] &7The server linked no longer exists.");
                     plugin.setSetup(false);
