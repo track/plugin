@@ -33,8 +33,8 @@ public class PlayerActivityListener implements Listener {
             hostName = hostName.substring(0, hostName.indexOf('\0'));
         }
 
-        plugin.debug("Player connecting via: " + event.getHostname());
-        plugin.getPlayerDomainMap().put(event.getPlayer().getUniqueId(), event.getHostname());
+        plugin.debug("Player connecting via: " + hostName);
+        plugin.getPlayerDomainMap().put(event.getPlayer().getUniqueId(), hostName);
     }
 
     @EventHandler
