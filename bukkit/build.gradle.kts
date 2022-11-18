@@ -13,7 +13,7 @@ tasks.shadowJar.get().dependsOn(tasks.getByName("relocateShadowJar"))
 
 repositories {
     mavenLocal()
-    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://repo.maven.apache.org/maven2/")
     mavenCentral()
@@ -29,6 +29,6 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.7.36")
 
     compileOnly("me.clip:placeholderapi:2.11.1")
-    compileOnly("io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT")
+    compileOnly("org.spigotmc:spigot-api:1.18-R0.1-SNAPSHOT")
     compileOnly("org.jetbrains:annotations:23.0.0")
 }
