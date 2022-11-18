@@ -6,6 +6,7 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import net.analyse.plugin.bukkit.commands.AnalyseCommand;
 import net.analyse.plugin.bukkit.event.ServerHeartbeatEvent;
 import net.analyse.plugin.bukkit.listener.PlayerActivityListener;
+import net.analyse.plugin.bukkit.listener.PlayerHandShakeListener;
 import net.analyse.plugin.bukkit.util.Config;
 import net.analyse.sdk.AnalyseSDK;
 import net.analyse.sdk.exception.ServerNotFoundException;
@@ -52,6 +53,16 @@ public class AnalysePlugin extends JavaPlugin {
 
         getCommand("analyse").setExecutor(new AnalyseCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerActivityListener(this), this);
+        
+        boolean isPaper = false;
+        try {
+            Class.forName("com.destroystokyo.paper.event.player.PlayerHandshakeEvent");
+            isPaper = true;
+        } catch (ClassNotFoundException ignored) {}
+
+        if(isPaper) {
+            Bukkit.getPluginManager().registerEvents(new PlayerHandShakeListener(this), this);
+        }
 
         ServerHeartbeatEvent serverHeartBeatEvent = new ServerHeartbeatEvent(this);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, serverHeartBeatEvent, 0, 20 * 10);
