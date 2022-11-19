@@ -27,8 +27,14 @@ public class PlayerActivityListener implements Listener {
 
         if (Config.ADVANCED_MODE) return;
 
-        plugin.debug("Player connecting via: " + event.getHostname());
-        plugin.getPlayerDomainMap().put(event.getPlayer().getUniqueId(), event.getHostname());
+        String hostName = event.getHostname();
+
+        if (hostName.indexOf('\0') != -1) {
+            hostName = hostName.substring(0, hostName.indexOf('\0'));
+        }
+
+        plugin.debug("Player connecting via: " + hostName);
+        plugin.getPlayerDomainMap().put(event.getPlayer().getUniqueId(), hostName);
     }
 
     @EventHandler
