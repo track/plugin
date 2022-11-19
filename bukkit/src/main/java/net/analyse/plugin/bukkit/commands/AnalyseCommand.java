@@ -7,15 +7,16 @@ import net.analyse.plugin.bukkit.commands.subcommands.SetupCommand;
 import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.response.GetServerResponse;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class AnalyseCommand implements CommandExecutor {
+public class AnalyseCommand implements TabExecutor {
 
     private final AnalysePlugin plugin;
     private final Map<String, SubCommand> commands = new HashMap<>();
@@ -66,5 +67,16 @@ public class AnalyseCommand implements CommandExecutor {
 
         subCommand.execute(sender, Arrays.copyOfRange(args, 1, args.length));
         return true;
+    }
+
+    @NotNull
+    @Override
+    public List<String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String alias, final @NotNull String[] args) {
+        if (args.length == 1) {
+            return commands.keySet().stream()
+                    .filter(subCommand -> subCommand.startsWith(args[0]))
+                    .collect(ImmutableList.toImmutableList());
+        }
+        return ImmutableList.of();
     }
 }
