@@ -198,6 +198,10 @@ public class AnalyseSDK {
                 .withServerToken(this.token)
                 .send();
 
+        if(response == null) {
+            return null;
+        }
+
         if(response.code() == 404) {
             response.close();
             throw new ServerNotFoundException();

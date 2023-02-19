@@ -16,7 +16,7 @@ subprojects {
     }
 
     group = "net.analyse.plugin"
-    version = "1.1.12"
+    version = "1.1.13"
 
     tasks {
         shadowJar {
