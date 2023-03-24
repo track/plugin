@@ -1,6 +1,5 @@
 package net.analyse.plugin;
 
-import com.google.common.collect.Maps;
 import gnu.trove.map.hash.TCustomHashMap;
 import gnu.trove.strategy.IdentityHashingStrategy;
 import net.analyse.plugin.event.PlayerJoinListener;
@@ -77,7 +76,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         registerEvents(new PlayerQuitListener(this));
 
         debug("Debug mode has been enabled. Type 'analyse debug' to disable.");
-        debug("Telemetry: " + getTelemetry().toString());
+        debug("Telemetry: " + getTelemetry());
 
         try {
             PluginInformation corePluginVersion = getPluginInformation();

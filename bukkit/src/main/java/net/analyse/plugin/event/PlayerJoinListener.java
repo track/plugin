@@ -1,10 +1,8 @@
 package net.analyse.plugin.event;
 
 import net.analyse.plugin.AnalysePlugin;
-import net.analyse.plugin.util.GeyserUtil;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.PlatformConfig;
-import net.analyse.sdk.platform.PlayerType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -39,9 +37,11 @@ public class PlayerJoinListener implements Listener {
             player.setDomain(bukkitPlayer.getAddress().getHostName());
         }
 
-        if(platform.getServer().getPluginManager().isPluginEnabled("Geyser-Spigot") && GeyserUtil.isBedrockPlayer(bukkitPlayer.getUniqueId())) {
-            player.setType(PlayerType.BEDROCK);
-        }
+//        GeyserBridge geyserBridge = GeyserBridgeLoader.getGeyserBridge();
+
+//        if(platform.getServer().getPluginManager().isPluginEnabled("Geyser-Spigot") && geyserBridge.isBedrockPlayer(bukkitPlayer.getUniqueId())) {
+//            player.setType(PlayerType.BEDROCK);
+//        }
 
         platform.debug("Tracking " + bukkitPlayer.getName() + " (" + player.getType().name() + ") that connected via: " + player.getDomain());
 
