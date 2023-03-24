@@ -1,0 +1,76 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+group = 'net.analyse'
+version = '2.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "spigotmc-repo"
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+    maven {
+        name = "opencollab-snapshot-repo"
+        url = "https://repo.opencollab.dev/main/"
+    }
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
+    compileOnly 'org.geysermc.geyser:api:2.1.0-SNAPSHOT'
+    implementation 'net.sf.trove4j:trove4j:3.0.3' // Add trove4j dependency
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+    implementation 'dev.dejvokep:boosted-yaml:1.3'
+}
+
+shadowJar {
+    configurations = [project.configurations.runtimeClasspath]
+
+    exclude 'module-info.class'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/proguard/**'
+
+    relocate 'gnu.trove4j', 'net.analyse.plugin.libs.trove4j' // Relocate trove4j
+    relocate 'okhttp3', 'net.analyse.plugin.libs.okhttp3' // Relocate okhttp
+    relocate 'okio', 'net.analyse.plugin.libs.okio' // Relocate okio (okhttp dependency)
+    relocate 'dev.dejvokep.boostedyaml', 'net.analyse.plugin.libs.boostedyaml' // Relocate boostedyaml
+    relocate 'org.jetbrains.annotations', 'net.analyse.plugin.libs.jetbrains' // Relocate jetbrains
+    relocate 'kotlin', 'net.analyse.plugin.libs.kotlin' // Relocate jetbrains
+    minimize()
+}
+
+def targetJavaVersion = 8
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release = targetJavaVersion
+    }
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+    filesNotMatching("**/*.zip") {
+        expand props
+    }
+}
