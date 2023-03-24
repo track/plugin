@@ -9,6 +9,7 @@ import net.analyse.plugin.manager.HeartbeatManager;
 import net.analyse.sdk.Analyse;
 import net.analyse.sdk.SDK;
 import net.analyse.sdk.module.ModuleManager;
+import net.analyse.sdk.module.PlatformModule;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.Platform;
 import net.analyse.sdk.platform.PlatformConfig;
@@ -18,12 +19,14 @@ import net.analyse.sdk.request.exception.AnalyseException;
 import net.analyse.sdk.request.exception.ServerNotFoundException;
 import net.analyse.sdk.request.response.PluginInformation;
 import net.analyse.sdk.request.response.ServerInformation;
+import net.analyse.sdk.util.StringUtil;
 import net.analyse.sdk.util.VersionUtil;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -36,6 +39,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     private Map<UUID, AnalysePlayer> players;
     private boolean setup;
     private HeartbeatManager heartbeatManager;
+    private ModuleManager moduleManager;
 
     @Override
     public void onEnable() {
@@ -43,13 +47,15 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         Analyse.init(this);
 
         try {
-            log("Loading modules..");
-            ModuleManager moduleManager = new ModuleManager(this);
+            debug("Loading modules..");
+            moduleManager = new ModuleManager(this);
             moduleManager.load();
 
-            log("Loaded " + moduleManager.getModules().size() + " modules.");
+            List<PlatformModule> modules = moduleManager.getModules();
+            log("Loaded " + modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + ".");
 
-            moduleManager.getModules().forEach(platformModule -> {
+            modules.forEach(platformModule -> {
+                if (!(platformModule instanceof Listener)) return;
                 getServer().getPluginManager().registerEvents((Listener) platformModule, this);
             });
         } catch (Exception e) {
@@ -201,5 +207,10 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
                 System.getProperty("os.arch"),
                 getServer().getOnlineMode()
         );
+    }
+
+    @Override
+    public ModuleManager getModuleManager() {
+        return moduleManager;
     }
 }

@@ -2,6 +2,7 @@ package net.analyse.sdk.platform;
 
 import dev.dejvokep.boostedyaml.YamlDocument;
 import net.analyse.sdk.SDK;
+import net.analyse.sdk.module.ModuleManager;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.request.exception.AnalyseException;
 import net.analyse.sdk.request.response.PluginInformation;
@@ -111,4 +112,5 @@ public interface Platform {
     void setPlatformConfig(PlatformConfig config);
 
     PlatformTelemetry getTelemetry();
+    ModuleManager getModuleManager();
 }
