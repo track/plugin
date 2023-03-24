@@ -108,4 +108,20 @@ public class AnalysePlayer {
     public void setFirstJoinedAt(Date firstJoinedAt) {
         this.firstJoinedAt = firstJoinedAt;
     }
+
+    @Override
+    public String toString() {
+        return "AnalysePlayer{" +
+                "name='" + name + '\'' +
+                ", uuid=" + uuid +
+                ", joinedAt=" + joinedAt +
+                ", ipAddress='" + ipAddress + '\'' +
+                ", firstJoinedAt=" + firstJoinedAt +
+                ", quitAt=" + quitAt +
+                ", type=" + type +
+                ", domain='" + domain + '\'' +
+                ", statistics=" + statistics +
+                ", events=" + events +
+                '}';
+    }
 }

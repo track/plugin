@@ -8,6 +8,7 @@ import net.analyse.plugin.manager.CommandManager;
 import net.analyse.plugin.manager.HeartbeatManager;
 import net.analyse.sdk.Analyse;
 import net.analyse.sdk.SDK;
+import net.analyse.sdk.module.ModuleManager;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.Platform;
 import net.analyse.sdk.platform.PlatformConfig;
@@ -40,6 +41,20 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     public void onEnable() {
         // initialise SDK.
         Analyse.init(this);
+
+        try {
+            log("Loading modules..");
+            ModuleManager moduleManager = new ModuleManager(this);
+            moduleManager.load();
+
+            log("Loaded " + moduleManager.getModules().size() + " modules.");
+
+            moduleManager.getModules().forEach(platformModule -> {
+                getServer().getPluginManager().registerEvents((Listener) platformModule, this);
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         try {
             // Load the platform config file.

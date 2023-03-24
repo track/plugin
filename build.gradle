@@ -1,16 +1,18 @@
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'maven-publish'
 }
 
 defaultTasks("clean", "shadowJar")
 
+group = 'net.analyse'
+version = '2.0.0'
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'com.github.johnrengelman.shadow'
-
-    group = 'net.analyse'
-    version = '2.0'
+    apply plugin: 'maven-publish'
 
     // Add the following block
     plugins.withId('java') {
@@ -22,7 +24,7 @@ subprojects {
     }
 
     shadowJar {
-        archiveFileName.set("${project.name}-analyse-${project.version}.jar")
+        archiveFileName.set("${project.name}-analyse-${rootProject.version}.jar")
     }
 
     repositories {
@@ -42,7 +44,7 @@ subprojects {
     }
 
     processResources {
-        def props = [version: version]
+        def props = [version: rootProject.version]
         inputs.properties props
         filteringCharset 'UTF-8'
         duplicatesStrategy = DuplicatesStrategy.INCLUDE

@@ -5,6 +5,7 @@ import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.PlatformConfig;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
@@ -17,7 +18,7 @@ public class PlayerJoinListener implements Listener {
         this.platform = platform;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent event) {
         Player bukkitPlayer = event.getPlayer();
 
@@ -37,13 +38,7 @@ public class PlayerJoinListener implements Listener {
             player.setDomain(bukkitPlayer.getAddress().getHostName());
         }
 
-//        GeyserBridge geyserBridge = GeyserBridgeLoader.getGeyserBridge();
-
-//        if(platform.getServer().getPluginManager().isPluginEnabled("Geyser-Spigot") && geyserBridge.isBedrockPlayer(bukkitPlayer.getUniqueId())) {
-//            player.setType(PlayerType.BEDROCK);
-//        }
-
-        platform.debug("Tracking " + bukkitPlayer.getName() + " (" + player.getType().name() + ") that connected via: " + player.getDomain());
+        platform.debug("Tracking " + bukkitPlayer.getName() + " that connected via: " + player.getDomain());
 
         if(analyseConfig.shouldUseServerFirstJoinedAt()) {
             player.setFirstJoinedAt(new Date(bukkitPlayer.getFirstPlayed()));
