@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import java.util.logging.Level;
 
 public class ModuleManager {
     private final Platform plugin;
@@ -106,6 +107,10 @@ public class ModuleManager {
 
         List<Class<?>> moduleClasses = getClasses("modules", PlatformModule.class);
 
+        if(moduleClasses == null) {
+            return;
+        }
+
         for (Class<?> moduleClass : moduleClasses) {
             try {
                 Constructor<?>[] constructors = moduleClass.getConstructors();
@@ -122,9 +127,8 @@ public class ModuleManager {
                     }
                 }
 
-                if (module != null) {
-                    this.modules.add(module);
-                }
+                if(module == null) continue;
+                this.modules.add(module);
             } catch (IllegalAccessException | InstantiationException ignored) {
 
             }
@@ -136,12 +140,18 @@ public class ModuleManager {
     }
 
     // A plugin developer runs this on startup of the plugin.
-    public void register(PlatformModule addon) {
-        // Registers an addon manually.
+    public void register(PlatformModule module) {
+        // Registers anmodule manually.
     }
 
     // A plugin developer can call this so Analyse stops it, now this doesn't unregister their events, only removes it from the plugin data.
-    public void unregister(PlatformModule addon) {
-        // Unregisters an addon manually.
+    public void unregister(PlatformModule module) {
+        // Unregisters an module manually.
+        getModules().remove(module);
+    }
+
+    public void disable(PlatformModule module, String reason) {
+        plugin.log(Level.WARNING, "Disabling module " + module.getName() + " because: " + reason);
+        unregister(module);
     }
 }

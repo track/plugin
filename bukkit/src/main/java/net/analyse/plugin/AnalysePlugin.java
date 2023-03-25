@@ -21,6 +21,7 @@ import net.analyse.sdk.request.response.PluginInformation;
 import net.analyse.sdk.request.response.ServerInformation;
 import net.analyse.sdk.util.StringUtil;
 import net.analyse.sdk.util.VersionUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -45,22 +46,6 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     public void onEnable() {
         // initialise SDK.
         Analyse.init(this);
-
-        try {
-            debug("Loading modules..");
-            moduleManager = new ModuleManager(this);
-            moduleManager.load();
-
-            List<PlatformModule> modules = moduleManager.getModules();
-            log("Loaded " + modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + ".");
-
-            modules.forEach(platformModule -> {
-                if (!(platformModule instanceof Listener)) return;
-                getServer().getPluginManager().registerEvents((Listener) platformModule, this);
-            });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 
         try {
             // Load the platform config file.
@@ -109,6 +94,31 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             }
         } catch (AnalyseException e) {
             getLogger().warning("Failed to get plugin information: " + e.getMessage());
+        }
+
+        try {
+            debug("Loading modules..");
+            moduleManager = new ModuleManager(this);
+            moduleManager.load();
+
+            List<PlatformModule> modules = moduleManager.getModules();
+
+            for (PlatformModule module : modules) {
+                if(module.getRequiredPlugin() != null && !Bukkit.getPluginManager().isPluginEnabled(module.getRequiredPlugin())) {
+                    moduleManager.disable(module, module.getRequiredPlugin() + " not installed.");
+                    continue;
+                }
+
+                if (module instanceof Listener) {
+                    getServer().getPluginManager().registerEvents((Listener) module, this);
+                }
+
+                log("Loaded module: " + module.getName());
+            }
+
+            log("Loaded " + modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + ".");
+        } catch (Exception e) {
+            log(Level.WARNING, "Failed to load modules: " + e.getMessage());
         }
     }
 
