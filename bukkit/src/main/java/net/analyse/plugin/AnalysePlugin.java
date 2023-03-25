@@ -105,10 +105,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     @Override
     public void onDisable() {
         for(PlatformModule module : moduleManager.getModules()) {
-            if (module instanceof Listener) {
-                HandlerList.unregisterAll((Listener) module);
-            }
-            moduleManager.unregister(module);
+            unloadModule(module);
         }
     }
 
@@ -119,18 +116,29 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             moduleManager = new ModuleManager(this);
             List<PlatformModule> modules = moduleManager.load();
 
-            for (PlatformModule module : modules) {
-                if (module instanceof Listener) {
-                    getServer().getPluginManager().registerEvents((Listener) module, this);
-                }
-                moduleManager.register(module);
-            }
+            modules.forEach(this::loadModule);
 
             log("Loaded " + modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + ".");
         } catch (Exception e) {
             log(Level.WARNING, "Failed to load modules: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void loadModule(PlatformModule module) {
+        if (module instanceof Listener) {
+            getServer().getPluginManager().registerEvents((Listener) module, this);
+        }
+        moduleManager.register(module);
+    }
+
+    @Override
+    public void unloadModule(PlatformModule module) {
+        if (module instanceof Listener) {
+            HandlerList.unregisterAll((Listener) module);
+        }
+        moduleManager.unregister(module);
     }
 
     /**

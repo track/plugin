@@ -42,6 +42,8 @@ public interface Platform {
     boolean isPluginEnabled(String plugin);
 
     void loadModules();
+    void loadModule(PlatformModule module);
+    void unloadModule(PlatformModule module);
 
     String getVersion();
 
