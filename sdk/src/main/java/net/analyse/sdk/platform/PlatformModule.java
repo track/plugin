@@ -1,4 +1,4 @@
-package net.analyse.sdk.module;
+package net.analyse.sdk.platform;
 
 import net.analyse.sdk.Analyse;
 import net.analyse.sdk.platform.Platform;

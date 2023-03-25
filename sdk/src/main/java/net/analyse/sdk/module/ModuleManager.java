@@ -1,6 +1,7 @@
 package net.analyse.sdk.module;
 
 import net.analyse.sdk.platform.Platform;
+import net.analyse.sdk.platform.PlatformModule;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -15,14 +16,14 @@ import java.util.jar.JarInputStream;
 import java.util.logging.Level;
 
 public class ModuleManager {
-    private final Platform plugin;
-    private List<PlatformModule> modules;
-    private File baseDirectory;
+    private final Platform platform;
+    private final List<PlatformModule> modules;
+    private final File baseDirectory;
 
-    public ModuleManager(Platform plugin) {
-        this.plugin = plugin;
+    public ModuleManager(Platform platform) {
+        this.platform = platform;
         this.modules = new ArrayList<>();
-        this.baseDirectory = plugin.getDirectory();
+        this.baseDirectory = platform.getDirectory();
     }
 
     public List<PlatformModule> getModules() {
@@ -94,10 +95,10 @@ public class ModuleManager {
     }
 
     public void load() throws Exception {
-        File moduleDir = new File(plugin.getDirectory() + File.separator + "modules");
+        File moduleDir = new File(platform.getDirectory() + File.separator + "modules");
 
         if(! moduleDir.exists()) {
-            plugin.debug("Module folder doesn't exist (creating it!).");
+            platform.debug("Module folder doesn't exist (creating it!).");
             moduleDir.createNewFile();
         }
 
@@ -151,7 +152,7 @@ public class ModuleManager {
     }
 
     public void disable(PlatformModule module, String reason) {
-        plugin.log(Level.WARNING, "Disabling module " + module.getName() + " because: " + reason);
+        platform.log(Level.WARNING, "Disabling module " + module.getName() + " because: " + reason);
         unregister(module);
     }
 }

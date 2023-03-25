@@ -39,6 +39,8 @@ public interface Platform {
     void configure();
     void halt();
 
+    void loadModules();
+
     String getVersion();
 
     default int getVersionNumber() {

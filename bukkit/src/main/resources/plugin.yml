@@ -1,8 +1,6 @@
 name: Analyse
 version: '${version}'
 main: net.analyse.plugin.AnalysePlugin
-softdepend:
-  - Geyser-Spigot
 commands:
   analyse:
     description: The main command

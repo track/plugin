@@ -4,12 +4,13 @@ import gnu.trove.map.hash.TCustomHashMap;
 import gnu.trove.strategy.IdentityHashingStrategy;
 import net.analyse.plugin.event.PlayerJoinListener;
 import net.analyse.plugin.event.PlayerQuitListener;
+import net.analyse.plugin.event.ServerLoadListener;
 import net.analyse.plugin.manager.CommandManager;
 import net.analyse.plugin.manager.HeartbeatManager;
 import net.analyse.sdk.Analyse;
 import net.analyse.sdk.SDK;
 import net.analyse.sdk.module.ModuleManager;
-import net.analyse.sdk.module.PlatformModule;
+import net.analyse.sdk.platform.PlatformModule;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.Platform;
 import net.analyse.sdk.platform.PlatformConfig;
@@ -97,6 +98,21 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         }
 
         try {
+            Class.forName("org.bukkit.event.server.ServerLoadEvent");
+            registerEvents(new ServerLoadListener(this));
+        } catch (final ClassNotFoundException ignored) {
+            Bukkit.getScheduler().runTaskLater(this, this::loadModules, 1);
+        }
+    }
+
+    @Override
+    public void onDisable() {
+
+    }
+
+    @Override
+    public void loadModules() {
+        try {
             debug("Loading modules..");
             moduleManager = new ModuleManager(this);
             moduleManager.load();
@@ -120,11 +136,6 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         } catch (Exception e) {
             log(Level.WARNING, "Failed to load modules: " + e.getMessage());
         }
-    }
-
-    @Override
-    public void onDisable() {
-
     }
 
     /**
