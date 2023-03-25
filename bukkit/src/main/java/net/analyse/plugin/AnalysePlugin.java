@@ -28,6 +28,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -107,7 +108,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
     @Override
     public void onDisable() {
-
+        moduleManager.unload();
     }
 
     @Override
@@ -118,10 +119,13 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             moduleManager.load();
 
             List<PlatformModule> modules = moduleManager.getModules();
+            Iterator<PlatformModule> iterator = modules.iterator();
 
-            for (PlatformModule module : modules) {
+            while (iterator.hasNext()) {
+                PlatformModule module = iterator.next();
                 if(module.getRequiredPlugin() != null && !Bukkit.getPluginManager().isPluginEnabled(module.getRequiredPlugin())) {
                     moduleManager.disable(module, module.getRequiredPlugin() + " not installed.");
+                    iterator.remove();
                     continue;
                 }
 
@@ -135,6 +139,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             log("Loaded " + modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + ".");
         } catch (Exception e) {
             log(Level.WARNING, "Failed to load modules: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

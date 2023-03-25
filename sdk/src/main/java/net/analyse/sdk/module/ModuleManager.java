@@ -138,6 +138,11 @@ public class ModuleManager {
 
     public void unload() {
         // Unloads all addons
+        for(PlatformModule module : getModules()) {
+            platform.debug("Disabling " + module.getName() + "..");
+            module.onDisable();
+            getModules().remove(module);
+        }
     }
 
     // A plugin developer runs this on startup of the plugin.
@@ -148,11 +153,11 @@ public class ModuleManager {
     // A plugin developer can call this so Analyse stops it, now this doesn't unregister their events, only removes it from the plugin data.
     public void unregister(PlatformModule module) {
         // Unregisters an module manually.
-        getModules().remove(module);
+
     }
 
     public void disable(PlatformModule module, String reason) {
-        platform.log(Level.WARNING, "Disabling module " + module.getName() + " because: " + reason);
+        platform.debug("Disabling module " + module.getName() + " because: " + reason);
         unregister(module);
     }
 }
