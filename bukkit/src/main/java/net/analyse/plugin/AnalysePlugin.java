@@ -10,12 +10,8 @@ import net.analyse.plugin.manager.HeartbeatManager;
 import net.analyse.sdk.Analyse;
 import net.analyse.sdk.SDK;
 import net.analyse.sdk.module.ModuleManager;
-import net.analyse.sdk.platform.PlatformModule;
 import net.analyse.sdk.obj.AnalysePlayer;
-import net.analyse.sdk.platform.Platform;
-import net.analyse.sdk.platform.PlatformConfig;
-import net.analyse.sdk.platform.PlatformTelemetry;
-import net.analyse.sdk.platform.PlatformType;
+import net.analyse.sdk.platform.*;
 import net.analyse.sdk.request.exception.AnalyseException;
 import net.analyse.sdk.request.exception.ServerNotFoundException;
 import net.analyse.sdk.request.response.PluginInformation;
@@ -114,7 +110,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     @Override
     public void loadModules() {
         try {
-            debug("Loading modules..");
+            log("Loading modules..");
             moduleManager = new ModuleManager(this);
             moduleManager.load();
 
@@ -124,7 +120,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             while (iterator.hasNext()) {
                 PlatformModule module = iterator.next();
                 if(module.getRequiredPlugin() != null && !Bukkit.getPluginManager().isPluginEnabled(module.getRequiredPlugin())) {
-                    moduleManager.disable(module, module.getRequiredPlugin() + " not installed.");
+                    moduleManager.disable(module, String.format("Skipped %s module due to a missing plugin: %s", module.getName(), module.getRequiredPlugin()));
                     iterator.remove();
                     continue;
                 }

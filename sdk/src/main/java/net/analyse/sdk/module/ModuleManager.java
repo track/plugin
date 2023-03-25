@@ -15,6 +15,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.logging.Level;
 
+/**
+ * A manager that loads, unloads, registers, unregisters and disables platform modules.
+ */
 public class ModuleManager {
     private final Platform platform;
     private final List<PlatformModule> modules;
@@ -30,6 +33,13 @@ public class ModuleManager {
         return modules;
     }
 
+    /**
+     * Scans the specified folder for jar files containing classes that implement the given target class.
+     *
+     * @param folder      The folder to scan for jar files.
+     * @param targetClass The target class to look for.
+     * @return The list of classes that implement the target class.
+     */
     private List<Class<?>> getClasses(String folder, Class<?> targetClass) {
         List<Class<?>> list = new ArrayList<>();
 
@@ -58,6 +68,15 @@ public class ModuleManager {
         return null;
     }
 
+    /**
+     * Scans the specified jar file for classes that implement the given target class.
+     *
+     * @param jar         The jar file to scan.
+     * @param list        The list of classes found so far.
+     * @param classLoader The class loader to use.
+     * @param targetClass The target class to look for.
+     * @return The updated list of classes that implement the target class.
+     */
     private List<Class<?>> gather(final URL jar, List<Class<?>> list, ClassLoader classLoader, Class<?> targetClass) {
         if (list == null) {
             list = new ArrayList<>();
@@ -94,6 +113,9 @@ public class ModuleManager {
         return list;
     }
 
+    /**
+     * Unloads all loaded platform modules.
+     */
     public void load() throws Exception {
         File moduleDir = new File(platform.getDirectory() + File.separator + "modules");
 
@@ -136,6 +158,9 @@ public class ModuleManager {
         }
     }
 
+    /**
+     * Unloads all loaded platform modules.
+     */
     public void unload() {
         // Unloads all addons
         for(PlatformModule module : getModules()) {
@@ -145,19 +170,29 @@ public class ModuleManager {
         }
     }
 
-    // A plugin developer runs this on startup of the plugin.
+    /**
+     * Registers a platform module manually.
+     * @param module the module to register.
+     */
     public void register(PlatformModule module) {
-        // Registers anmodule manually.
+        // Registers a module manually.
     }
 
-    // A plugin developer can call this so Analyse stops it, now this doesn't unregister their events, only removes it from the plugin data.
+    /**
+     * Unregisters a platform module manually, removing it from the plugin data.
+     * @param module the module to unregister.
+     */
     public void unregister(PlatformModule module) {
-        // Unregisters an module manually.
-
+        // Unregisters a module manually.
     }
 
+    /**
+     * Disables a platform module, logging a warning message with the given reason and unregistering it from the plugin data.
+     * @param module the module to disable.
+     * @param reason the reason for disabling the module.
+     */
     public void disable(PlatformModule module, String reason) {
-        platform.debug("Disabling module " + module.getName() + " because: " + reason);
+        platform.log(Level.WARNING, reason);
         unregister(module);
     }
 }
