@@ -31,6 +31,10 @@ public class ModuleManager {
         this.baseDirectory = platform.getDirectory();
     }
 
+    /**
+     * Get the loaded modules
+     * @return Loaded modules
+     */
     public List<PlatformModule> getModules() {
         return modules;
     }
@@ -166,18 +170,6 @@ public class ModuleManager {
     }
 
     /**
-     * Unloads all loaded platform modules.
-     */
-    public void unload() {
-        // Unloads all addons
-        for(PlatformModule module : getModules()) {
-            platform.debug("Disabling " + module.getName() + "..");
-            module.onDisable();
-            getModules().remove(module);
-        }
-    }
-
-    /**
      * Registers a platform module manually.
      * @param module the module to register.
      */
@@ -187,7 +179,9 @@ public class ModuleManager {
             return;
         }
 
-        getModules().add(module);
+        platform.log("Loaded module: " + module.getName());
+        modules.add(module);
+        module.onEnable();
     }
 
     /**
@@ -195,7 +189,9 @@ public class ModuleManager {
      * @param module the module to unregister.
      */
     public void unregister(PlatformModule module) {
-        // Unregisters a module manually.
+        platform.log("Unloaded module: " + module.getName());
+        modules.remove(module);
+        module.onDisable();
     }
 
     /**

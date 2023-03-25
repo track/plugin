@@ -19,12 +19,12 @@ import net.analyse.sdk.request.response.ServerInformation;
 import net.analyse.sdk.util.StringUtil;
 import net.analyse.sdk.util.VersionUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -104,7 +104,12 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
     @Override
     public void onDisable() {
-
+        for(PlatformModule module : moduleManager.getModules()) {
+            if (module instanceof Listener) {
+                HandlerList.unregisterAll((Listener) module);
+            }
+            moduleManager.unregister(module);
+        }
     }
 
     @Override
@@ -112,18 +117,13 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         try {
             log("Loading modules..");
             moduleManager = new ModuleManager(this);
-
             List<PlatformModule> modules = moduleManager.load();
-            Iterator<PlatformModule> iterator = modules.iterator();
 
-            while (iterator.hasNext()) {
-                PlatformModule module = iterator.next();
-
+            for (PlatformModule module : modules) {
                 if (module instanceof Listener) {
                     getServer().getPluginManager().registerEvents((Listener) module, this);
                 }
-
-                log("Loaded module: " + module.getName());
+                moduleManager.register(module);
             }
 
             log("Loaded " + modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + ".");
