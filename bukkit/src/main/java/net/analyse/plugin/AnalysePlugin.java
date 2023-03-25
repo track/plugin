@@ -104,7 +104,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
     @Override
     public void onDisable() {
-        moduleManager.unload();
+
     }
 
     @Override
@@ -112,18 +112,12 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         try {
             log("Loading modules..");
             moduleManager = new ModuleManager(this);
-            moduleManager.load();
 
-            List<PlatformModule> modules = moduleManager.getModules();
+            List<PlatformModule> modules = moduleManager.load();
             Iterator<PlatformModule> iterator = modules.iterator();
 
             while (iterator.hasNext()) {
                 PlatformModule module = iterator.next();
-                if(module.getRequiredPlugin() != null && !Bukkit.getPluginManager().isPluginEnabled(module.getRequiredPlugin())) {
-                    moduleManager.disable(module, String.format("Skipped %s module due to a missing plugin: %s", module.getName(), module.getRequiredPlugin()));
-                    iterator.remove();
-                    continue;
-                }
 
                 if (module instanceof Listener) {
                     getServer().getPluginManager().registerEvents((Listener) module, this);
@@ -191,6 +185,11 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     public void halt() {
         setup = false;
         heartbeatManager.stop();
+    }
+
+    @Override
+    public boolean isPluginEnabled(String plugin) {
+        return Bukkit.getServer().getPluginManager().isPluginEnabled(plugin);
     }
 
     @Override

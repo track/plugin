@@ -10,6 +10,8 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -114,9 +116,11 @@ public class ModuleManager {
     }
 
     /**
-     * Unloads all loaded platform modules.
+     * Loads all platform modules.
+     *
+     * @return
      */
-    public void load() throws Exception {
+    public List<PlatformModule> load() throws Exception {
         File moduleDir = new File(platform.getDirectory() + File.separator + "modules");
 
         if(! moduleDir.exists()) {
@@ -131,8 +135,10 @@ public class ModuleManager {
         List<Class<?>> moduleClasses = getClasses("modules", PlatformModule.class);
 
         if(moduleClasses == null) {
-            return;
+            return Collections.emptyList();
         }
+
+        List<PlatformModule> moduleList = new ArrayList<>();
 
         for (Class<?> moduleClass : moduleClasses) {
             try {
@@ -151,11 +157,12 @@ public class ModuleManager {
                 }
 
                 if(module == null) continue;
-                this.modules.add(module);
+                moduleList.add(module);
             } catch (IllegalAccessException | InstantiationException ignored) {
 
             }
         }
+        return moduleList;
     }
 
     /**
@@ -175,7 +182,12 @@ public class ModuleManager {
      * @param module the module to register.
      */
     public void register(PlatformModule module) {
-        // Registers a module manually.
+        if(module.getRequiredPlugin() != null && !platform.isPluginEnabled(module.getRequiredPlugin())) {
+            disable(module, String.format("Skipped %s module due to a missing plugin: %s", module.getName(), module.getRequiredPlugin()));
+            return;
+        }
+
+        getModules().add(module);
     }
 
     /**
