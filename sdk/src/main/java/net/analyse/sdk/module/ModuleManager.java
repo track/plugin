@@ -124,16 +124,20 @@ public class ModuleManager {
      *
      * @return
      */
-    public List<PlatformModule> load() throws Exception {
-        File moduleDir = new File(platform.getDirectory() + File.separator + "modules");
+    public List<PlatformModule> load() {
+        File moduleDir = new File(platform.getDirectory(), "modules");
 
         if(! moduleDir.exists()) {
-            platform.debug("Module folder doesn't exist (creating it!).");
-            moduleDir.createNewFile();
+            platform.debug("Creating module directory..");
+            if(! moduleDir.mkdirs()) {
+                platform.log(Level.WARNING, "Failed to create module directory!");
+                return Collections.emptyList();
+            }
         }
 
         if (! moduleDir.isDirectory()) {
-            throw new Exception("Invalid module directory: " + moduleDir.getAbsolutePath());
+            platform.log(Level.WARNING, "Invalid module directory!");
+            return Collections.emptyList();
         }
 
         List<Class<?>> moduleClasses = getClasses("modules", PlatformModule.class);
@@ -180,7 +184,6 @@ public class ModuleManager {
         }
 
         platform.log("Loaded module: " + module.getName());
-        modules.add(module);
         module.onEnable();
     }
 
@@ -190,7 +193,6 @@ public class ModuleManager {
      */
     public void unregister(PlatformModule module) {
         platform.log("Unloaded module: " + module.getName());
-        modules.remove(module);
         module.onDisable();
     }
 

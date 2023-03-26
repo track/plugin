@@ -43,6 +43,8 @@ public interface Platform {
 
     void loadModules();
     void loadModule(PlatformModule module);
+
+    void unloadModules();
     void unloadModule(PlatformModule module);
 
     String getVersion();

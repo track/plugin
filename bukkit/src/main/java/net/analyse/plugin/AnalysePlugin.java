@@ -25,6 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -65,30 +66,31 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         if (config.getServerToken() != null && !config.getServerToken().isEmpty()) {
             try {
                 ServerInformation serverInformation = sdk.getServerInformation();
-                log("Successfully connected to " + serverInformation.getName() + ".");
+                log("Connected to '" + serverInformation.getName() + "'.");
                 configure();
             } catch (AnalyseException e) {
                 log(Level.WARNING, "Failed to get server information: " + e.getMessage());
             } catch (ServerNotFoundException e) {
-                log(Level.WARNING, "The server specified is not found. Please check your server key or re-run the setup command.");
+                log(Level.WARNING, "Failed to connect. Please double-check your server key or run the setup command again.");
             }
         } else {
-            log(Level.WARNING, "Looks like this is a fresh setup. Get started by using 'analyse setup <key>' in the console.");
+            log(Level.WARNING, "Welcome to Analyse! It seems like this is a new setup.");
+            log(Level.WARNING, "To get started, please use the 'analyse setup <key>' command in the console.");
         }
 
         registerEvents(new PlayerJoinListener(this));
         registerEvents(new PlayerQuitListener(this));
 
-        debug("Debug mode has been enabled. Type 'analyse debug' to disable.");
+        debug("Debug mode enabled. Type 'analyse debug' to disable.");
         debug("Telemetry: " + getTelemetry());
 
         try {
             PluginInformation corePluginVersion = getPluginInformation();
             if (VersionUtil.isNewerVersion(getVersion(), corePluginVersion.getVersionName())) {
-                log(Level.WARNING, String.format("This server is running v%s, an outdated version of Analyse.", getDescription().getVersion()));
-                log(Level.WARNING, String.format("Download v%s at: %s", corePluginVersion.getVersionName(), corePluginVersion.getDownloadUrl()));
+                log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", corePluginVersion.getVersionName(), getDescription().getVersion()));
+                log(Level.WARNING, "Download the latest version at: " + corePluginVersion.getDownloadUrl());
             } else {
-                log("This server is running the latest version of Analyse.");
+                log("You are running the latest version of Analyse.");
             }
         } catch (AnalyseException e) {
             getLogger().warning("Failed to get plugin information: " + e.getMessage());
@@ -104,9 +106,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
     @Override
     public void onDisable() {
-        for(PlatformModule module : moduleManager.getModules()) {
-            unloadModule(module);
-        }
+        unloadModules();
     }
 
     @Override
@@ -118,7 +118,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
             modules.forEach(this::loadModule);
 
-            log("Loaded " + modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + ".");
+            log(modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + " loaded.");
         } catch (Exception e) {
             log(Level.WARNING, "Failed to load modules: " + e.getMessage());
             e.printStackTrace();
@@ -131,6 +131,18 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             getServer().getPluginManager().registerEvents((Listener) module, this);
         }
         moduleManager.register(module);
+        moduleManager.getModules().add(module);
+    }
+
+    @Override
+    public void unloadModules() {
+        Iterator<PlatformModule> iterator = moduleManager.getModules().iterator();
+
+        while(iterator.hasNext()) {
+            PlatformModule module = iterator.next();
+            unloadModule(module);
+            iterator.remove();
+        }
     }
 
     @Override
