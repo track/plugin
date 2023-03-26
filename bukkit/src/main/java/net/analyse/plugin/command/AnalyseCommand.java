@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AnalyseCommand implements TabExecutor {
-    private CommandManager commandManager;
+    private final CommandManager commandManager;
 
     public AnalyseCommand(CommandManager commandManager) {
         this.commandManager = commandManager;
