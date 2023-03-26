@@ -2,9 +2,12 @@ package net.analyse.plugin.command;
 
 import com.google.common.collect.ImmutableList;
 import net.analyse.plugin.manager.CommandManager;
+import net.analyse.sdk.platform.command.PlatformCommand;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,21 +22,23 @@ public class AnalyseCommand implements TabExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if(args.length == 0) {
-            sender.sendMessage("§8[Analyse] §7Plugin information.");
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8[Analyse] &7Plugin information:"));
             return true;
         }
 
-        Map<String, SubCommand> commands = commandManager.getCommands();
-        if(! commands.containsKey(args[0].toLowerCase())) {
-            sender.sendMessage("§8[Analyse] §7Unknown command.");
+        Map<String, PlatformCommand> commands = commandManager.getCommands();
+
+        if(!commands.containsKey(args[0].toLowerCase())) {
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8[Analyse] &7Unknown command."));
             return true;
         }
 
-        final SubCommand subCommand = commands.get(args[0].toLowerCase());
-        if (! sender.hasPermission(subCommand.getPermission())) {
-            sender.sendMessage("§b[Analyse] §7You do not have access to that command.");
+        final PlatformCommand subCommand = commands.get(args[0].toLowerCase());
+
+        if(!sender.hasPermission("analyse." + subCommand.getName())) {
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8[Analyse] &7You do not have access to that command."));
             return true;
         }
 
@@ -42,7 +47,7 @@ public class AnalyseCommand implements TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if(args.length == 1) {
             return commandManager.getCommands()
                     .keySet()

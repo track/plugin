@@ -2,55 +2,57 @@ package net.analyse.plugin.command.sub;
 
 import dev.dejvokep.boostedyaml.YamlDocument;
 import net.analyse.plugin.AnalysePlugin;
-import net.analyse.plugin.command.SubCommand;
 import net.analyse.sdk.SDK;
 import net.analyse.sdk.platform.PlatformConfig;
+import net.analyse.sdk.platform.command.PlatformCommand;
 import net.analyse.sdk.request.exception.AnalyseException;
 import net.analyse.sdk.request.exception.ServerNotFoundException;
 import net.analyse.sdk.request.response.ServerInformation;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.io.IOException;
 
-public class SetupCommand extends SubCommand {
+public class SetupCommand extends PlatformCommand {
+
     public SetupCommand(AnalysePlugin platform) {
-        super(platform, "setup", "analyse.setup");
-    }
+        super("setup", "Configure the server token key", commandContext -> {
+            CommandSender sender = (CommandSender) commandContext.getSender();
+            String[] args = commandContext.getArguments();
 
-    @Override
-    public void execute(CommandSender sender, String[] args) {
-        if(args.length == 0) {
-            sender.sendMessage("§8[Analyse] §7Usage: /analyse setup <serverToken>");
-            return;
-        }
-
-        String serverToken = args[0];
-        AnalysePlugin platform = getPlatform();
-
-        SDK analyse = platform.getSDK();
-        PlatformConfig analyseConfig = platform.getPlatformConfig();
-        YamlDocument configFile = analyseConfig.getYamlDocument();
-
-        analyse.setServerToken(serverToken);
-
-        try {
-            ServerInformation serverInformation = analyse.getServerInformation();
-            analyseConfig.setServerToken(serverToken);
-            configFile.set("server.token", serverToken);
-            configFile.save();
-
-            sender.sendMessage("§8[Analyse] §7Connected to §b" + serverInformation.getName() + "§7.");
-            platform.configure();
-        } catch (AnalyseException | ServerNotFoundException e) {
-            if(e instanceof ServerNotFoundException) {
-                sender.sendMessage("§8[Analyse] §7Server not found. Please check your server token.");
-                platform.getHeartbeatManager().stop();
+            // Your command logic goes here
+            if (args.length == 0) {
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8[Analyse] &7Usage: /analyse setup <serverToken>"));
                 return;
             }
 
-            sender.sendMessage("§8[Analyse] §cAn error occurred: " + e.getMessage());
-        } catch (IOException e) {
-            sender.sendMessage("§8[Analyse] §7Failed to save config: " + e.getMessage());
-        }
+            String serverToken = args[0];
+
+            SDK analyse = platform.getSDK();
+            PlatformConfig analyseConfig = platform.getPlatformConfig();
+            YamlDocument configFile = analyseConfig.getYamlDocument();
+
+            analyse.setServerToken(serverToken);
+
+            try {
+                ServerInformation serverInformation = analyse.getServerInformation();
+                analyseConfig.setServerToken(serverToken);
+                configFile.set("server.token", serverToken);
+                configFile.save();
+
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&8[Analyse] &7Connected to &b%s&7.", serverInformation.getName())));
+                platform.configure();
+            } catch (AnalyseException | ServerNotFoundException e) {
+                if (e instanceof ServerNotFoundException) {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8[Analyse] &7Server not found. Please check your server token."));
+                    platform.getHeartbeatManager().stop();
+                    return;
+                }
+
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&8[Analyse] &cAn error occurred: &f%s&c.", e.getMessage())));
+            } catch (IOException e) {
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&8[Analyse] Failed to save config: %s", e.getMessage())));
+            }
+        });
     }
 }

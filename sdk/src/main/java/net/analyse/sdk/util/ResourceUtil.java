@@ -68,7 +68,7 @@ public final class ResourceUtil {
      * @throws IOException If the file could not be extracted.
      */
     private static File getFile(String platform, String fileName) throws IOException {
-        InputStream inputStream = getFileFromResourceAsStream(String.format("platform/%s/%s", platform, fileName));
+        InputStream inputStream = getFileFromResourceAsStream(String.format("%s/%s", platform, fileName));
 
         // Retrieve file name and extension
         String[] split = fileName.split("\\.");

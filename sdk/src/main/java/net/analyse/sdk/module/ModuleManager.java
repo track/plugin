@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
-import java.util.logging.Level;
 
 public class ModuleManager {
     private final Platform platform;
@@ -30,11 +29,11 @@ public class ModuleManager {
         return modules;
     }
 
-    private List<Class<?>> getClasses(String folder, Class<?> targetClass) {
+    private List<Class<?>> getClasses() {
         List<Class<?>> list = new ArrayList<>();
 
         try {
-            File f = new File(this.baseDirectory, folder);
+            File f = new File(this.baseDirectory, "modules");
             if (!f.exists()) {
                 return list;
             }
@@ -45,9 +44,9 @@ public class ModuleManager {
                 return list;
             }
 
-            ClassLoader classLoader = targetClass.getClassLoader();
+            ClassLoader classLoader = PlatformModule.class.getClassLoader();
             for (File file : jars) {
-                list = gather(file.toURI().toURL(), list, classLoader, targetClass);
+                list = gather(file.toURI().toURL(), list, classLoader);
             }
 
             return list;
@@ -58,7 +57,7 @@ public class ModuleManager {
         return null;
     }
 
-    private List<Class<?>> gather(final URL jar, List<Class<?>> list, ClassLoader classLoader, Class<?> targetClass) {
+    private List<Class<?>> gather(final URL jar, List<Class<?>> list, ClassLoader classLoader) {
         if (list == null) {
             list = new ArrayList<>();
         }
@@ -73,7 +72,7 @@ public class ModuleManager {
                 }
 
                 String name = jarInputStreamNextJarEntry.getName();
-                if (name == null || name.isEmpty()) {
+                if (name.isEmpty()) {
                     continue;
                 }
 
@@ -82,7 +81,7 @@ public class ModuleManager {
                     String cname = name.substring(0, name.lastIndexOf(".class"));
 
                     Class<?> c = cl.loadClass(cname);
-                    if (targetClass.isAssignableFrom(c)) {
+                    if (PlatformModule.class.isAssignableFrom(c)) {
                         list.add(c);
                     }
                 }
@@ -95,20 +94,26 @@ public class ModuleManager {
     }
 
     public void load() throws Exception {
-        File moduleDir = new File(platform.getDirectory() + File.separator + "modules");
+        File moduleDir = new File(platform.getDirectory(), "modules");
 
-        if(! moduleDir.exists()) {
-            platform.debug("Module folder doesn't exist (creating it!).");
-            moduleDir.createNewFile();
+        if (!moduleDir.exists()) {
+            boolean created = moduleDir.mkdirs();
+
+            // Check if the directory was created successfully
+            if (!created) {
+                throw new RuntimeException("Unable to create the Module directory");
+            }
+        } else if (!moduleDir.isDirectory()) {
+            throw new IllegalArgumentException("The Module directory path points to a file, not a directory");
         }
 
-        if (! moduleDir.isDirectory()) {
+        if (!moduleDir.isDirectory()) {
             throw new Exception("Invalid module directory: " + moduleDir.getAbsolutePath());
         }
 
-        List<Class<?>> moduleClasses = getClasses("modules", PlatformModule.class);
+        List<Class<?>> moduleClasses = getClasses();
 
-        if(moduleClasses == null) {
+        if (moduleClasses == null) {
             return;
         }
 
@@ -128,7 +133,7 @@ public class ModuleManager {
                     }
                 }
 
-                if(module == null) continue;
+                if (module == null) continue;
                 this.modules.add(module);
             } catch (IllegalAccessException | InstantiationException ignored) {
 
@@ -138,7 +143,7 @@ public class ModuleManager {
 
     public void unload() {
         // Unloads all addons
-        for(PlatformModule module : getModules()) {
+        for (PlatformModule module : getModules()) {
             platform.debug("Disabling " + module.getName() + "..");
             module.onDisable();
             getModules().remove(module);

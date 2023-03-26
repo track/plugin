@@ -1,37 +1,29 @@
 package net.analyse.plugin.manager;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.command.AnalyseCommand;
-import net.analyse.plugin.command.SubCommand;
 import net.analyse.plugin.command.sub.DebugCommand;
 import net.analyse.plugin.command.sub.SetupCommand;
-import net.analyse.plugin.command.sub.StatsCommand;
+import net.analyse.sdk.platform.command.PlatformCommand;
 import org.bukkit.command.PluginCommand;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CommandManager {
     private final AnalysePlugin platform;
-    private final Map<String, SubCommand> commands;
+    private final Map<String, PlatformCommand> commands = new HashMap<>();
 
     public CommandManager(AnalysePlugin platform) {
         this.platform = platform;
-        this.commands = Maps.newHashMap();
+
+        // Load built-in commands
+        registerCommands(Arrays.asList(new SetupCommand(platform), new DebugCommand(platform)));
     }
 
     public void register() {
-        ImmutableList.of(
-                new SetupCommand(platform),
-                new DebugCommand(platform),
-                new StatsCommand(platform)
-//                new PlayerCommand(platform),
-//                new StatsCommand(platform)
-        ).forEach(command -> {
-            commands.put(command.getName(), command);
-        });
-
         AnalyseCommand analyseCommand = new AnalyseCommand(this);
         PluginCommand pluginCommand = platform.getCommand("analyse");
 
@@ -43,7 +35,18 @@ public class CommandManager {
         pluginCommand.setTabCompleter(analyseCommand);
     }
 
-    public Map<String, SubCommand> getCommands() {
+    public void registerCommands(List<PlatformCommand> commands) {
+        commands.forEach(platformCommand -> {
+            if (this.commands.containsKey(platformCommand.getName())) {
+                platform.getLogger().warning("A command with the name '" + platformCommand.getName() + "' is already registered. Skipping...");
+                return;
+            }
+
+            this.commands.put(platformCommand.getName(), platformCommand);
+        });
+    }
+
+    public Map<String, PlatformCommand> getCommands() {
         return commands;
     }
 }

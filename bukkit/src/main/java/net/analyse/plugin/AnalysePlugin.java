@@ -16,6 +16,7 @@ import net.analyse.sdk.platform.Platform;
 import net.analyse.sdk.platform.PlatformConfig;
 import net.analyse.sdk.platform.PlatformTelemetry;
 import net.analyse.sdk.platform.PlatformType;
+import net.analyse.sdk.platform.command.PlatformCommand;
 import net.analyse.sdk.request.exception.AnalyseException;
 import net.analyse.sdk.request.exception.ServerNotFoundException;
 import net.analyse.sdk.request.response.PluginInformation;
@@ -24,6 +25,7 @@ import net.analyse.sdk.util.StringUtil;
 import net.analyse.sdk.util.VersionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -41,8 +43,9 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     private PlatformConfig config;
     private Map<UUID, AnalysePlayer> players;
     private boolean setup;
-    private HeartbeatManager heartbeatManager;
-    private ModuleManager moduleManager;
+    private final CommandManager commandManager = new CommandManager(this);
+    private final HeartbeatManager heartbeatManager = new HeartbeatManager(this);
+    private final ModuleManager moduleManager = new ModuleManager(this);
 
     @Override
     public void onEnable() {
@@ -59,10 +62,6 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         }
 
         players = new TCustomHashMap<>(new IdentityHashingStrategy<>());
-
-        // Initialise managers.
-        heartbeatManager = new HeartbeatManager(this);
-        new CommandManager(this).register();
 
         sdk = new SDK(this, config.getServerToken());
 
@@ -115,32 +114,45 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     public void loadModules() {
         try {
             debug("Loading modules..");
-            moduleManager = new ModuleManager(this);
             moduleManager.load();
 
             List<PlatformModule> modules = moduleManager.getModules();
             Iterator<PlatformModule> iterator = modules.iterator();
 
+            final PluginManager pluginManager = getServer().getPluginManager();
+
             while (iterator.hasNext()) {
                 PlatformModule module = iterator.next();
-                if(module.getRequiredPlugin() != null && !Bukkit.getPluginManager().isPluginEnabled(module.getRequiredPlugin())) {
-                    moduleManager.disable(module, module.getRequiredPlugin() + " not installed.");
-                    iterator.remove();
-                    continue;
+
+                List<String> moduleDependencies = module.getDependencies();
+
+                for (String dependency : moduleDependencies) {
+                    if (!pluginManager.isPluginEnabled(dependency)) {
+                        moduleManager.disable(module, dependency + " not installed.");
+                        iterator.remove();
+                        break;
+                    }
                 }
 
                 if (module instanceof Listener) {
                     getServer().getPluginManager().registerEvents((Listener) module, this);
                 }
 
+                commandManager.registerCommands(module.getCommands());
+
                 log("Loaded module: " + module.getName());
             }
 
             log("Loaded " + modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + ".");
+
+
         } catch (Exception e) {
             log(Level.WARNING, "Failed to load modules: " + e.getMessage());
             e.printStackTrace();
         }
+
+        // Register commands
+        commandManager.register();
     }
 
     /**
@@ -149,6 +161,10 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
      */
     public <T extends Listener> void registerEvents(T l) {
         getServer().getPluginManager().registerEvents(l, this);
+    }
+
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 
     public HeartbeatManager getHeartbeatManager() {
