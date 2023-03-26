@@ -5,9 +5,7 @@ import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.command.SubCommand;
 import net.analyse.sdk.SDK;
 import net.analyse.sdk.platform.PlatformConfig;
-import net.analyse.sdk.request.exception.AnalyseException;
 import net.analyse.sdk.request.exception.ServerNotFoundException;
-import net.analyse.sdk.request.response.ServerInformation;
 import org.bukkit.command.CommandSender;
 
 import java.io.IOException;
@@ -33,24 +31,29 @@ public class SetupCommand extends SubCommand {
 
         analyse.setServerToken(serverToken);
 
-        try {
-            ServerInformation serverInformation = analyse.getServerInformation();
-            analyseConfig.setServerToken(serverToken);
-            configFile.set("server.token", serverToken);
-            configFile.save();
+        platform.getSDK().getServerInformation().whenComplete((information, throwable) -> {
+            if(throwable != null) {
+                if(throwable.getCause() instanceof ServerNotFoundException) {
+                    sender.sendMessage("§8[Analyse] §7Server not found. Please check your server token.");
+                    platform.getHeartbeatManager().stop();
+                    return;
+                }
 
-            sender.sendMessage("§8[Analyse] §7Connected to §b" + serverInformation.getName() + "§7.");
-            platform.configure();
-        } catch (AnalyseException | ServerNotFoundException e) {
-            if(e instanceof ServerNotFoundException) {
-                sender.sendMessage("§8[Analyse] §7Server not found. Please check your server token.");
-                platform.getHeartbeatManager().stop();
+                sender.sendMessage("§8[Analyse] §cAn error occurred: " + throwable.getMessage());
                 return;
             }
 
-            sender.sendMessage("§8[Analyse] §cAn error occurred: " + e.getMessage());
-        } catch (IOException e) {
-            sender.sendMessage("§8[Analyse] §7Failed to save config: " + e.getMessage());
-        }
+            analyseConfig.setServerToken(serverToken);
+            configFile.set("server.token", serverToken);
+
+            try {
+                configFile.save();
+            } catch (IOException e) {
+                sender.sendMessage("§8[Analyse] §7Failed to save config: " + e.getMessage());
+            }
+
+            sender.sendMessage("§8[Analyse] §7Connected to §b" + information.getName() + "§7.");
+            platform.configure();
+        });
     }
 }

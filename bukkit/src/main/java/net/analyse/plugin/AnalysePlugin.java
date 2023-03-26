@@ -14,8 +14,6 @@ import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.*;
 import net.analyse.sdk.request.exception.AnalyseException;
 import net.analyse.sdk.request.exception.ServerNotFoundException;
-import net.analyse.sdk.request.response.PluginInformation;
-import net.analyse.sdk.request.response.ServerInformation;
 import net.analyse.sdk.util.StringUtil;
 import net.analyse.sdk.util.VersionUtil;
 import org.bukkit.Bukkit;
@@ -64,15 +62,21 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         sdk = new SDK(this, config.getServerToken());
 
         if (config.getServerToken() != null && !config.getServerToken().isEmpty()) {
-            try {
-                ServerInformation serverInformation = sdk.getServerInformation();
-                log("Connected to '" + serverInformation.getName() + "'.");
+            sdk.getServerInformation().whenComplete((information, throwable) -> {
+                if(throwable != null) {
+                    Throwable cause = throwable.getCause();
+
+                    if(cause instanceof AnalyseException) {
+                        log(Level.WARNING, "Failed to get server information: " + throwable.getMessage());
+                    } else if(cause instanceof ServerNotFoundException) {
+                        log(Level.WARNING, "Failed to connect. Please double-check your server key or run the setup command again.");
+                    }
+                    return;
+                }
+
+                log("Connected to '" + information.getName() + "'.");
                 configure();
-            } catch (AnalyseException e) {
-                log(Level.WARNING, "Failed to get server information: " + e.getMessage());
-            } catch (ServerNotFoundException e) {
-                log(Level.WARNING, "Failed to connect. Please double-check your server key or run the setup command again.");
-            }
+            });
         } else {
             log(Level.WARNING, "Welcome to Analyse! It seems like this is a new setup.");
             log(Level.WARNING, "To get started, please use the 'analyse setup <key>' command in the console.");
@@ -84,17 +88,19 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         debug("Debug mode enabled. Type 'analyse debug' to disable.");
         debug("Telemetry: " + getTelemetry());
 
-        try {
-            PluginInformation corePluginVersion = getPluginInformation();
-            if (VersionUtil.isNewerVersion(getVersion(), corePluginVersion.getVersionName())) {
-                log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", corePluginVersion.getVersionName(), getDescription().getVersion()));
-                log(Level.WARNING, "Download the latest version at: " + corePluginVersion.getDownloadUrl());
+        sdk.getPluginVersion(getType()).whenComplete((information, throwable) -> {
+            if(throwable != null) {
+                getLogger().warning("Failed to get plugin information: " + throwable.getMessage());
+                return;
+            }
+
+            if (VersionUtil.isNewerVersion(getVersion(), information.getVersionName())) {
+                log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", information.getVersionName(), getDescription().getVersion()));
+                log(Level.WARNING, "Download the latest version at: " + information.getDownloadUrl());
             } else {
                 log("You are running the latest version of Analyse.");
             }
-        } catch (AnalyseException e) {
-            getLogger().warning("Failed to get plugin information: " + e.getMessage());
-        }
+        });
 
         try {
             Class.forName("org.bukkit.event.server.ServerLoadEvent");

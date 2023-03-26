@@ -165,6 +165,12 @@ public class ModuleManager {
                 }
 
                 if(module == null) continue;
+
+                if(module.getRequiredPlugin() != null && !platform.isPluginEnabled(module.getRequiredPlugin())) {
+                    disable(module, String.format("Skipped %s module due to a missing plugin: %s", module.getName(), module.getRequiredPlugin()));
+                    continue;
+                }
+
                 moduleList.add(module);
             } catch (IllegalAccessException | InstantiationException ignored) {
 
@@ -178,11 +184,6 @@ public class ModuleManager {
      * @param module the module to register.
      */
     public void register(PlatformModule module) {
-        if(module.getRequiredPlugin() != null && !platform.isPluginEnabled(module.getRequiredPlugin())) {
-            disable(module, String.format("Skipped %s module due to a missing plugin: %s", module.getName(), module.getRequiredPlugin()));
-            return;
-        }
-
         platform.log("Loaded module: " + module.getName());
         module.onEnable();
     }

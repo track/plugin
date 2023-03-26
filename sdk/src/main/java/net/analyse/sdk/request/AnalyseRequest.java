@@ -1,10 +1,16 @@
 package net.analyse.sdk.request;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AnalyseRequest {
+    private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("analyse-#%1$d").build());
+
     private final Request.Builder request;
     private final OkHttpClient client;
 
@@ -27,7 +33,25 @@ public class AnalyseRequest {
         return withHeader("X-SERVER-TOKEN", token);
     }
 
+    public Call build() {
+        return client.newCall(request.build());
+    }
+
     public Response send() throws IOException {
-        return client.newCall(request.build()).execute();
+        return build().execute();
+    }
+
+    public CompletableFuture<Response> sendAsync() {
+        CompletableFuture<Response> future = new CompletableFuture<>();
+
+        EXECUTOR.execute(() -> {
+            try (Response response = send()) {
+                future.complete(response);
+            } catch (IOException e) {
+                future.completeExceptionally(e);
+            }
+        });
+
+        return future;
     }
 }

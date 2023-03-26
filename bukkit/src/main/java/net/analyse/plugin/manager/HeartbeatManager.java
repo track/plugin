@@ -1,7 +1,6 @@
 package net.analyse.plugin.manager;
 
 import net.analyse.plugin.AnalysePlugin;
-import net.analyse.sdk.request.exception.AnalyseException;
 import net.analyse.sdk.request.exception.ServerNotFoundException;
 import net.analyse.sdk.util.StringUtil;
 import org.bukkit.Bukkit;
@@ -18,21 +17,28 @@ public class HeartbeatManager {
     }
 
     public void start() {
-        task = platform.getServer().getScheduler().runTaskTimerAsynchronously(platform, () -> {
-            try {
-                int playerCount = Bukkit.getOnlinePlayers().size();
+        task = platform.getServer().getScheduler().runTaskTimer(platform, () -> {
+            int playerCount = Bukkit.getOnlinePlayers().size();
 
-                if(playerCount == 0) {
-                    platform.debug("Not sending heartbeat as there are no players online.");
+            if(playerCount == 0) {
+                platform.debug("Not sending heartbeat as there are no players online.");
+                return;
+            }
+
+            platform.getSDK().trackHeartbeat(playerCount).whenComplete((successful, throwable) -> {
+                if(throwable != null) {
+                    Throwable cause = throwable.getCause();
+                    if(cause instanceof ServerNotFoundException) this.stop();
+                    platform.log(Level.WARNING, "Failed to send heartbeat: " + cause.getMessage());
+                }
+
+                if(! successful) {
+                    platform.log(Level.WARNING, "Failed to send heartbeat!");
                     return;
                 }
 
                 platform.debug("Sending heartbeat with " + playerCount + " " + StringUtil.pluralise(playerCount, "player", "players") + ".");
-                platform.getSDK().trackHeartbeat(playerCount);
-            } catch (AnalyseException | ServerNotFoundException e) {
-                if(e instanceof ServerNotFoundException) this.stop();
-                platform.log(Level.WARNING, "Failed to send heartbeat: " + e.getMessage());
-            }
+            });
         }, 0, 20 * 60);
     }
 

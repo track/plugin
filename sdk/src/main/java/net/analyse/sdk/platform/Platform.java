@@ -4,8 +4,6 @@ import dev.dejvokep.boostedyaml.YamlDocument;
 import net.analyse.sdk.SDK;
 import net.analyse.sdk.module.ModuleManager;
 import net.analyse.sdk.obj.AnalysePlayer;
-import net.analyse.sdk.request.exception.AnalyseException;
-import net.analyse.sdk.request.response.PluginInformation;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,19 +49,6 @@ public interface Platform {
 
     default int getVersionNumber() {
         return Integer.parseInt(getVersion().replace(".", ""));
-    }
-
-    default PluginInformation getPluginInformation() throws AnalyseException {
-        return getSDK().getPluginVersion(getType());
-    }
-
-    default boolean isOutdated() {
-        try {
-            return getVersionNumber() < getPluginInformation().getVersionNumber();
-        } catch (AnalyseException e) {
-            log(Level.WARNING, "Failed to check for updates: " + e.getMessage());
-            return false;
-        }
     }
 
     /**

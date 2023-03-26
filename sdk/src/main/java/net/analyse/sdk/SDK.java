@@ -19,6 +19,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Response;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.logging.Level;
 
 public class SDK {
@@ -43,52 +45,57 @@ public class SDK {
     /**
      * Get the server information from the API.
      * @return The server information
-     * @throws AnalyseException Thrown if the request fails
      */
-    public PluginInformation getPluginVersion(PlatformType type) throws AnalyseException {
-        try (Response response = request("/plugin").send()) {
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                JsonObject versionData = jsonObject.get("version").getAsJsonObject();
-                JsonObject assetData = jsonObject.get("assets").getAsJsonObject();
+    public CompletableFuture<PluginInformation> getPluginVersion(PlatformType type) {
+        return request("/plugin").sendAsync()
+                .thenApply(response -> {
+                    try {
+                        JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+                        JsonObject versionData = jsonObject.get("version").getAsJsonObject();
+                        JsonObject assetData = jsonObject.get("assets").getAsJsonObject();
 
-                return new PluginInformation(
-                        versionData.get("name").getAsString(),
-                        versionData.get("incremental").getAsInt(),
-                        assetData.get(type.name().toLowerCase()).getAsString()
-                );
-            } catch (IOException e) {
-                throw new AnalyseException("Failed to convert plugin information to object: " + e.getMessage());
-            }
-        } catch (IOException e) {
-            platform.log(Level.WARNING, "Failed to get plugin information: " + e.getMessage());
-        }
+                        return new PluginInformation(
+                                versionData.get("name").getAsString(),
+                                versionData.get("incremental").getAsInt(),
+                                assetData.get(type.name().toLowerCase()).getAsString()
+                        );
+                    } catch (IOException e) {
+                        platform.log(Level.WARNING, "Failed to get plugin version: " + e.getMessage());
+                        e.printStackTrace();
+                    }
 
-        return null;
+                    return null;
+                });
     }
 
     /**
      * Get the server information from the API.
      * @return The server information
-     * @throws AnalyseException Thrown if the request fails
      */
-    public ServerInformation getServerInformation() throws AnalyseException, ServerNotFoundException {
-        if (getServerToken() == null) throw new AnalyseException("Analyse is not setup!");
-
-        try (Response response = request("/server").withServerToken(serverToken).send()) {
-            if (response.code() == 404) throw new ServerNotFoundException("Server not found");
-
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                return GSON.fromJson(jsonObject.get("data"), ServerInformation.class);
-            } catch (IOException e) {
-                throw new AnalyseException("Failed to convert server information to object: " + e.getMessage());
-            }
-        } catch (IOException e) {
-            platform.log(Level.WARNING, "Failed to get server information: " + e.getMessage());
+    public CompletableFuture<ServerInformation> getServerInformation() {
+        if (getServerToken() == null) {
+            CompletableFuture<ServerInformation> future = new CompletableFuture<>();
+            future.completeExceptionally(new AnalyseException("Analyse is not setup!"));
+            return future;
         }
 
-        return null;
+        return request("/server").withServerToken(serverToken).sendAsync()
+                .thenApply(response -> {
+                    if (response.code() == 404) throw new CompletionException(new ServerNotFoundException("Server not found"));
+
+                    try {
+                        JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+                        return GSON.fromJson(jsonObject.get("data"), ServerInformation.class);
+                    } catch (IOException e) {
+                        throw new CompletionException(e);
+                    }
+                }).exceptionally(throwable -> {
+                    Throwable cause = throwable.getCause();
+                    if (!(cause instanceof ServerNotFoundException) && !(cause instanceof AnalyseException)) {
+                        platform.log(Level.WARNING, "Failed to get server information: " + cause.getMessage());
+                    }
+                    throw new CompletionException(cause);
+                });
     }
 
     /**
@@ -201,32 +208,48 @@ public class SDK {
      * Send the current player count to the API.
      * @param playerCount The current player count
      */
-    public void trackHeartbeat(int playerCount) throws AnalyseException, ServerNotFoundException {
-        if (!platform.isSetup()) throw new AnalyseException("Analyse is not setup!");
+    public CompletableFuture<Boolean> trackHeartbeat(int playerCount) {
+        if (getServerToken() == null) {
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            future.completeExceptionally(new AnalyseException("Analyse is not setup!"));
+            return future;
+        }
 
         JsonObject body = new JsonObject();
         body.addProperty("players", playerCount);
 
-        try (Response response = request("/server/heartbeat").withServerToken(serverToken).withBody(GSON.toJson(body)).send()) {
-            if(response.code() == 404) throw new ServerNotFoundException("Server not found");
-            if(response.code() != 200) {
-                if(!response.message().isEmpty()) {
-                    throw new AnalyseException(response.message());
-                }
+        return request("/server/heartbeat").withServerToken(serverToken).withBody(GSON.toJson(body)).sendAsync()
+                .thenApply(response -> {
+                    if (response.code() == 404) throw new CompletionException(new ServerNotFoundException("Server not found"));
 
-                throw new AnalyseException(String.valueOf(response.code()));
-            }
+                    try {
+                        JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+                        return jsonObject.get("success").getAsBoolean();
+                    } catch (IOException e) {
+                        throw new CompletionException(e);
+                    }
+                }).exceptionally(throwable -> {
+                    Throwable cause = throwable.getCause();
+                    if (!(cause instanceof ServerNotFoundException) && !(cause instanceof AnalyseException)) {
+                        platform.log(Level.WARNING, "Failed to get send heartbeat: " + throwable.getMessage());
+                    }
 
-            platform.debug("Sending heartbeat with " + playerCount + " players...");
-        } catch (IOException e) {
-            platform.log(Level.WARNING, "Failed to send heartbeat: " + e.getMessage());
-        }
+                    throw new CompletionException(cause);
+                });
     }
 
+    /**
+     * Sets the server token
+     * @param serverToken The server token
+     */
     public void setServerToken(String serverToken) {
         this.serverToken = serverToken;
     }
 
+    /**
+     * Get the server token
+     * @return The server token
+     */
     public String getServerToken() {
         return serverToken;
     }
