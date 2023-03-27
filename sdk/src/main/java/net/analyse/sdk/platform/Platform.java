@@ -65,6 +65,11 @@ public interface Platform {
     default void log(String message) {
         log(Level.INFO, message);
     }
+
+    default void warning(String message) {
+        log(Level.WARNING, message);
+    }
+
     /**
      * Log a debug message to the console if debugging is enabled.
      * @param message The message to log.

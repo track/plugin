@@ -5,7 +5,7 @@ import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.command.SubCommand;
 import net.analyse.sdk.SDK;
 import net.analyse.sdk.platform.PlatformConfig;
-import net.analyse.sdk.request.exception.ServerNotFoundException;
+import net.analyse.sdk.exception.ServerNotFoundException;
 import org.bukkit.command.CommandSender;
 
 import java.io.IOException;

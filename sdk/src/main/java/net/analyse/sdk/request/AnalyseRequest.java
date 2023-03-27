@@ -2,6 +2,7 @@ package net.analyse.sdk.request;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -44,13 +45,17 @@ public class AnalyseRequest {
     public CompletableFuture<Response> sendAsync() {
         CompletableFuture<Response> future = new CompletableFuture<>();
 
-        EXECUTOR.execute(() -> {
-            try (Response response = send()) {
-                future.complete(response);
-            } catch (IOException e) {
+        EXECUTOR.submit(() -> this.build().enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 future.completeExceptionally(e);
             }
-        });
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                future.complete(response);
+            }
+        }));
 
         return future;
     }

@@ -4,24 +4,22 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import net.analyse.sdk.exception.ServerNotFoundException;
+import net.analyse.sdk.exception.ServerNotSetupException;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.Platform;
 import net.analyse.sdk.platform.PlatformType;
 import net.analyse.sdk.request.AnalyseRequest;
-import net.analyse.sdk.request.exception.AnalyseException;
-import net.analyse.sdk.request.exception.ServerNotFoundException;
 import net.analyse.sdk.request.response.AnalyseLeaderboard;
 import net.analyse.sdk.request.response.PlayerProfile;
 import net.analyse.sdk.request.response.PluginInformation;
 import net.analyse.sdk.request.response.ServerInformation;
 import net.analyse.sdk.util.StringUtil;
 import okhttp3.OkHttpClient;
-import okhttp3.Response;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.logging.Level;
 
 public class SDK {
     private static final Gson GSON = new GsonBuilder()
@@ -43,76 +41,82 @@ public class SDK {
     }
 
     /**
-     * Get the server information from the API.
-     * @return The server information
+     * Get the latest plugin information
+     * @return PluginInformation
      */
-    public CompletableFuture<PluginInformation> getPluginVersion(PlatformType type) {
-        return request("/plugin").sendAsync()
-                .thenApply(response -> {
-                    try {
-                        JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                        JsonObject versionData = jsonObject.get("version").getAsJsonObject();
-                        JsonObject assetData = jsonObject.get("assets").getAsJsonObject();
+    public CompletableFuture<PluginInformation> getPluginVersion(PlatformType platformType) {
+        return request("/plugin").sendAsync().thenApply(response -> {
+            if(response.code() == 404) {
+                throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() != 200) {
+                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+            }
 
-                        return new PluginInformation(
-                                versionData.get("name").getAsString(),
-                                versionData.get("incremental").getAsInt(),
-                                assetData.get(type.name().toLowerCase()).getAsString()
-                        );
-                    } catch (IOException e) {
-                        platform.log(Level.WARNING, "Failed to get plugin version: " + e.getMessage());
-                        e.printStackTrace();
-                    }
+            try {
+                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+                JsonObject versionData = jsonObject.get("version").getAsJsonObject();
+                JsonObject assetData = jsonObject.get("assets").getAsJsonObject();
 
-                    return null;
-                });
+                return new PluginInformation(
+                        versionData.get("name").getAsString(),
+                        versionData.get("incremental").getAsInt(),
+                        assetData.get(platformType.name().toLowerCase()).getAsString()
+                );
+            } catch (IOException e) {
+                throw new CompletionException(new IOException("Unexpected response"));
+            }
+        });
     }
 
     /**
-     * Get the server information from the API.
-     * @return The server information
+     * Get information about a server
+     * @return ServerInformation
      */
     public CompletableFuture<ServerInformation> getServerInformation() {
         if (getServerToken() == null) {
             CompletableFuture<ServerInformation> future = new CompletableFuture<>();
-            future.completeExceptionally(new AnalyseException("Analyse is not setup!"));
+            future.completeExceptionally(new ServerNotSetupException());
             return future;
         }
 
-        return request("/server").withServerToken(serverToken).sendAsync()
-                .thenApply(response -> {
-                    if (response.code() == 404) throw new CompletionException(new ServerNotFoundException("Server not found"));
+        return request("/server").withServerToken(serverToken).sendAsync().thenApply(response -> {
+            if(response.code() == 404) {
+                throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() != 200) {
+                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+            }
 
-                    try {
-                        JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                        return GSON.fromJson(jsonObject.get("data"), ServerInformation.class);
-                    } catch (IOException e) {
-                        throw new CompletionException(e);
-                    }
-                }).exceptionally(throwable -> {
-                    Throwable cause = throwable.getCause();
-                    if (!(cause instanceof ServerNotFoundException) && !(cause instanceof AnalyseException)) {
-                        platform.log(Level.WARNING, "Failed to get server information: " + cause.getMessage());
-                    }
-                    throw new CompletionException(cause);
-                });
+            try {
+                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+                return GSON.fromJson(jsonObject.get("data"), ServerInformation.class);
+            } catch (IOException e) {
+                throw new CompletionException(new IOException("Unexpected response"));
+            }
+        });
     }
 
     /**
-     * Send a player session to the API.
+     * Send a player session to Analyse
      * @param player The player to track
-     * @throws AnalyseException Thrown if the server is not setup or the request fails
+     * @return If successful
      */
-    public void trackPlayerSession(AnalysePlayer player) throws AnalyseException, ServerNotFoundException {
+    public CompletableFuture<Boolean> trackPlayerSession(AnalysePlayer player) {
         platform.getPlayers().remove(player.getUniqueId());
+
+        if (getServerToken() == null) {
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            future.completeExceptionally(new ServerNotSetupException());
+            return future;
+        }
 
         if (! platform.isSetup()) {
             platform.debug("Skipped tracking player session for " + player.getName() + " as Analyse isn't setup.");
-            return;
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            future.complete(false);
+            return future;
         }
 
         player.logout();
-
         platform.debug("Sending payload: " + GSON.toJson(player));
 
         if(player.getDurationInSeconds() < platform.getPlatformConfig().getMinimumPlaytime()) {
@@ -121,7 +125,9 @@ public class SDK {
                     "They played for " + player.getDurationInSeconds() + " " + StringUtil.pluralise(player.getDurationInSeconds(), "second", "seconds")
                             + " but your minimum requirement is " + platform.getPlatformConfig().getMinimumPlaytime() + " " + StringUtil.pluralise(platform.getPlatformConfig().getMinimumPlaytime(), "second", "seconds") + "."
             );
-            return;
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            future.complete(false);
+            return future;
         }
 
         platform.debug("Tracking player session for " + player.getName() + "..");
@@ -130,120 +136,117 @@ public class SDK {
         platform.debug(" - IP: " + player.getIpAddress());
         platform.debug(" - Joined at: " + player.getJoinedAt());
 
-        try (Response response = request("/server/sessions").withServerToken(serverToken).withBody(GSON.toJson(player)).send()) {
-            if(response.code() == 404) throw new ServerNotFoundException("Server not found");
-            if(response.code() != 200) {
-                if(!response.message().isEmpty()) {
-                    throw new AnalyseException(response.message());
-                }
-
-                throw new AnalyseException(String.valueOf(response.code()));
+        return request("/server/sessions").withServerToken(serverToken).withBody(GSON.toJson(player)).sendAsync().thenApply(response -> {
+            if(response.code() == 404) {
+                throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() != 200) {
+                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
             }
-
-            platform.debug("Successfully tracked player session for " + player.getName() + ".");
-        } catch (IOException e) {
-            platform.log(Level.WARNING, "Failed to track session for " + player.getName() + ": " + e.getMessage());
-        }
-    }
-
-    public AnalyseLeaderboard getLeaderboard(String leaderboard) throws AnalyseException, ServerNotFoundException {
-        return getLeaderboard(leaderboard, 1);
-    }
-
-    public AnalyseLeaderboard getLeaderboard(String leaderboard, int page) throws AnalyseException, ServerNotFoundException {
-        if (!platform.isSetup()) throw new AnalyseException("Analyse is not setup!");
-
-        try (Response response = request("/server/leaderboard/" + leaderboard + "?page=" + page).withServerToken(serverToken).send()) {
-            if(response.code() == 404) throw new ServerNotFoundException("Leaderboard not found");
-            if(response.code() != 200) {
-                if(!response.message().isEmpty()) {
-                    throw new AnalyseException(response.message());
-                }
-
-                throw new AnalyseException(String.valueOf(response.code()));
-            }
-
-            platform.debug("Successfully got leaderboard " + leaderboard + ".");
 
             try {
                 JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                return GSON.fromJson(jsonObject.get("leaderboard"), AnalyseLeaderboard.class);
+                return jsonObject.get("success").getAsBoolean();
             } catch (IOException e) {
-                throw new AnalyseException("Failed to convert leaderboard to object: " + e.getMessage());
+                throw new CompletionException(new IOException("Unexpected response"));
             }
-        } catch (IOException e) {
-            platform.log(Level.WARNING, "Failed to get leaderboard " + leaderboard + ": " + e.getMessage());
-        }
-        return null;
-    }
-
-    public PlayerProfile getPlayer(String id) throws AnalyseException, ServerNotFoundException {
-        if (!platform.isSetup()) throw new AnalyseException("Analyse is not setup!");
-
-        try (Response response = request("/server/player/" + id).withServerToken(serverToken).send()) {
-            if(response.code() == 404) throw new ServerNotFoundException("Player not found");
-            if(response.code() != 200) {
-                if(!response.message().isEmpty()) {
-                    throw new AnalyseException(response.message());
-                }
-
-                throw new AnalyseException(String.valueOf(response.code()));
-            }
-
-            platform.debug("Successfully got player " + id + ".");
-
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                return GSON.fromJson(jsonObject.get("player"), PlayerProfile.class);
-            } catch (IOException e) {
-                throw new AnalyseException("Failed to convert player to object: " + e.getMessage());
-            }
-        } catch (IOException e) {
-            platform.log(Level.WARNING, "Failed to get player " + id + ": " + e.getMessage());
-        }
-        return null;
+        });
     }
 
     /**
-     * Send the current player count to the API.
-     * @param playerCount The current player count
+     * Send the current player count to Analyse
+     * @param playerCount The player count
+     * @return If successful
      */
     public CompletableFuture<Boolean> trackHeartbeat(int playerCount) {
         if (getServerToken() == null) {
             CompletableFuture<Boolean> future = new CompletableFuture<>();
-            future.completeExceptionally(new AnalyseException("Analyse is not setup!"));
+            future.completeExceptionally(new ServerNotSetupException());
             return future;
         }
 
         JsonObject body = new JsonObject();
         body.addProperty("players", playerCount);
 
-        return request("/server/heartbeat").withServerToken(serverToken).withBody(GSON.toJson(body)).sendAsync()
-                .thenApply(response -> {
-                    if (response.code() == 404) throw new CompletionException(new ServerNotFoundException("Server not found"));
+        return request("/server/heartbeat").withServerToken(serverToken).withBody(GSON.toJson(body)).sendAsync().thenApply(response -> {
+            if(response.code() == 404) {
+                throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() != 200) {
+                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+            }
 
-                    try {
-                        JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                        return jsonObject.get("success").getAsBoolean();
-                    } catch (IOException e) {
-                        throw new CompletionException(e);
-                    }
-                }).exceptionally(throwable -> {
-                    Throwable cause = throwable.getCause();
-                    if (!(cause instanceof ServerNotFoundException) && !(cause instanceof AnalyseException)) {
-                        platform.log(Level.WARNING, "Failed to get send heartbeat: " + throwable.getMessage());
-                    }
-
-                    throw new CompletionException(cause);
-                });
+            try {
+                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+                return jsonObject.get("success").getAsBoolean();
+            } catch (IOException e) {
+                throw new CompletionException(new IOException("Unexpected response"));
+            }
+        });
     }
 
     /**
-     * Sets the server token
-     * @param serverToken The server token
+     * Get a statistic leaderboard for the first page
+     * @param leaderboard The leaderboard
+     * @return AnalyseLeaderboard
      */
-    public void setServerToken(String serverToken) {
-        this.serverToken = serverToken;
+    public CompletableFuture<AnalyseLeaderboard> getLeaderboard(String leaderboard) {
+        return getLeaderboard(leaderboard, 1);
+    }
+
+    /**
+     * Get a statistic leaderboard on a specific page
+     * @param leaderboard The leaderboard
+     * @param page The page
+     * @return AnalyseLeaderboard
+     */
+    public CompletableFuture<AnalyseLeaderboard> getLeaderboard(String leaderboard, int page) {
+        if (getServerToken() == null) {
+            CompletableFuture<AnalyseLeaderboard> future = new CompletableFuture<>();
+            future.completeExceptionally(new ServerNotSetupException());
+            return future;
+        }
+
+        return request("/server/leaderboard/" + leaderboard + "?page=" + page).withServerToken(serverToken).sendAsync().thenApply(response -> {
+            if(response.code() == 404) {
+                throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() != 200) {
+                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+            }
+
+            try {
+                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+                return GSON.fromJson(jsonObject.get("leaderboard"), AnalyseLeaderboard.class);
+            } catch (IOException e) {
+                throw new CompletionException(new IOException("Unexpected response"));
+            }
+        });
+    }
+
+    /**
+     * Get information about a specific player
+     * @param id The player name/uuid
+     * @return PlayerProfile
+     */
+    public CompletableFuture<PlayerProfile> getPlayer(String id) {
+        if (getServerToken() == null) {
+            CompletableFuture<PlayerProfile> future = new CompletableFuture<>();
+            future.completeExceptionally(new ServerNotSetupException());
+            return future;
+        }
+
+        return request("/server/player/" + id).withServerToken(serverToken).sendAsync().thenApply(response -> {
+            if(response.code() == 404) {
+                throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() != 200) {
+                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+            }
+
+            try {
+                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+                return GSON.fromJson(jsonObject.get("player"), PlayerProfile.class);
+            } catch (IOException e) {
+                throw new CompletionException(new IOException("Unexpected response"));
+            }
+        });
     }
 
     /**
@@ -252,6 +255,14 @@ public class SDK {
      */
     public String getServerToken() {
         return serverToken;
+    }
+
+    /**
+     * Sets the server token
+     * @param serverToken The server token
+     */
+    public void setServerToken(String serverToken) {
+        this.serverToken = serverToken;
     }
 
     /**

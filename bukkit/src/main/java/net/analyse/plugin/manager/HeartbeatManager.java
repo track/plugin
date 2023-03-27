@@ -1,7 +1,7 @@
 package net.analyse.plugin.manager;
 
 import net.analyse.plugin.AnalysePlugin;
-import net.analyse.sdk.request.exception.ServerNotFoundException;
+import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.util.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
@@ -25,19 +25,24 @@ public class HeartbeatManager {
                 return;
             }
 
-            platform.getSDK().trackHeartbeat(playerCount).whenComplete((successful, throwable) -> {
-                if(throwable != null) {
-                    Throwable cause = throwable.getCause();
-                    if(cause instanceof ServerNotFoundException) this.stop();
-                    platform.log(Level.WARNING, "Failed to send heartbeat: " + cause.getMessage());
-                }
-
+            platform.getSDK().trackHeartbeat(playerCount).thenAccept(successful -> {
                 if(! successful) {
-                    platform.log(Level.WARNING, "Failed to send heartbeat!");
+                    platform.warning("Failed to send server heartbeat.");
                     return;
                 }
 
-                platform.debug("Sending heartbeat with " + playerCount + " " + StringUtil.pluralise(playerCount, "player", "players") + ".");
+                platform.debug("Successfully sent server heartbeat.");
+            }).exceptionally(ex -> {
+                Throwable cause = ex.getCause();
+                platform.log(Level.WARNING, "Failed to track server heartbeat: " + cause.getMessage());
+
+                if(cause instanceof ServerNotFoundException) {
+                    platform.halt();
+                } else {
+                    cause.printStackTrace();
+                }
+
+                return null;
             });
         }, 0, 20 * 60);
     }

@@ -12,8 +12,7 @@ import net.analyse.sdk.SDK;
 import net.analyse.sdk.module.ModuleManager;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.*;
-import net.analyse.sdk.request.exception.AnalyseException;
-import net.analyse.sdk.request.exception.ServerNotFoundException;
+import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.util.StringUtil;
 import net.analyse.sdk.util.VersionUtil;
 import org.bukkit.Bukkit;
@@ -62,20 +61,21 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         sdk = new SDK(this, config.getServerToken());
 
         if (config.getServerToken() != null && !config.getServerToken().isEmpty()) {
-            sdk.getServerInformation().whenComplete((information, throwable) -> {
-                if(throwable != null) {
-                    Throwable cause = throwable.getCause();
+            sdk.getServerInformation().thenAccept(serverInformation -> {
+                log("Connected to '" + serverInformation.getName() + "'.");
+                configure();
+            }).exceptionally(ex -> {
+                Throwable cause = ex.getCause();
 
-                    if(cause instanceof AnalyseException) {
-                        log(Level.WARNING, "Failed to get server information: " + throwable.getMessage());
-                    } else if(cause instanceof ServerNotFoundException) {
-                        log(Level.WARNING, "Failed to connect. Please double-check your server key or run the setup command again.");
-                    }
-                    return;
+                if(cause instanceof ServerNotFoundException) {
+                    warning("Failed to connect. Please double-check your server key or run the setup command again.");
+                    this.halt();
+                } else {
+                    warning("Failed to get server information: " + cause.getMessage());
+                    cause.printStackTrace();
                 }
 
-                log("Connected to '" + information.getName() + "'.");
-                configure();
+                return null;
             });
         } else {
             log(Level.WARNING, "Welcome to Analyse! It seems like this is a new setup.");
@@ -88,18 +88,25 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         debug("Debug mode enabled. Type 'analyse debug' to disable.");
         debug("Telemetry: " + getTelemetry());
 
-        sdk.getPluginVersion(getType()).whenComplete((information, throwable) -> {
-            if(throwable != null) {
-                getLogger().warning("Failed to get plugin information: " + throwable.getMessage());
-                return;
-            }
 
-            if (VersionUtil.isNewerVersion(getVersion(), information.getVersionName())) {
-                log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", information.getVersionName(), getDescription().getVersion()));
-                log(Level.WARNING, "Download the latest version at: " + information.getDownloadUrl());
+        sdk.getPluginVersion(getType()).thenAccept(pluginInformation -> {
+            if (VersionUtil.isNewerVersion(getVersion(), pluginInformation.getVersionName())) {
+                log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", pluginInformation.getVersionName(), getDescription().getVersion()));
+                log(Level.WARNING, "Download the latest version at: " + pluginInformation.getDownloadUrl());
             } else {
                 log("You are running the latest version of Analyse.");
             }
+        }).exceptionally(ex -> {
+            Throwable cause = ex.getCause();
+            log(Level.WARNING, "Failed to get plugin version: " + cause.getMessage());
+
+            if(cause instanceof ServerNotFoundException) {
+                this.halt();
+            } else {
+                cause.printStackTrace();
+            }
+
+            return null;
         });
 
         try {

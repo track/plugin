@@ -1,9 +1,9 @@
 package net.analyse.plugin.event;
 
 import net.analyse.plugin.AnalysePlugin;
+import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.obj.AnalysePlayer;
-import net.analyse.sdk.request.exception.AnalyseException;
-import net.analyse.sdk.request.exception.ServerNotFoundException;
+import net.analyse.sdk.util.VersionUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,17 +21,30 @@ public class PlayerQuitListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player bukkitPlayer = event.getPlayer();
-
         AnalysePlayer player = platform.getPlayers().get(bukkitPlayer.getUniqueId());
-        platform.debug("Finalising tracking for " + bukkitPlayer.getName() + "..");
+
         if(player == null) return;
 
-        try {
-            platform.debug("Sending session for " + bukkitPlayer.getName() + " to Analyse..");
-            platform.getSDK().trackPlayerSession(player);
-        } catch (AnalyseException | ServerNotFoundException e) {
-            if(e instanceof ServerNotFoundException) platform.halt();
-            platform.log(Level.WARNING, "Failed to track player session: " + e.getMessage());
-        }
+        platform.debug("Preparing to track " + bukkitPlayer.getName() + "..");
+
+        platform.getSDK().trackPlayerSession(player).thenAccept(successful -> {
+            if(! successful) {
+                platform.warning("Failed to track player session for " + player.getName() + ".");
+                return;
+            }
+
+            platform.debug("Successfully tracked player session for " + player.getName() + ".");
+        }).exceptionally(ex -> {
+            Throwable cause = ex.getCause();
+            platform.log(Level.WARNING, "Failed to track player session: " + cause.getMessage());
+
+            if(cause instanceof ServerNotFoundException) {
+                platform.halt();
+            } else {
+                cause.printStackTrace();
+            }
+
+            return null;
+        });
     }
 }
