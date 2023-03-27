@@ -10,7 +10,6 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -33,6 +32,7 @@ public class ModuleManager {
 
     /**
      * Get the loaded modules
+     *
      * @return Loaded modules
      */
     public List<PlatformModule> getModules() {
@@ -40,109 +40,29 @@ public class ModuleManager {
     }
 
     /**
-     * Scans the specified folder for jar files containing classes that implement the given target class.
-     *
-     * @param folder      The folder to scan for jar files.
-     * @param targetClass The target class to look for.
-     * @return The list of classes that implement the target class.
-     */
-    private List<Class<?>> getClasses(String folder, Class<?> targetClass) {
-        List<Class<?>> list = new ArrayList<>();
-
-        try {
-            File f = new File(this.baseDirectory, folder);
-            if (!f.exists()) {
-                return list;
-            }
-
-            FilenameFilter fileNameFilter = (dir, name) -> name.endsWith(".jar");
-            File[] jars = f.listFiles(fileNameFilter);
-            if (jars == null) {
-                return list;
-            }
-
-            ClassLoader classLoader = targetClass.getClassLoader();
-            for (File file : jars) {
-                list = gather(file.toURI().toURL(), list, classLoader, targetClass);
-            }
-
-            return list;
-        } catch (Throwable ignored) {
-
-        }
-
-        return null;
-    }
-
-    /**
-     * Scans the specified jar file for classes that implement the given target class.
-     *
-     * @param jar         The jar file to scan.
-     * @param list        The list of classes found so far.
-     * @param classLoader The class loader to use.
-     * @param targetClass The target class to look for.
-     * @return The updated list of classes that implement the target class.
-     */
-    private List<Class<?>> gather(final URL jar, List<Class<?>> list, ClassLoader classLoader, Class<?> targetClass) {
-        if (list == null) {
-            list = new ArrayList<>();
-        }
-
-        try (URLClassLoader cl = new URLClassLoader(new URL[]{jar}, classLoader);
-             final JarInputStream jarInputStream = new JarInputStream(jar.openStream())) {
-
-            while (true) {
-                JarEntry jarInputStreamNextJarEntry = jarInputStream.getNextJarEntry();
-                if (jarInputStreamNextJarEntry == null) {
-                    break;
-                }
-
-                String name = jarInputStreamNextJarEntry.getName();
-                if (name == null || name.isEmpty()) {
-                    continue;
-                }
-
-                if (name.endsWith(".class")) {
-                    name = name.replace("/", ".");
-                    String cname = name.substring(0, name.lastIndexOf(".class"));
-
-                    Class<?> c = cl.loadClass(cname);
-                    if (targetClass.isAssignableFrom(c)) {
-                        list.add(c);
-                    }
-                }
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return list;
-    }
-
-    /**
      * Loads all platform modules.
      *
-     * @return
+     * @return The list of loaded modules.
      */
     public List<PlatformModule> load() {
         File moduleDir = new File(platform.getDirectory(), "modules");
 
-        if(! moduleDir.exists()) {
+        if (!moduleDir.exists()) {
             platform.debug("Creating module directory..");
-            if(! moduleDir.mkdirs()) {
+            if (!moduleDir.mkdirs()) {
                 platform.log(Level.WARNING, "Failed to create module directory!");
                 return Collections.emptyList();
             }
         }
 
-        if (! moduleDir.isDirectory()) {
+        if (!moduleDir.isDirectory()) {
             platform.log(Level.WARNING, "Invalid module directory!");
             return Collections.emptyList();
         }
 
-        List<Class<?>> moduleClasses = getClasses("modules", PlatformModule.class);
+        List<Class<?>> moduleClasses = getClasses();
 
-        if(moduleClasses == null) {
+        if (moduleClasses == null) {
             return Collections.emptyList();
         }
 
@@ -164,14 +84,18 @@ public class ModuleManager {
                     }
                 }
 
-                if(module == null) continue;
+                if (module == null) continue;
 
-                if(module.getRequiredPlugin() != null && !platform.isPluginEnabled(module.getRequiredPlugin())) {
-                    disable(module, String.format("Skipped %s module due to a missing plugin: %s", module.getName(), module.getRequiredPlugin()));
-                    continue;
+                List<String> dependencies = module.getDependencies();
+                boolean allDependenciesEnabled = dependencies.stream().allMatch(platform::isPluginEnabled);
+                if (allDependenciesEnabled) {
+                    moduleList.add(module);
+                } else {
+                    String missingDependency = dependencies.stream().filter(dependency -> !platform.isPluginEnabled(dependency)).findFirst().orElse(null);
+                    if (missingDependency != null) {
+                        disable(module, String.format("Skipped %s module due to a missing dependency: %s", module.getName(), missingDependency));
+                    }
                 }
-
-                moduleList.add(module);
             } catch (IllegalAccessException | InstantiationException ignored) {
 
             }
@@ -180,7 +104,85 @@ public class ModuleManager {
     }
 
     /**
+     * Scans the specified folder for jar files containing classes that implement the given target class.
+     *
+     * @return The list of classes that implement the target class.
+     */
+    private List<Class<?>> getClasses() {
+        List<Class<?>> list = new ArrayList<>();
+
+        try {
+            File f = new File(this.baseDirectory, "modules");
+            if (!f.exists()) {
+                return list;
+            }
+
+            FilenameFilter fileNameFilter = (dir, name) -> name.endsWith(".jar");
+            File[] jars = f.listFiles(fileNameFilter);
+            if (jars == null) {
+                return list;
+            }
+
+            ClassLoader classLoader = PlatformModule.class.getClassLoader();
+            for (File file : jars) {
+                list = gather(file.toURI().toURL(), list, classLoader);
+            }
+
+            return list;
+        } catch (Throwable ignored) {
+
+        }
+
+        return null;
+    }
+
+    /**
+     * Scans the specified jar file for classes that implement the given target class.
+     *
+     * @param jar         The jar file to scan.
+     * @param list        The list of classes found so far.
+     * @param classLoader The class loader to use.
+     * @return The updated list of classes that implement the target class.
+     */
+    private List<Class<?>> gather(final URL jar, List<Class<?>> list, ClassLoader classLoader) {
+        if (list == null) {
+            list = new ArrayList<>();
+        }
+
+        try (URLClassLoader cl = new URLClassLoader(new URL[]{jar}, classLoader);
+             final JarInputStream jarInputStream = new JarInputStream(jar.openStream())) {
+
+            while (true) {
+                JarEntry jarInputStreamNextJarEntry = jarInputStream.getNextJarEntry();
+                if (jarInputStreamNextJarEntry == null) {
+                    break;
+                }
+
+                String name = jarInputStreamNextJarEntry.getName();
+                if (name.isEmpty()) {
+                    continue;
+                }
+
+                if (name.endsWith(".class")) {
+                    name = name.replace("/", ".");
+                    String cname = name.substring(0, name.lastIndexOf(".class"));
+
+                    Class<?> c = cl.loadClass(cname);
+                    if (PlatformModule.class.isAssignableFrom(c)) {
+                        list.add(c);
+                    }
+                }
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    /**
      * Registers a platform module manually.
+     *
      * @param module the module to register.
      */
     public void register(PlatformModule module) {
@@ -190,6 +192,7 @@ public class ModuleManager {
 
     /**
      * Unregisters a platform module manually, removing it from the plugin data.
+     *
      * @param module the module to unregister.
      */
     public void unregister(PlatformModule module) {
@@ -199,6 +202,7 @@ public class ModuleManager {
 
     /**
      * Disables a platform module, logging a warning message with the given reason and unregistering it from the plugin data.
+     *
      * @param module the module to disable.
      * @param reason the reason for disabling the module.
      */

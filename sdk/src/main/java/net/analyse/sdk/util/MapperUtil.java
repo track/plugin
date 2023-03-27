@@ -3,6 +3,11 @@ package net.analyse.sdk.util;
 import java.net.InetSocketAddress;
 
 public class MapperUtil {
+    /**
+     * Maps a virtual domain to a player name.
+     * @param virtualDomain The virtual domain to map.
+     * @return The player name.
+     */
     public static String mapVirtualDomainToPlayer(InetSocketAddress virtualDomain) {
         if (virtualDomain == null) return null;
 

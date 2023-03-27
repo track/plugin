@@ -11,6 +11,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.util.Date;
 
+/**
+ * Listens for player join events.
+ */
 public class PlayerJoinListener implements Listener {
     private final AnalysePlugin platform;
 
@@ -18,29 +21,35 @@ public class PlayerJoinListener implements Listener {
         this.platform = platform;
     }
 
+    /**
+     * Handles the player join event.
+     * @param event The event.
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent event) {
         Player bukkitPlayer = event.getPlayer();
-
         PlatformConfig analyseConfig = platform.getPlatformConfig();
-        if(analyseConfig.isPlayerExcluded(bukkitPlayer.getUniqueId())) {
+
+        // Check if the player is excluded from tracking.
+        if (analyseConfig.isPlayerExcluded(bukkitPlayer.getUniqueId())) {
             platform.debug("Skipped tracking " + bukkitPlayer.getName() + " as they are an excluded player.");
             return;
         }
 
+        // Create a new player object.
         AnalysePlayer player = new AnalysePlayer(
                 bukkitPlayer.getName(),
                 bukkitPlayer.getUniqueId(),
                 bukkitPlayer.getAddress() != null ? bukkitPlayer.getAddress().getAddress().getHostAddress() : null
         );
 
-        if(bukkitPlayer.getAddress() != null) {
+        if (bukkitPlayer.getAddress() != null) {
             player.setDomain(bukkitPlayer.getAddress().getHostName());
         }
 
         platform.debug("Tracking " + bukkitPlayer.getName() + " that connected via: " + player.getDomain());
 
-        if(analyseConfig.shouldUseServerFirstJoinedAt()) {
+        if (analyseConfig.shouldUseServerFirstJoinedAt()) {
             player.setFirstJoinedAt(new Date(bukkitPlayer.getFirstPlayed()));
         }
 

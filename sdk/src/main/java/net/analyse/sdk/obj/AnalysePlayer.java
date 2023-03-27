@@ -4,6 +4,9 @@ import net.analyse.sdk.platform.PlayerType;
 
 import java.util.*;
 
+/**
+ * The player object
+ */
 public class AnalysePlayer {
     private final String name;
     private final UUID uuid;

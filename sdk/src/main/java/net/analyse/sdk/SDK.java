@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+/**
+ * The main SDK class.
+ */
 public class SDK {
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -35,6 +38,11 @@ public class SDK {
     private final Platform platform;
     private String serverToken;
 
+    /**
+     * Create a new SDK instance.
+     * @param platform The platform
+     * @param serverToken The server token
+     */
     public SDK(Platform platform, String serverToken) {
         this.platform = platform;
         this.serverToken = serverToken;

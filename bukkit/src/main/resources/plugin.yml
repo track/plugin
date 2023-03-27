@@ -1,6 +1,9 @@
 name: Analyse
 version: '${version}'
 main: net.analyse.plugin.AnalysePlugin
+authors: [Analyse]
+description: The official Minecraft plugin for Analyse.
+website: https://analyse.net
 commands:
   analyse:
     description: The main command

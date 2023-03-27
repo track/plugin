@@ -22,8 +22,8 @@ public interface Platform {
 
     /**
      * Get a player
-     * @param uuid
-     * @return
+     * @param uuid The UUID of the player
+     * @return The player
      */
     AnalysePlayer getPlayer(UUID uuid);
 

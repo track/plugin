@@ -5,6 +5,9 @@ import dev.dejvokep.boostedyaml.YamlDocument;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Represents the configuration of the platform.
+ */
 public class PlatformConfig {
     private final int configVersion;
 

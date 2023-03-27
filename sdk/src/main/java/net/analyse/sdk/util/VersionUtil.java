@@ -1,5 +1,9 @@
 package net.analyse.sdk.util;
 
+
+/**
+ * Utility class for version comparison.
+ */
 public class VersionUtil {
     public static boolean isNewerVersion(String currentVersion, String newVersion) {
         String[] currentVersionArray = currentVersion.split("\\.");

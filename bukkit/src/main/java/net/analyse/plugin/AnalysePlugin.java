@@ -30,6 +30,9 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The Bukkit platform.
+ */
 public final class AnalysePlugin extends JavaPlugin implements Platform {
     private SDK sdk;
     private PlatformConfig config;
@@ -37,10 +40,14 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     private boolean setup;
     private HeartbeatManager heartbeatManager;
     private ModuleManager moduleManager;
+    private CommandManager commandManager;
 
+    /**
+     * Starts the Bukkit platform.
+     */
     @Override
     public void onEnable() {
-        // initialise SDK.
+        // Initialise SDK.
         Analyse.init(this);
 
         try {
@@ -54,12 +61,12 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
         players = new TCustomHashMap<>(new IdentityHashingStrategy<>());
 
-        // Initialise managers.
+        // Initialise heartbeat manager.
         heartbeatManager = new HeartbeatManager(this);
-        new CommandManager(this).register();
 
         sdk = new SDK(this, config.getServerToken());
 
+        // Check if the server has been set up.
         if (config.getServerToken() != null && !config.getServerToken().isEmpty()) {
             sdk.getServerInformation().thenAccept(serverInformation -> {
                 log("Connected to '" + serverInformation.getName() + "'.");
@@ -88,7 +95,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         debug("Debug mode enabled. Type 'analyse debug' to disable.");
         debug("Telemetry: " + getTelemetry());
 
-
+        // Check for updates.
         sdk.getPluginVersion(getType()).thenAccept(pluginInformation -> {
             if (VersionUtil.isNewerVersion(getVersion(), pluginInformation.getVersionName())) {
                 log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", pluginInformation.getVersionName(), getDescription().getVersion()));
@@ -109,12 +116,16 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             return null;
         });
 
+        // Load modules.
         try {
             Class.forName("org.bukkit.event.server.ServerLoadEvent");
             registerEvents(new ServerLoadListener(this));
         } catch (final ClassNotFoundException ignored) {
             Bukkit.getScheduler().runTaskLater(this, this::loadModules, 1);
         }
+
+        // Register command manager after modules are finished loading (or failed to load).
+        commandManager.register();
     }
 
     @Override
@@ -155,6 +166,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             PlatformModule module = iterator.next();
             unloadModule(module);
             iterator.remove();
+            commandManager.unregisterCommands(module.getName());
         }
     }
 
@@ -164,6 +176,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             HandlerList.unregisterAll((Listener) module);
         }
         moduleManager.unregister(module);
+        commandManager.unregisterCommands(module.getName());
     }
 
     /**
@@ -266,5 +279,9 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     @Override
     public ModuleManager getModuleManager() {
         return moduleManager;
+    }
+
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 }

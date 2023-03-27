@@ -8,6 +8,15 @@ public class PlatformTelemetry {
     private final String systemArch;
     private final boolean onlineMode;
 
+    /**
+     * Creates a new platform telemetry instance.
+     * @param pluginVersion The version of the plugin.
+     * @param serverSoftware The software of the server.
+     * @param serverVersion The version of the server.
+     * @param javaVersion The version of the java runtime.
+     * @param systemArch The architecture of the system.
+     * @param onlineMode Whether the server is in online mode.
+     */
     public PlatformTelemetry(String pluginVersion, String serverSoftware, String serverVersion, String javaVersion, String systemArch, boolean onlineMode) {
         this.pluginVersion = pluginVersion;
         this.serverSoftware = serverSoftware;
@@ -41,6 +50,10 @@ public class PlatformTelemetry {
         return onlineMode;
     }
 
+    /**
+     * Returns a string representation of this object.
+     * @return A string representation of this object.
+     */
     @Override
     public String toString() {
         return "PlatformTelemetry{" +
