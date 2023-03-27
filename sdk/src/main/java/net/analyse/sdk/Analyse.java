@@ -2,6 +2,9 @@ package net.analyse.sdk;
 
 import net.analyse.sdk.platform.Platform;
 
+/**
+ * Entry point for the Analyse SDK.
+ */
 public class Analyse {
     private static Platform platform;
 

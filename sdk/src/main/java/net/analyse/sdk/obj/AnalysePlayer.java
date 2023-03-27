@@ -4,6 +4,9 @@ import net.analyse.sdk.platform.PlayerType;
 
 import java.util.*;
 
+/**
+ * The player object
+ */
 public class AnalysePlayer {
     private final String name;
     private final UUID uuid;
@@ -12,9 +15,7 @@ public class AnalysePlayer {
     private Date firstJoinedAt;
     private Date quitAt;
     private PlayerType type;
-
     private String domain;
-
     private final List<PlayerStatistic> statistics;
     private final List<PlayerEvent> events;
 

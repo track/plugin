@@ -17,12 +17,17 @@ import net.analyse.sdk.request.response.ServerInformation;
 import net.analyse.sdk.util.StringUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.logging.Level;
 
+/**
+ * The main SDK class.
+ */
 public class SDK {
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -37,6 +42,11 @@ public class SDK {
     private final Platform platform;
     private String serverToken;
 
+    /**
+     * Create a new SDK instance.
+     * @param platform The platform
+     * @param serverToken The server token
+     */
     public SDK(Platform platform, String serverToken) {
         this.platform = platform;
         this.serverToken = serverToken;
@@ -46,25 +56,31 @@ public class SDK {
      * Get the server information from the API.
      * @return The server information
      */
-    public CompletableFuture<PluginInformation> getPluginVersion(PlatformType type) {
+    public CompletableFuture<Optional<PluginInformation>> getPluginVersion(PlatformType type) {
         return request("/plugin").sendAsync()
                 .thenApply(response -> {
                     try {
-                        JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                        JsonObject versionData = jsonObject.get("version").getAsJsonObject();
-                        JsonObject assetData = jsonObject.get("assets").getAsJsonObject();
+                        ResponseBody responseBody = response.body();
 
-                        return new PluginInformation(
-                                versionData.get("name").getAsString(),
-                                versionData.get("incremental").getAsInt(),
-                                assetData.get(type.name().toLowerCase()).getAsString()
-                        );
+                        if (responseBody != null) {
+                            JsonObject jsonObject = GSON.fromJson(responseBody.string(), JsonObject.class);
+                            JsonObject versionData = jsonObject.get("version").getAsJsonObject();
+                            JsonObject assetData = jsonObject.get("assets").getAsJsonObject();
+
+                            PluginInformation pluginInformation = new PluginInformation(
+                                    versionData.get("name").getAsString(),
+                                    versionData.get("incremental").getAsInt(),
+                                    assetData.get(type.name().toLowerCase()).getAsString()
+                            );
+
+                            return Optional.of(pluginInformation);
+                        } else {
+                            throw new CompletionException(new NullPointerException("Response body is null"));
+                        }
                     } catch (IOException e) {
                         platform.log(Level.WARNING, "Failed to get plugin version: " + e.getMessage());
-                        e.printStackTrace();
+                        return Optional.empty();
                     }
-
-                    return null;
                 });
     }
 
@@ -83,11 +99,17 @@ public class SDK {
                 .thenApply(response -> {
                     if (response.code() == 404) throw new CompletionException(new ServerNotFoundException("Server not found"));
 
-                    try {
-                        JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                        return GSON.fromJson(jsonObject.get("data"), ServerInformation.class);
-                    } catch (IOException e) {
-                        throw new CompletionException(e);
+                    ResponseBody responseBody = response.body();
+
+                    if (responseBody != null) {
+                        try {
+                            JsonObject jsonObject = GSON.fromJson(responseBody.string(), JsonObject.class);
+                            return GSON.fromJson(jsonObject.get("data"), ServerInformation.class);
+                        } catch (IOException e) {
+                            throw new CompletionException(e);
+                        }
+                    } else {
+                        throw new CompletionException(new NullPointerException("Response body is null"));
                     }
                 }).exceptionally(throwable -> {
                     Throwable cause = throwable.getCause();
@@ -165,11 +187,17 @@ public class SDK {
 
             platform.debug("Successfully got leaderboard " + leaderboard + ".");
 
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                return GSON.fromJson(jsonObject.get("leaderboard"), AnalyseLeaderboard.class);
-            } catch (IOException e) {
-                throw new AnalyseException("Failed to convert leaderboard to object: " + e.getMessage());
+            ResponseBody responseBody = response.body();
+
+            if (responseBody != null) {
+                try {
+                    JsonObject jsonObject = GSON.fromJson(responseBody.string(), JsonObject.class);
+                    return GSON.fromJson(jsonObject.get("leaderboard"), AnalyseLeaderboard.class);
+                } catch (IOException e) {
+                    throw new CompletionException(e);
+                }
+            } else {
+                throw new CompletionException(new NullPointerException("Response body is null"));
             }
         } catch (IOException e) {
             platform.log(Level.WARNING, "Failed to get leaderboard " + leaderboard + ": " + e.getMessage());
@@ -192,11 +220,17 @@ public class SDK {
 
             platform.debug("Successfully got player " + id + ".");
 
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                return GSON.fromJson(jsonObject.get("player"), PlayerProfile.class);
-            } catch (IOException e) {
-                throw new AnalyseException("Failed to convert player to object: " + e.getMessage());
+            ResponseBody responseBody = response.body();
+
+            if (responseBody != null) {
+                try {
+                    JsonObject jsonObject = GSON.fromJson(responseBody.string(), JsonObject.class);
+                    return GSON.fromJson(jsonObject.get("player"), PlayerProfile.class);
+                } catch (IOException e) {
+                    throw new CompletionException(e);
+                }
+            } else {
+                throw new CompletionException(new NullPointerException("Response body is null"));
             }
         } catch (IOException e) {
             platform.log(Level.WARNING, "Failed to get player " + id + ": " + e.getMessage());
@@ -222,11 +256,16 @@ public class SDK {
                 .thenApply(response -> {
                     if (response.code() == 404) throw new CompletionException(new ServerNotFoundException("Server not found"));
 
-                    try {
-                        JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                        return jsonObject.get("success").getAsBoolean();
-                    } catch (IOException e) {
-                        throw new CompletionException(e);
+                    ResponseBody responseBody = response.body();
+                    if (responseBody != null) {
+                        try {
+                            JsonObject jsonObject = GSON.fromJson(responseBody.string(), JsonObject.class);
+                            return jsonObject.get("success").getAsBoolean();
+                        } catch (IOException e) {
+                            throw new CompletionException(e);
+                        }
+                    } else {
+                        throw new CompletionException(new NullPointerException("Response body is null"));
                     }
                 }).exceptionally(throwable -> {
                     Throwable cause = throwable.getCause();

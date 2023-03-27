@@ -8,14 +8,24 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.logging.Level;
 
+/**
+ * The heartbeat manager is responsible for sending a heartbeat to the Analyse
+ */
 public class HeartbeatManager {
     private final AnalysePlugin platform;
     private BukkitTask task;
 
+    /**
+     * Create a new heartbeat manager.
+     * @param platform The platform.
+     */
     public HeartbeatManager(AnalysePlugin platform) {
         this.platform = platform;
     }
 
+    /**
+     * Start sending heartbeats.
+     */
     public void start() {
         task = platform.getServer().getScheduler().runTaskTimer(platform, () -> {
             int playerCount = Bukkit.getOnlinePlayers().size();
@@ -42,6 +52,9 @@ public class HeartbeatManager {
         }, 0, 20 * 60);
     }
 
+    /**
+     * Stop sending heartbeats.
+     */
     public void stop() {
         if (task == null) return;
         task.cancel();

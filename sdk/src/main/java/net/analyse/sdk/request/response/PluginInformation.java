@@ -1,5 +1,8 @@
 package net.analyse.sdk.request.response;
 
+/**
+ * Represents the platform plugin information.
+ */
 public class PluginInformation {
     private final String versionName;
     private final Integer versionNumber;

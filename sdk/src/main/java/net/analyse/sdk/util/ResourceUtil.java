@@ -9,6 +9,12 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.logging.Level;
 
+/**
+ * Utility class for extracting resources from the jar file.
+ *
+ * @author kylegrahammatzen (kgm)
+ * @since 2.0.0
+ */
 public final class ResourceUtil {
     private ResourceUtil() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
