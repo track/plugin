@@ -16,6 +16,7 @@ public class PlatformConfig {
     private String encryptionKey;
 
     private boolean debug;
+    private boolean proxyMode;
 
     private YamlDocument yamlDocument;
 
@@ -41,6 +42,10 @@ public class PlatformConfig {
 
     public void setEncryptionKey(String encryptionKey) {
         this.encryptionKey = encryptionKey;
+    }
+
+    public void setProxyMode(boolean proxyMode) {
+        this.proxyMode = proxyMode;
     }
 
     public int getConfigVersion() {
@@ -75,8 +80,12 @@ public class PlatformConfig {
         this.debug = debug;
     }
 
-    public boolean isDebugEnabled() {
+    public boolean hasDebugEnabled() {
         return debug;
+    }
+
+    public boolean hasProxyModeEnabled() {
+        return proxyMode;
     }
 
     public void setYamlDocument(YamlDocument yamlDocument) {

@@ -18,7 +18,7 @@ public class DebugCommand extends SubCommand {
         AnalysePlugin platform = getPlatform();
         PlatformConfig analyseConfig = platform.getPlatformConfig();
 
-        boolean debugEnabled = args.length > 0 ? Boolean.parseBoolean(args[0]) : !analyseConfig.isDebugEnabled();
+        boolean debugEnabled = args.length > 0 ? Boolean.parseBoolean(args[0]) : !analyseConfig.hasDebugEnabled();
 
         sender.sendMessage("§8[Analyse] §7Debug Mode: §f" + (debugEnabled ? "Enabled" : "Disabled") + "§7.");
 

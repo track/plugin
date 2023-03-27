@@ -4,6 +4,7 @@ import gnu.trove.map.hash.TCustomHashMap;
 import gnu.trove.strategy.IdentityHashingStrategy;
 import net.analyse.plugin.event.PlayerJoinListener;
 import net.analyse.plugin.event.PlayerQuitListener;
+import net.analyse.plugin.event.ProxyMessageListener;
 import net.analyse.plugin.event.ServerLoadListener;
 import net.analyse.plugin.manager.CommandManager;
 import net.analyse.plugin.manager.HeartbeatManager;
@@ -88,7 +89,6 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         debug("Debug mode enabled. Type 'analyse debug' to disable.");
         debug("Telemetry: " + getTelemetry());
 
-
         sdk.getPluginVersion(getType()).thenAccept(pluginInformation -> {
             if (VersionUtil.isNewerVersion(getVersion(), pluginInformation.getVersionName())) {
                 log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", pluginInformation.getVersionName(), getDescription().getVersion()));
@@ -108,6 +108,10 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
             return null;
         });
+
+        if(config.hasProxyModeEnabled()) {
+            new ProxyMessageListener(this);
+        }
 
         try {
             Class.forName("org.bukkit.event.server.ServerLoadEvent");
