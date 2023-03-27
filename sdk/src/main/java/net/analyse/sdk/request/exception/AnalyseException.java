@@ -1,5 +1,8 @@
 package net.analyse.sdk.request.exception;
 
+/**
+ * Exception thrown when an error occurs during the request.
+ */
 public class AnalyseException extends Throwable {
     private final String message;
 

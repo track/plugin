@@ -31,14 +31,21 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The Bukkit platform.
+ */
 public final class AnalysePlugin extends JavaPlugin implements Platform {
     private SDK sdk;
     private PlatformConfig config;
     private Map<UUID, AnalysePlayer> players;
     private boolean setup;
+    private final CommandManager commandManager = new CommandManager(this);
     private HeartbeatManager heartbeatManager;
     private ModuleManager moduleManager;
 
+    /**
+     * Starts the Bukkit platform.
+     */
     @Override
     public void onEnable() {
         // initialise SDK.
@@ -55,12 +62,13 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
         players = new TCustomHashMap<>(new IdentityHashingStrategy<>());
 
-        // Initialise managers.
+        // Initialise heartbeat manager.
         heartbeatManager = new HeartbeatManager(this);
-        new CommandManager(this).register();
 
+        // Initialise SDK.
         sdk = new SDK(this, config.getServerToken());
 
+        // Check if the server has been set up.
         if (config.getServerToken() != null && !config.getServerToken().isEmpty()) {
             sdk.getServerInformation().whenComplete((information, throwable) -> {
                 if(throwable != null) {
@@ -88,20 +96,24 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         debug("Debug mode enabled. Type 'analyse debug' to disable.");
         debug("Telemetry: " + getTelemetry());
 
+        // Check for updates.
         sdk.getPluginVersion(getType()).whenComplete((information, throwable) -> {
             if(throwable != null) {
                 getLogger().warning("Failed to get plugin information: " + throwable.getMessage());
                 return;
             }
 
-            if (VersionUtil.isNewerVersion(getVersion(), information.getVersionName())) {
-                log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", information.getVersionName(), getDescription().getVersion()));
-                log(Level.WARNING, "Download the latest version at: " + information.getDownloadUrl());
-            } else {
-                log("You are running the latest version of Analyse.");
-            }
+            information.ifPresent(data -> {
+                if (VersionUtil.isNewerVersion(getVersion(), data.getVersionName())) {
+                    log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", data.getVersionName(), getDescription().getVersion()));
+                    log(Level.WARNING, "Download the latest version at: " + data.getDownloadUrl());
+                } else {
+                    log("You are running the latest version of Analyse.");
+                }
+            });
         });
 
+        // Load modules.
         try {
             Class.forName("org.bukkit.event.server.ServerLoadEvent");
             registerEvents(new ServerLoadListener(this));
@@ -129,6 +141,9 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             log(Level.WARNING, "Failed to load modules: " + e.getMessage());
             e.printStackTrace();
         }
+
+        // Register command manager after modules are finished loading (or failed to load).
+        commandManager.register();
     }
 
     @Override
@@ -136,6 +151,8 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         if (module instanceof Listener) {
             getServer().getPluginManager().registerEvents((Listener) module, this);
         }
+
+
         moduleManager.register(module);
         moduleManager.getModules().add(module);
     }
@@ -148,6 +165,8 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             PlatformModule module = iterator.next();
             unloadModule(module);
             iterator.remove();
+
+            commandManager.unregisterCommands(module.getName());
         }
     }
 
@@ -156,7 +175,9 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         if (module instanceof Listener) {
             HandlerList.unregisterAll((Listener) module);
         }
+
         moduleManager.unregister(module);
+        commandManager.unregisterCommands(module.getName());
     }
 
     /**
@@ -259,5 +280,9 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     @Override
     public ModuleManager getModuleManager() {
         return moduleManager;
+    }
+
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 }

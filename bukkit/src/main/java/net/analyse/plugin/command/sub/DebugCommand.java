@@ -2,34 +2,35 @@ package net.analyse.plugin.command.sub;
 
 import dev.dejvokep.boostedyaml.YamlDocument;
 import net.analyse.plugin.AnalysePlugin;
-import net.analyse.plugin.command.SubCommand;
 import net.analyse.sdk.platform.PlatformConfig;
+import net.analyse.sdk.platform.command.PlatformCommand;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.io.IOException;
 
-public class DebugCommand extends SubCommand {
+public class DebugCommand extends PlatformCommand {
+
     public DebugCommand(AnalysePlugin platform) {
-        super(platform, "debug", "analyse.admin");
-    }
+        super("debug", "Toggles Analyses plugin-wide debug mode.", commandContext -> {
+            CommandSender sender = (CommandSender) commandContext.getSender();
+            String[] args = commandContext.getArguments();
 
-    @Override
-    public void execute(CommandSender sender, String[] args) {
-        AnalysePlugin platform = getPlatform();
-        PlatformConfig analyseConfig = platform.getPlatformConfig();
+            PlatformConfig analyseConfig = platform.getPlatformConfig();
 
-        boolean debugEnabled = args.length > 0 ? Boolean.parseBoolean(args[0]) : !analyseConfig.isDebugEnabled();
+            boolean debugEnabled = args.length > 0 ? Boolean.parseBoolean(args[0]) : !analyseConfig.isDebugEnabled();
 
-        sender.sendMessage("§8[Analyse] §7Debug Mode: §f" + (debugEnabled ? "Enabled" : "Disabled") + "§7.");
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&8[Analyse] &7Debug Mode: &f%s&7.", debugEnabled ? "Enabled" : "Disabled")));
 
-        YamlDocument configFile = analyseConfig.getYamlDocument();
-        configFile.set("debug", debugEnabled);
-        analyseConfig.setDebugEnabled(debugEnabled);
+            YamlDocument configFile = analyseConfig.getYamlDocument();
+            configFile.set("debug", debugEnabled);
+            analyseConfig.setDebugEnabled(debugEnabled);
 
-        try {
-            configFile.save();
-        } catch (IOException e) {
-            sender.sendMessage("§8[Analyse] §7Failed to save config: " + e.getMessage());
-        }
+            try {
+                configFile.save();
+            } catch (IOException e) {
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&8[Analyse] &7Failed to save config: &f%s&7.", e.getMessage())));
+            }
+        });
     }
 }

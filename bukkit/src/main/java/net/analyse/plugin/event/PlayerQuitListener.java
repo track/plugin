@@ -11,6 +11,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.logging.Level;
 
+/**
+ * Listens for player leave events.
+ */
 public class PlayerQuitListener implements Listener {
     private final AnalysePlugin platform;
 
@@ -18,6 +21,10 @@ public class PlayerQuitListener implements Listener {
         this.platform = platform;
     }
 
+    /**
+     * Handles the player leave event.
+     * @param event The event.
+     */
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player bukkitPlayer = event.getPlayer();

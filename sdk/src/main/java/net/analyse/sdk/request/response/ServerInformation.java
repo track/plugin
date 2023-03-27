@@ -3,6 +3,9 @@ package net.analyse.sdk.request.response;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * Represents the information of a server.
+ */
 public class ServerInformation {
     private final String name;
     private final UUID uuid;
