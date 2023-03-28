@@ -21,17 +21,16 @@ public class PlayerJoinListener implements Listener {
     @EventHandler
     public void onPostLogin(PostLoginEvent event) {
         ProxiedPlayer player = event.getPlayer();
+        String ipAddress = player.getPendingConnection().getVirtualHost().getAddress().getHostAddress();
+
+        plugin.log(player.getName() + " has connected from IP address: " + ipAddress);
+
         InetSocketAddress virtualDomain = player.getPendingConnection().getVirtualHost();
-        String domain = MapperUtil.mapVirtualDomainToPlayer(virtualDomain);
-        plugin.getPlayerDomains().put(player.getUniqueId(), domain);
+        if (virtualDomain != null) {
+            String hostName = MapperUtil.mapVirtualDomainToPlayer(virtualDomain);
 
-        plugin.log(player.getName() + " connected to the proxy from: " + domain);
-    }
-
-    @EventHandler
-    public void onPlayerDisconnect(PlayerDisconnectEvent event) {
-        ProxiedPlayer player = event.getPlayer();
-        plugin.getPlayerDomains().remove(player.getUniqueId());
-        plugin.log(player.getName() + " disconnected from the proxy");
+            plugin.log(player.getName() + " has connected from domain: " + hostName);
+            plugin.getPlayerDomains().put(player.getUniqueId(), hostName);
+        }
     }
 }

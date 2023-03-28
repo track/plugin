@@ -144,6 +144,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
     @Override
     public void loadModule(PlatformModule module) {
+        if(moduleManager == null) return;
         if (module instanceof Listener) {
             getServer().getPluginManager().registerEvents((Listener) module, this);
         }
@@ -153,6 +154,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
     @Override
     public void unloadModules() {
+        if(moduleManager == null) return;
         Iterator<PlatformModule> iterator = moduleManager.getModules().iterator();
 
         while(iterator.hasNext()) {
@@ -164,6 +166,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
     @Override
     public void unloadModule(PlatformModule module) {
+        if(moduleManager == null) return;
         if (module instanceof Listener) {
             HandlerList.unregisterAll((Listener) module);
         }

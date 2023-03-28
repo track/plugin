@@ -18,7 +18,7 @@ subprojects {
     plugins.withId('java') {
         java {
             toolchain {
-                languageVersion = JavaLanguageVersion.of(name == 'geyser-bridge' ? 16 : 8)
+                languageVersion = JavaLanguageVersion.of(8)
             }
         }
     }
@@ -40,6 +40,10 @@ subprojects {
         maven {
             name = "opencollab-snapshot-repo"
             url = "https://repo.opencollab.dev/main/"
+        }
+        maven {
+            name = "velocity-repo"
+            url = "https://nexus.velocitypowered.com/repository/maven-public/"
         }
     }
 

@@ -18,6 +18,5 @@ public class PlayerQuitListener implements Listener {
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         ProxiedPlayer player = event.getPlayer();
         plugin.getPlayerDomains().remove(player.getUniqueId());
-        plugin.log(player.getName() + " disconnected from the proxy");
     }
 }
