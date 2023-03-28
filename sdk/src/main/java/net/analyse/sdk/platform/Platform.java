@@ -66,6 +66,10 @@ public interface Platform {
         log(Level.INFO, message);
     }
 
+    /**
+     * Log a warning message to the console.
+     * @param message The message to log.
+     */
     default void warning(String message) {
         log(Level.WARNING, message);
     }
@@ -75,7 +79,7 @@ public interface Platform {
      * @param message The message to log.
      */
     default void debug(String message) {
-        if (! getPlatformConfig().isDebugEnabled()) return;
+        if (! getPlatformConfig().hasDebugEnabled()) return;
         log("[DEBUG] " + message);
     }
 
@@ -102,6 +106,7 @@ public interface Platform {
         config.setServerToken(configFile.getString("server.token"));
         config.setEncryptionKey(configFile.getString("server.encryption-key"));
         config.setDebugEnabled(configFile.getBoolean("debug", false));
+        config.setProxyMode(configFile.getBoolean("proxy", false));
 
         return config;
     }

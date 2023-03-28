@@ -18,7 +18,7 @@ public class DebugCommand extends PlatformCommand {
 
             PlatformConfig analyseConfig = platform.getPlatformConfig();
 
-            boolean debugEnabled = args.length > 0 ? Boolean.parseBoolean(args[0]) : !analyseConfig.isDebugEnabled();
+            boolean debugEnabled = args.length > 0 ? Boolean.parseBoolean(args[0]) : !analyseConfig.hasDebugEnabled();
 
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format("&8[Analyse] &7Debug Mode: &f%s&7.", debugEnabled ? "Enabled" : "Disabled")));
 
