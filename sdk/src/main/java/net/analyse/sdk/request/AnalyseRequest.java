@@ -54,6 +54,7 @@ public class AnalyseRequest {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 future.complete(response);
+                response.close();
             }
         }));
 

@@ -31,18 +31,7 @@ public class SetupCommand extends SubCommand {
 
         analyse.setServerToken(serverToken);
 
-        platform.getSDK().getServerInformation().whenComplete((information, throwable) -> {
-            if(throwable != null) {
-                if(throwable.getCause() instanceof ServerNotFoundException) {
-                    sender.sendMessage("§8[Analyse] §7Server not found. Please check your server token.");
-                    platform.getHeartbeatManager().stop();
-                    return;
-                }
-
-                sender.sendMessage("§8[Analyse] §cAn error occurred: " + throwable.getMessage());
-                return;
-            }
-
+        platform.getSDK().getServerInformation().thenAccept(serverInformation -> {
             analyseConfig.setServerToken(serverToken);
             configFile.set("server.token", serverToken);
 
@@ -52,8 +41,20 @@ public class SetupCommand extends SubCommand {
                 sender.sendMessage("§8[Analyse] §7Failed to save config: " + e.getMessage());
             }
 
-            sender.sendMessage("§8[Analyse] §7Connected to §b" + information.getName() + "§7.");
+            sender.sendMessage("§8[Analyse] §7Connected to §b" + serverInformation.getName() + "§7.");
             platform.configure();
+            platform.getSDK().completeServerSetup();
+        }).exceptionally(ex -> {
+            Throwable cause = ex.getCause();
+
+            if(cause instanceof ServerNotFoundException) {
+                sender.sendMessage("§8[Analyse] §7Server not found. Please check your server token.");
+                platform.halt();
+            } else {
+                sender.sendMessage("§8[Analyse] §cAn error occurred: " + cause.getMessage());
+            }
+
+            return null;
         });
     }
 }

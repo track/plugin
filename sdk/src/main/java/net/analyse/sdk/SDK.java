@@ -29,8 +29,8 @@ public class SDK {
             .create();
     private final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder().retryOnConnectionFailure(true).build();
 
-    private final int API_VERSION = 1;
-    private final String API_URL = String.format("https://app.analyse.net/api/v%d", API_VERSION);
+    private final int API_VERSION = 2;
+    private final String API_URL = String.format("http://analyse.test/api/v%d", API_VERSION);
 
     private final Platform platform;
     private String serverToken;
@@ -137,6 +137,33 @@ public class SDK {
         platform.debug(" - Joined at: " + player.getJoinedAt());
 
         return request("/server/sessions").withServerToken(serverToken).withBody(GSON.toJson(player)).sendAsync().thenApply(response -> {
+            if(response.code() == 404) {
+                throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() != 200) {
+                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+            }
+
+            try {
+                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+                return jsonObject.get("success").getAsBoolean();
+            } catch (IOException e) {
+                throw new CompletionException(new IOException("Unexpected response"));
+            }
+        });
+    }
+
+    /**
+     * Complete the server setup process
+     * @return If successful
+     */
+    public CompletableFuture<Boolean> completeServerSetup() {
+        if (getServerToken() == null) {
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            future.completeExceptionally(new ServerNotSetupException());
+            return future;
+        }
+
+        return request("/server/setup").withServerToken(serverToken).sendAsync().thenApply(response -> {
             if(response.code() == 404) {
                 throw new CompletionException(new ServerNotFoundException());
             } else if(response.code() != 200) {
