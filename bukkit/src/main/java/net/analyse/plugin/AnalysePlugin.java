@@ -1,7 +1,6 @@
 package net.analyse.plugin;
 
-import gnu.trove.map.hash.TCustomHashMap;
-import gnu.trove.strategy.IdentityHashingStrategy;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.analyse.plugin.event.PlayerJoinListener;
 import net.analyse.plugin.event.PlayerQuitListener;
 import net.analyse.plugin.event.ProxyMessageListener;
@@ -10,10 +9,10 @@ import net.analyse.plugin.manager.CommandManager;
 import net.analyse.plugin.manager.HeartbeatManager;
 import net.analyse.sdk.Analyse;
 import net.analyse.sdk.SDK;
+import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.module.ModuleManager;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.*;
-import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.util.StringUtil;
 import net.analyse.sdk.util.VersionUtil;
 import org.bukkit.Bukkit;
@@ -34,7 +33,7 @@ import java.util.regex.Pattern;
 public final class AnalysePlugin extends JavaPlugin implements Platform {
     private SDK sdk;
     private PlatformConfig config;
-    private Map<UUID, AnalysePlayer> players;
+    private Object2ObjectOpenHashMap<UUID, AnalysePlayer> players;
     private boolean setup;
     private HeartbeatManager heartbeatManager;
     private ModuleManager moduleManager;
@@ -53,7 +52,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             return;
         }
 
-        players = new TCustomHashMap<>(new IdentityHashingStrategy<>());
+        players = new Object2ObjectOpenHashMap<>();
 
         // Initialise managers.
         heartbeatManager = new HeartbeatManager(this);
@@ -196,7 +195,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     }
 
     @Override
-    public Map<UUID, AnalysePlayer> getPlayers() {
+    public Object2ObjectOpenHashMap<UUID, AnalysePlayer> getPlayers() {
         return players;
     }
 

@@ -3,7 +3,7 @@ version = rootProject.version
 
 dependencies {
     implementation project(':sdk')
-    implementation 'net.sf.trove4j:trove4j:3.0.3' // Add trove4j dependency
+    implementation 'it.unimi.dsi:fastutil:8.5.6'
 
     compileOnly 'org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT'
     compileOnly 'dev.dejvokep:boosted-yaml:1.3'
@@ -12,7 +12,7 @@ dependencies {
 shadowJar {
     configurations = [project.configurations.runtimeClasspath]
 
-    relocate 'gnu.trove4j', 'net.analyse.plugin.libs.trove4j' // Relocate trove4j
+    relocate 'it.unimi', 'net.analyse.plugin.libs.fastutil' // Relocate fastutil
     relocate 'okhttp3', 'net.analyse.plugin.libs.okhttp3' // Relocate okhttp
     relocate 'okio', 'net.analyse.plugin.libs.okio' // Relocate okio (okhttp dependency)
     relocate 'dev.dejvokep.boostedyaml', 'net.analyse.plugin.libs.boostedyaml' // Relocate boostedyaml
