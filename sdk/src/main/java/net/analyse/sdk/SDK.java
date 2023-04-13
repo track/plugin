@@ -8,6 +8,7 @@ import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.exception.ServerNotSetupException;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.Platform;
+import net.analyse.sdk.platform.PlatformTelemetry;
 import net.analyse.sdk.platform.PlatformType;
 import net.analyse.sdk.request.AnalyseRequest;
 import net.analyse.sdk.request.response.AnalyseLeaderboard;
@@ -195,6 +196,29 @@ public class SDK {
         body.addProperty("players", playerCount);
 
         return request("/server/heartbeat").withServerToken(serverToken).withBody(GSON.toJson(body)).sendAsync().thenApply(response -> {
+            if(response.code() == 404) {
+                throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() != 200) {
+                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+            }
+
+            try {
+                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+                return jsonObject.get("success").getAsBoolean();
+            } catch (IOException e) {
+                throw new CompletionException(new IOException("Unexpected response"));
+            }
+        });
+    }
+
+    public CompletableFuture<Boolean> sendTelemetry() {
+        if (getServerToken() == null) {
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            future.completeExceptionally(new ServerNotSetupException());
+            return future;
+        }
+
+        return request("/server/telemetry").withServerToken(serverToken).withBody(GSON.toJson(platform.getTelemetry())).sendAsync().thenApply(response -> {
             if(response.code() == 404) {
                 throw new CompletionException(new ServerNotFoundException());
             } else if(response.code() != 200) {

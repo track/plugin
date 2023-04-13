@@ -86,7 +86,6 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         registerEvents(new PlayerQuitListener(this));
 
         debug("Debug mode enabled. Type 'analyse debug' to disable.");
-        debug("Telemetry: " + getTelemetry());
 
         sdk.getPluginVersion(getType()).thenAccept(pluginInformation -> {
             if (VersionUtil.isNewerVersion(getVersion(), pluginInformation.getVersionName())) {
@@ -117,6 +116,17 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             registerEvents(new ServerLoadListener(this));
         } catch (final ClassNotFoundException ignored) {
             Bukkit.getScheduler().runTaskLater(this, this::loadModules, 1);
+        }
+
+        if(isSetup()) {
+            sdk.sendTelemetry().thenAccept(telemetry -> {
+                debug("Sent telemetry data.");
+            }).exceptionally(ex -> {
+                Throwable cause = ex.getCause();
+                log(Level.WARNING, "Failed to send telemetry: " + cause.getMessage());
+                cause.printStackTrace();
+                return null;
+            });
         }
     }
 
