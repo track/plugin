@@ -1,6 +1,8 @@
 name: Analyse
 version: '${version}'
 main: net.analyse.plugin.AnalysePlugin
+softdepend:
+  - PlaceholderAPI
 commands:
   analyse:
     description: The main command

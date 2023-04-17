@@ -30,7 +30,7 @@ public class SDK {
             .create();
     private final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder().retryOnConnectionFailure(true).build();
 
-    private final int API_VERSION = 2;
+    private final int API_VERSION = 1;
     private final String API_URL = String.format("http://analyse.test/api/v%d", API_VERSION);
 
     private final Platform platform;

@@ -5,6 +5,7 @@ import net.analyse.plugin.event.PlayerJoinListener;
 import net.analyse.plugin.event.PlayerQuitListener;
 import net.analyse.plugin.event.ProxyMessageListener;
 import net.analyse.plugin.event.ServerLoadListener;
+import net.analyse.plugin.hook.PlaceholderAPIHook;
 import net.analyse.plugin.manager.CommandManager;
 import net.analyse.plugin.manager.HeartbeatManager;
 import net.analyse.sdk.Analyse;
@@ -109,6 +110,11 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
         if(config.hasProxyModeEnabled()) {
             new ProxyMessageListener(this);
+        }
+
+        if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            log("PlaceholderAPI found. Registering placeholders..");
+            new PlaceholderAPIHook(this).register();
         }
 
         try {
