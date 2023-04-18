@@ -11,10 +11,7 @@ import net.analyse.sdk.platform.Platform;
 import net.analyse.sdk.platform.PlatformTelemetry;
 import net.analyse.sdk.platform.PlatformType;
 import net.analyse.sdk.request.AnalyseRequest;
-import net.analyse.sdk.request.response.AnalyseLeaderboard;
-import net.analyse.sdk.request.response.PlayerProfile;
-import net.analyse.sdk.request.response.PluginInformation;
-import net.analyse.sdk.request.response.ServerInformation;
+import net.analyse.sdk.request.response.*;
 import net.analyse.sdk.util.StringUtil;
 import okhttp3.OkHttpClient;
 
@@ -294,6 +291,36 @@ public class SDK {
             try {
                 JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
                 return GSON.fromJson(jsonObject.get("player"), PlayerProfile.class);
+            } catch (IOException e) {
+                throw new CompletionException(new IOException("Unexpected response"));
+            }
+        });
+    }
+
+    /**
+     * Get the country of a specific IP address
+     * @param ip The IP address
+     * @return The country code
+     */
+    @Deprecated
+    public CompletableFuture<String> getCountryFromIp(String ip) {
+        if (getServerToken() == null) {
+            CompletableFuture<String> future = new CompletableFuture<>();
+            future.completeExceptionally(new ServerNotSetupException());
+            return future;
+        }
+
+        return request("/ip/" + ip).withServerToken(serverToken).sendAsync().thenApply(response -> {
+            if(response.code() == 404) {
+                throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() != 200) {
+                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+            }
+
+            try {
+                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+                if(! jsonObject.get("success").getAsBoolean()) return null;
+                return jsonObject.get("country_name").getAsString();
             } catch (IOException e) {
                 throw new CompletionException(new IOException("Unexpected response"));
             }

@@ -12,6 +12,7 @@ public class AnalysePlayer {
     private Date firstJoinedAt;
     private Date quitAt;
     private PlayerType type;
+    private String country;
 
     private String domain;
 
@@ -69,8 +70,16 @@ public class AnalysePlayer {
         return type;
     }
 
+    public String getCountry() {
+        return country;
+    }
+
     public void setType(PlayerType type) {
         this.type = type;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     /**

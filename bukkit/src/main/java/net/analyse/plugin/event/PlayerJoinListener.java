@@ -44,6 +44,8 @@ public class PlayerJoinListener implements Listener {
             player.setFirstJoinedAt(new Date(bukkitPlayer.getFirstPlayed()));
         }
 
+        platform.getSDK().getCountryFromIp(player.getIpAddress()).thenAccept(player::setCountry);
+
         platform.getPlayers().put(bukkitPlayer.getUniqueId(), player);
     }
 }
