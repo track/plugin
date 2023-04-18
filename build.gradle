@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
-    id 'maven-publish'
 }
 
 defaultTasks("shadowJar")
@@ -12,7 +11,6 @@ version = '2.0.0'
 subprojects {
     apply plugin: 'java'
     apply plugin: 'com.github.johnrengelman.shadow'
-    apply plugin: 'maven-publish'
 
     // Add the following block
     plugins.withId('java') {
@@ -61,4 +59,9 @@ subprojects {
             expand props
         }
     }
+}
+
+ext {
+    ossrhUsername = System.getenv('OSSRH_USERNAME') ?: properties['ossrhUsername']
+    ossrhPassword = System.getenv('OSSRH_PASSWORD') ?: properties['ossrhPassword']
 }
