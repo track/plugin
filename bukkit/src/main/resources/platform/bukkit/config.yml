@@ -28,6 +28,11 @@ settings:
   # instead of when they first joined Analyse.
   use-server-playtime: true
 
+  # Use Proxy Mode
+  # Enable this if you are running Analyse within a proxy such as BungeeCord, Velocity, etc.
+  # This also requires you to download our proxy plugin. See https://analy.se/proxy-setup for more information.
+  proxy-mode: false
+
 server:
   token: ''
   encryption-key: ''

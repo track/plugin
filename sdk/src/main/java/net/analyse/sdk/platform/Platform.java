@@ -102,11 +102,12 @@ public interface Platform {
         config.setExcludedPlayers(configFile.getStringList("settings.excluded-players").stream().map(UUID::fromString).collect(Collectors.toList()));
         config.setMinimumPlaytime(configFile.getInt("settings.minimum-playtime", 0));
         config.setUseServerFirstJoinedAt(configFile.getBoolean("settings.use-server-playtime", false));
+        config.setProxyMode(configFile.getBoolean("settings.proxy-mode", false));
+        config.setBedrockPrefix(configFile.getString("settings.bedrock-prefix"));
 
         config.setServerToken(configFile.getString("server.token"));
         config.setEncryptionKey(configFile.getString("server.encryption-key"));
         config.setDebugEnabled(configFile.getBoolean("debug", false));
-        config.setProxyMode(configFile.getBoolean("proxy", false));
 
         return config;
     }
