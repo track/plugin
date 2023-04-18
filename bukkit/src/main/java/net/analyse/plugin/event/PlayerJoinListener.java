@@ -3,6 +3,7 @@ package net.analyse.plugin.event;
 import net.analyse.plugin.AnalysePlugin;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.PlatformConfig;
+import net.analyse.sdk.platform.PlayerType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -42,6 +43,11 @@ public class PlayerJoinListener implements Listener {
 
         if(analyseConfig.shouldUseServerFirstJoinedAt()) {
             player.setFirstJoinedAt(new Date(bukkitPlayer.getFirstPlayed()));
+        }
+
+        // Bedrock Tracking
+        if(analyseConfig.getBedrockPrefix() != null && player.getName().startsWith(analyseConfig.getBedrockPrefix())) {
+            player.setType(PlayerType.BEDROCK);
         }
 
         platform.getSDK().getCountryFromIp(player.getIpAddress()).thenAccept(player::setCountry);

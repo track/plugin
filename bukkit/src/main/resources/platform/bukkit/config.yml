@@ -14,6 +14,10 @@ settings:
   # Players listed here will not be tracked by Analyse.
   excluded-players: []
 
+  # Bedrock Username Prefix
+  # The prefix to distinguish between Java and Bedrock players.
+  bedrock-prefix: "."
+
   # Minimum Playtime (Seconds)
   # Only track players who have played for at least this amount of time.
   # Set to 0 to disable.

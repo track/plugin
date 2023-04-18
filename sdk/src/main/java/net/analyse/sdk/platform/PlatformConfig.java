@@ -14,6 +14,7 @@ public class PlatformConfig {
 
     private String serverToken;
     private String encryptionKey;
+    private String bedrockPrefix;
 
     private boolean debug;
     private boolean proxyMode;
@@ -42,6 +43,10 @@ public class PlatformConfig {
 
     public void setEncryptionKey(String encryptionKey) {
         this.encryptionKey = encryptionKey;
+    }
+
+    public void setBedrockPrefix(String bedrockPrefix) {
+        this.bedrockPrefix = bedrockPrefix;
     }
 
     public void setProxyMode(boolean proxyMode) {
@@ -74,6 +79,10 @@ public class PlatformConfig {
 
     public String getEncryptionKey() {
         return encryptionKey;
+    }
+
+    public String getBedrockPrefix() {
+        return bedrockPrefix;
     }
 
     public void setDebugEnabled(boolean debug) {
