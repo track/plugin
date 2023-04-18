@@ -26,7 +26,7 @@ public class CommandManager {
         ImmutableList.of(
                 new SetupCommand(platform),
                 new DebugCommand(platform),
-//                new StatsCommand(platform),
+                new StatsCommand(platform),
                 new TrackCommand(platform)
         ).forEach(command -> {
             commands.put(command.getName(), command);

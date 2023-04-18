@@ -50,7 +50,9 @@ public class PlayerJoinListener implements Listener {
             player.setType(PlayerType.BEDROCK);
         }
 
-        platform.getSDK().getCountryFromIp(player.getIpAddress()).thenAccept(player::setCountry);
+//        platform.getSDK().getCountryFromIp(player.getIpAddress()).thenAccept(player::setCountry);
+
+        player.setCountry("GB");
 
         platform.getPlayers().put(bukkitPlayer.getUniqueId(), player);
     }
