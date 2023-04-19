@@ -1,41 +1,94 @@
 plugins {
-    id 'java'
+    // To upload the Artifact to Maven Central
+    // See: https://docs.gradle.org/current/userguide/publishing_maven.html
     id 'maven-publish'
     id 'signing'
 }
 
+group = rootProject.group
+version = rootProject.version
+
+// Java 8 is the only Java version supported
+sourceCompatibility = JavaVersion.VERSION_1_8
+ext {
+    javaVersion = JavaVersion.current()
+    ossrhUsername = System.getenv("OSSRH_USERNAME") ?: properties['ossrhUsername']
+    ossrhPassword = System.getenv("OSSRH_PASSWORD") ?: properties['ossrhPassword']
+}
+
+if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
+    throw new GradleException(
+            "This build must be run with Java 8, using instead version ${javaVersion}")
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+// To emit the details of the error for the "uses or overrides a deprecated API" error.
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:deprecation"
+        options.compilerArgs << "-Xlint:unchecked"
+    }
+}
+
+javadoc {
+    title = 'Analyse SDK'
+    failOnError = true
+
+    destinationDir = file("${rootDir}/docs/javadoc/${project.name}/${version}")
+    options.addBooleanOption('Xdoclint:all,-missing', true)
+}
+
+// Generating Source & Javadoc JARs for publication
+// See: https://central.sonatype.org/publish/publish-gradle/
 java {
     withJavadocJar()
     withSourcesJar()
 }
 
+jar.enabled = true
+jar.dependsOn shadowJar
+
+shadowJar {
+    archiveClassifier.set('')
+}
+
+// Publishing Artifact to Maven Central
+//
+// The contents of this section are described here:
+//   https://docs.gradle.org/current/userguide/publishing_maven.html
+//
+// To Release to Maven see: https://central.sonatype.org/publish/release/
 publishing {
     publications {
         sdk(MavenPublication) {
-            from components.java
-            artifactId 'sdk'
-
+            artifactId = 'sdk'
+            artifacts = [ jar, javadocJar, sourcesJar ]
             pom {
-                name.set("Analyse")
-                description.set("TODO") // Add description
-                url.set("https://github.com/track/plugin/")
+                name = 'Analyse SDK'
+                description = 'The official Java SDK for Analyse.'
+                url = 'https://github.com/track/plugin'
 
                 licenses {
                     license {
-                        name.set("MIT License")
-                        url.set("https://www.opensource.org/licenses/mit-license.php")
+                        name = 'MIT License'
+                        url = 'https://github.com/track/plugin/blob/main/LICENSE'
                     }
                 }
-
-                developers {
-                    // add devs
-                }
-
-                // Change later
                 scm {
-                    connection.set("scm:git:git://github.com/track/plugin.git")
-                    developerConnection.set("scm:git:ssh://github.com:track/plugin.git")
-                    url.set("https://github.com/track/plugin")
+                    url = 'https://github.com/track/plugin'
+                    connection = 'scm:https://github.com/track/plugin.git'
+                    developerConnection = 'scm:git@github.com:track/plugin.git'
+                }
+                developers {
+                    developer {
+                        id = 'charliejoseph'
+                        name = 'Charlie Joseph'
+                        email = 'charlie.joseph@overwolf.com'
+                    }
                 }
             }
         }
@@ -43,21 +96,22 @@ publishing {
 
     repositories {
         maven {
-            url 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            url = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            // These are stored in gradle.properties and NEVER uploaded to GitHub
+            // See: https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.repositories.MavenArtifactRepository.html
             credentials {
-                username ossrhUsername
-                password ossrhPassword
+                username "${ossrhUsername}"
+                password "${ossrhPassword}"
             }
         }
     }
 }
 
+// Signs the `publication` generated above with the name `sdk`
+// Signing plugin, see: https://docs.gradle.org/current/userguide/signing_plugin.html#signing_plugin
 signing {
     sign publishing.publications.sdk
 }
-
-group = rootProject.group
-version = rootProject.version
 
 dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'

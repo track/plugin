@@ -7,4 +7,4 @@ ignore/
 **/*.zip
 .DS_Store
 **/.DS_Store
-gradle.properties
+docs
