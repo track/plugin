@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+/**
+ * The main SDK class for interacting with the Analyse API.
+ */
 public class SDK {
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
@@ -33,14 +36,22 @@ public class SDK {
     private final Platform platform;
     private String serverToken;
 
+    /**
+     * Constructs a new SDK instance with the specified platform and server token.
+     *
+     * @param platform    The platform on which the SDK is running.
+     * @param serverToken The server token for authentication.
+     */
     public SDK(Platform platform, String serverToken) {
         this.platform = platform;
         this.serverToken = serverToken;
     }
 
     /**
-     * Get the latest plugin information
-     * @return PluginInformation
+     * Retrieves the latest plugin information.
+     *
+     * @param platformType The platform type for which to retrieve the plugin information.
+     * @return A CompletableFuture that contains the PluginInformation object.
      */
     public CompletableFuture<PluginInformation> getPluginVersion(PlatformType platformType) {
         return request("/plugin").sendAsync().thenApply(response -> {
@@ -67,8 +78,9 @@ public class SDK {
     }
 
     /**
-     * Get information about a server
-     * @return ServerInformation
+     * Retrieves information about the server.
+     *
+     * @return A CompletableFuture that contains the ServerInformation object.
      */
     public CompletableFuture<ServerInformation> getServerInformation() {
         if (getServerToken() == null) {
@@ -94,9 +106,10 @@ public class SDK {
     }
 
     /**
-     * Send a player session to Analyse
-     * @param player The player to track
-     * @return If successful
+     * Sends a player session to the Analyse API for tracking.
+     *
+     * @param player The AnalysePlayer object representing the player to be tracked.
+     * @return A CompletableFuture that indicates whether the operation was successful.
      */
     public CompletableFuture<Boolean> trackPlayerSession(AnalysePlayer player) {
         platform.getPlayers().remove(player.getUniqueId());
@@ -151,8 +164,9 @@ public class SDK {
     }
 
     /**
-     * Complete the server setup process
-     * @return If successful
+     * Sends a setup completion request to the Analyse API.
+     *
+     * @return A CompletableFuture that indicates whether the operation was successful.
      */
     public CompletableFuture<Boolean> completeServerSetup() {
         if (getServerToken() == null) {
@@ -178,9 +192,10 @@ public class SDK {
     }
 
     /**
-     * Send the current player count to Analyse
-     * @param playerCount The player count
-     * @return If successful
+     * Sends the current player count to the Analyse API in the form of a heartbeat.
+     *
+     * @param playerCount The number of players currently online.
+     * @return A CompletableFuture that indicates whether the operation was successful.
      */
     public CompletableFuture<Boolean> trackHeartbeat(int playerCount) {
         if (getServerToken() == null) {
@@ -208,6 +223,11 @@ public class SDK {
         });
     }
 
+    /**
+     * Sends the current server telemetry to the Analyse API.
+     *
+     * @return A CompletableFuture that indicates whether the operation was successful.
+     */
     public CompletableFuture<Boolean> sendTelemetry() {
         if (getServerToken() == null) {
             CompletableFuture<Boolean> future = new CompletableFuture<>();
@@ -232,19 +252,21 @@ public class SDK {
     }
 
     /**
-     * Get a statistic leaderboard for the first page
-     * @param leaderboard The leaderboard
-     * @return AnalyseLeaderboard
+     * Get the first page of a specified statistic leaderboard.
+     *
+     * @param leaderboard The leaderboard identifier
+     * @return CompletableFuture<AnalyseLeaderboard> containing the leaderboard data
      */
     public CompletableFuture<AnalyseLeaderboard> getLeaderboard(String leaderboard) {
         return getLeaderboard(leaderboard, 1);
     }
 
     /**
-     * Get a statistic leaderboard on a specific page
-     * @param leaderboard The leaderboard
-     * @param page The page
-     * @return AnalyseLeaderboard
+     * Get a specified page of a statistic leaderboard.
+     *
+     * @param leaderboard The leaderboard identifier
+     * @param page The requested page number
+     * @return CompletableFuture<AnalyseLeaderboard> containing the leaderboard data
      */
     public CompletableFuture<AnalyseLeaderboard> getLeaderboard(String leaderboard, int page) {
         if (getServerToken() == null) {
@@ -270,9 +292,10 @@ public class SDK {
     }
 
     /**
-     * Get information about a specific player
-     * @param id The player name/uuid
-     * @return PlayerProfile
+     * Get information about a specific player by their name or UUID.
+     *
+     * @param id The player's name or UUID
+     * @return CompletableFuture<PlayerProfile> containing the player's profile data
      */
     public CompletableFuture<PlayerProfile> getPlayer(String id) {
         if (getServerToken() == null) {
@@ -298,9 +321,11 @@ public class SDK {
     }
 
     /**
-     * Get the country of a specific IP address
+     * Get the country code of a specific IP address.
+     *
      * @param ip The IP address
-     * @return The country code
+     * @return CompletableFuture<String> containing the country code
+     * @deprecated This method is deprecated and may be removed in future versions
      */
     @Deprecated
     public CompletableFuture<String> getCountryFromIp(String ip) {
@@ -328,25 +353,28 @@ public class SDK {
     }
 
     /**
-     * Get the server token
-     * @return The server token
+     * Get the server token associated with this SDK instance.
+     *
+     * @return The server token as a String
      */
     public String getServerToken() {
         return serverToken;
     }
 
     /**
-     * Sets the server token
-     * @param serverToken The server token
+     * Set the server token for this SDK instance.
+     *
+     * @param serverToken The server token as a String
      */
     public void setServerToken(String serverToken) {
         this.serverToken = serverToken;
     }
 
     /**
-     * Send a new Analyse request
+     * Create a new AnalyseRequest with the specified URL.
+     *
      * @param url The URL to send the request to
-     * @return The request
+     * @return An AnalyseRequest instance
      */
     public AnalyseRequest request(String url) {
         return new AnalyseRequest(API_URL + url, HTTP_CLIENT);

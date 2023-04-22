@@ -14,52 +14,123 @@ import java.util.stream.Collectors;
 
 import static net.analyse.sdk.util.ResourceUtil.getBundledFile;
 
+/**
+ * The Platform interface defines the base methods required for interacting with a server platform.
+ * Implementations should provide functionality specific to their platform, such as Bukkit or Sponge.
+ */
 public interface Platform {
+    /**
+     * Gets the platform type.
+     *
+     * @return The PlatformType enum value representing the server platform.
+     */
     PlatformType getType();
+
+    /**
+     * Gets the SDK instance associated with this platform.
+     *
+     * @return The SDK instance.
+     */
     SDK getSDK();
 
+    /**
+     * Gets a map of all online players.
+     *
+     * @return A map with the UUID as the key and the AnalysePlayer object as the value.
+     */
     Map<UUID, AnalysePlayer> getPlayers();
 
     /**
-     * Get a player
-     * @param uuid
-     * @return
+     * Gets an AnalysePlayer object by UUID.
+     *
+     * @param uuid The UUID of the player.
+     * @return The AnalysePlayer object, or null if the player is not online.
      */
     AnalysePlayer getPlayer(UUID uuid);
 
     /**
-     * Get the directory where the plugin is running from.
+     * Gets the directory where the plugin is running from.
+     *
      * @return The directory.
      */
     File getDirectory();
 
+    /**
+     * Checks if the platform is set up and ready to use.
+     *
+     * @return True if the platform is set up, false otherwise.
+     */
     boolean isSetup();
+
+    /**
+     * Configures the platform for use.
+     */
     void configure();
+
+    /**
+     * Halts the platform and stops any ongoing tasks.
+     */
     void halt();
 
+    /**
+     * Checks if a plugin is enabled on the platform.
+     *
+     * @param plugin The name of the plugin.
+     * @return True if the plugin is enabled, false otherwise.
+     */
     boolean isPluginEnabled(String plugin);
 
+    /**
+     * Loads all modules for the platform.
+     */
     void loadModules();
+
+    /**
+     * Loads a specific module for the platform.
+     *
+     * @param module The module to load.
+     */
     void loadModule(PlatformModule module);
 
+    /**
+     * Unloads all modules from the platform.
+     */
     void unloadModules();
+
+    /**
+     * Unloads a specific module from the platform.
+     *
+     * @param module The module to unload.
+     */
     void unloadModule(PlatformModule module);
 
+    /**
+     * Gets the version of the platform implementation.
+     *
+     * @return The version string.
+     */
     String getVersion();
 
+    /**
+     * Converts the version string into a version number.
+     *
+     * @return The version number.
+     */
     default int getVersionNumber() {
         return Integer.parseInt(getVersion().replace(".", ""));
     }
 
     /**
-     * Log a message to the console.
-     * @param level The level of the message.
+     * Logs a message to the console with the specified level.
+     *
+     * @param level   The level of the message.
      * @param message The message to log.
      */
     void log(Level level, String message);
 
     /**
-     * Log a normal message to the console.
+     * Logs an informational message to the console.
+     *
      * @param message The message to log.
      */
     default void log(String message) {
@@ -67,7 +138,8 @@ public interface Platform {
     }
 
     /**
-     * Log a warning message to the console.
+     * Logs a warning message to the console.
+     *
      * @param message The message to log.
      */
     default void warning(String message) {
@@ -75,7 +147,8 @@ public interface Platform {
     }
 
     /**
-     * Log a debug message to the console if debugging is enabled.
+     * Logs a debug message to the console if debugging is enabled in the platform configuration.
+     *
      * @param message The message to log.
      */
     default void debug(String message) {
@@ -84,9 +157,10 @@ public interface Platform {
     }
 
     /**
-     * Load configuration from file
+     * Loads the platform configuration from the file.
      *
-     * @return PlatformConfig
+     * @return The PlatformConfig instance representing the loaded configuration.
+     * @throws IOException If there is an issue reading the configuration file or if the config version is outdated.
      */
     default PlatformConfig loadPlatformConfig() throws IOException {
         // Create and update the file
@@ -112,9 +186,31 @@ public interface Platform {
         return config;
     }
 
+    /**
+     * Gets the current platform configuration.
+     *
+     * @return The PlatformConfig instance representing the current configuration.
+     */
     PlatformConfig getPlatformConfig();
+
+    /**
+     * Sets the platform configuration.
+     *
+     * @param config The PlatformConfig instance to set as the current configuration.
+     */
     void setPlatformConfig(PlatformConfig config);
 
+    /**
+     * Gets the platform telemetry instance.
+     *
+     * @return The PlatformTelemetry instance.
+     */
     PlatformTelemetry getTelemetry();
+
+    /**
+     * Gets the module manager instance.
+     *
+     * @return The ModuleManager instance.
+     */
     ModuleManager getModuleManager();
 }

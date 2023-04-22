@@ -18,7 +18,7 @@ import java.util.jar.JarInputStream;
 import java.util.logging.Level;
 
 /**
- * A manager that loads, unloads, registers, unregisters and disables platform modules.
+ * Manager that loads, unloads, registers, unregisters and disables platform modules.
  */
 public class ModuleManager {
     private final Platform platform;
@@ -32,7 +32,8 @@ public class ModuleManager {
     }
 
     /**
-     * Get the loaded modules
+     * Retrieves the loaded modules.
+     *
      * @return Loaded modules
      */
     public List<PlatformModule> getModules() {
@@ -42,9 +43,9 @@ public class ModuleManager {
     /**
      * Scans the specified folder for jar files containing classes that implement the given target class.
      *
-     * @param folder      The folder to scan for jar files.
-     * @param targetClass The target class to look for.
-     * @return The list of classes that implement the target class.
+     * @param folder      Folder to scan for jar files
+     * @param targetClass Target class to look for
+     * @return List of classes that implement the target class
      */
     private List<Class<?>> getClasses(String folder, Class<?> targetClass) {
         List<Class<?>> list = new ArrayList<>();
@@ -77,11 +78,11 @@ public class ModuleManager {
     /**
      * Scans the specified jar file for classes that implement the given target class.
      *
-     * @param jar         The jar file to scan.
-     * @param list        The list of classes found so far.
-     * @param classLoader The class loader to use.
-     * @param targetClass The target class to look for.
-     * @return The updated list of classes that implement the target class.
+     * @param jar         Jar file to scan
+     * @param list        List of classes found so far
+     * @param classLoader Class loader to use
+     * @param targetClass Target class to look for
+     * @return Updated list of classes that implement the target class
      */
     private List<Class<?>> gather(final URL jar, List<Class<?>> list, ClassLoader classLoader, Class<?> targetClass) {
         if (list == null) {
@@ -122,7 +123,7 @@ public class ModuleManager {
     /**
      * Loads all platform modules.
      *
-     * @return
+     * @return List of loaded modules
      */
     public List<PlatformModule> load() {
         File moduleDir = new File(platform.getDirectory(), "modules");
@@ -181,7 +182,8 @@ public class ModuleManager {
 
     /**
      * Registers a platform module manually.
-     * @param module the module to register.
+     *
+     * @param module Module to register
      */
     public void register(PlatformModule module) {
         platform.log("Loaded module: " + module.getName());
@@ -190,7 +192,8 @@ public class ModuleManager {
 
     /**
      * Unregisters a platform module manually, removing it from the plugin data.
-     * @param module the module to unregister.
+     *
+     * @param module Module to unregister
      */
     public void unregister(PlatformModule module) {
         platform.log("Unloaded module: " + module.getName());
@@ -199,8 +202,9 @@ public class ModuleManager {
 
     /**
      * Disables a platform module, logging a warning message with the given reason and unregistering it from the plugin data.
-     * @param module the module to disable.
-     * @param reason the reason for disabling the module.
+     *
+     * @param module Module to disable
+     * @param reason Reason for disabling the module
      */
     public void disable(PlatformModule module, String reason) {
         platform.log(Level.WARNING, reason);

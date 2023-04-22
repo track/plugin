@@ -31,6 +31,9 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The Bukkit platform.
+ */
 public final class AnalysePlugin extends JavaPlugin implements Platform {
     private SDK sdk;
     private PlatformConfig config;
@@ -39,9 +42,12 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     private HeartbeatManager heartbeatManager;
     private ModuleManager moduleManager;
 
+    /**
+     * Starts the Bukkit platform.
+     */
     @Override
     public void onEnable() {
-        // initialise SDK.
+        // Initialise SDK.
         Analyse.init(this);
 
         try {
@@ -55,12 +61,14 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
         players = new Object2ObjectOpenHashMap<>();
 
-        // Initialise managers.
+        // Initialise Managers.
         heartbeatManager = new HeartbeatManager(this);
         new CommandManager(this).register();
 
+        // Initialise SDK.
         sdk = new SDK(this, config.getServerToken());
 
+        // Check if the server has been set up.
         if (config.getServerToken() != null && !config.getServerToken().isEmpty()) {
             sdk.getServerInformation().thenAccept(serverInformation -> {
                 log("Connected to '" + serverInformation.getName() + "'.");
@@ -83,6 +91,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             log(Level.WARNING, "To get started, please use the 'analyse setup <key>' command in the console.");
         }
 
+        // Register events.
         registerEvents(new PlayerJoinListener(this));
         registerEvents(new PlayerQuitListener(this));
 
@@ -117,6 +126,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             new PlaceholderAPIHook(this).register();
         }
 
+        // Load modules.
         try {
             Class.forName("org.bukkit.event.server.ServerLoadEvent");
             registerEvents(new ServerLoadListener(this));
