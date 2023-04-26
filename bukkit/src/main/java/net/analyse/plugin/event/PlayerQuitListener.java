@@ -1,14 +1,17 @@
 package net.analyse.plugin.event;
 
 import net.analyse.plugin.AnalysePlugin;
+import net.analyse.plugin.hook.PlaceholderAPIStatisticsHook;
 import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.obj.AnalysePlayer;
+import net.analyse.sdk.obj.PlayerStatistic;
 import net.analyse.sdk.util.VersionUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.List;
 import java.util.logging.Level;
 
 public class PlayerQuitListener implements Listener {
@@ -25,6 +28,7 @@ public class PlayerQuitListener implements Listener {
 
         if(player == null) return;
 
+        platform.updatePlaceholderAPIStatistics(bukkitPlayer, player.getStatistics());
         platform.debug("Preparing to track " + bukkitPlayer.getName() + "..");
 
         platform.getSDK().trackPlayerSession(player).thenAccept(successful -> {

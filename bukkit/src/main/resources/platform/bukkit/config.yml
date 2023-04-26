@@ -4,7 +4,7 @@
 hooks:
   # Enable or disable the plugin's hooks.
   # See https://analyse.net/docs/plugins/bukkit for more information.
-  placeholder-api:
+  placeholderapi:
     enabled: true
     enabled-stats:
       - 'enter_placeholder_here'

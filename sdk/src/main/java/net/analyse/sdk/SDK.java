@@ -16,6 +16,7 @@ import net.analyse.sdk.util.StringUtil;
 import okhttp3.OkHttpClient;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -143,9 +144,18 @@ public class SDK {
 
         platform.debug("Tracking player session for " + player.getName() + "..");
         platform.debug(" - UUID: " + player.getUniqueId());
+        platform.debug(" - Type: " + player.getType());
         platform.debug(" - Played for: " + player.getDurationInSeconds() + "s");
         platform.debug(" - IP: " + player.getIpAddress());
         platform.debug(" - Joined at: " + player.getJoinedAt());
+        platform.debug(" - First joined at: " + player.getFirstJoinedAt());
+
+        if(player.getStatistics().size() > 0) {
+            platform.debug(" - Statistics:");
+            player.getStatistics().forEach((key, value) -> platform.debug("   - %" + key + "%: " + value));
+        } else {
+            platform.debug(" - No statistics to track.");
+        }
 
         return request("/server/sessions").withServerToken(serverToken).withBody(GSON.toJson(player)).sendAsync().thenApply(response -> {
             if(response.code() == 404) {

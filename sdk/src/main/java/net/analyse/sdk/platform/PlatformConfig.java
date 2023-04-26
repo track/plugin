@@ -16,6 +16,8 @@ public class PlatformConfig {
     private int minimumPlaytime;
     private boolean useServerFirstJoinedAt;
 
+    private List<String> enabledPapiStatistics;
+
     private String serverToken;
     private String encryptionKey;
     private String bedrockPrefix;
@@ -59,6 +61,15 @@ public class PlatformConfig {
      */
     public void setUseServerFirstJoinedAt(boolean useServerFirstJoinedAt) {
         this.useServerFirstJoinedAt = useServerFirstJoinedAt;
+    }
+
+    /**
+     * Sets the list of enabled PAPI statistics.
+     *
+     * @param enabledPapiStatistics The list of enabled PAPI statistics.
+     */
+    public void setEnabledPapiStatistics(List<String> enabledPapiStatistics) {
+        this.enabledPapiStatistics = enabledPapiStatistics;
     }
 
     /**
@@ -204,6 +215,15 @@ public class PlatformConfig {
      */
     public boolean hasProxyModeEnabled() {
         return proxyMode;
+    }
+
+    /**
+     * Returns the list of enabled PAPI statistics.
+     *
+     * @return The list of enabled PAPI statistics.
+     */
+    public List<String> getEnabledPapiStatistics() {
+        return enabledPapiStatistics;
     }
 
     /**

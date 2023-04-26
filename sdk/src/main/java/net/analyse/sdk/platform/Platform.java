@@ -179,6 +179,10 @@ public interface Platform {
         config.setProxyMode(configFile.getBoolean("settings.proxy-mode", false));
         config.setBedrockPrefix(configFile.getString("settings.bedrock-prefix"));
 
+        if(configFile.getBoolean("hooks.placeholderapi.enabled")) {
+            config.setEnabledPapiStatistics(configFile.getStringList("hooks.placeholderapi.enabled-stats"));
+        }
+
         config.setServerToken(configFile.getString("server.token"));
         config.setEncryptionKey(configFile.getString("server.encryption-key"));
         config.setDebugEnabled(configFile.getBoolean("debug", false));

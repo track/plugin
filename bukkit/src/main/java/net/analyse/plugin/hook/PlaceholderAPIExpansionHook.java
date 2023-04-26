@@ -11,12 +11,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class PlaceholderAPIHook extends PlaceholderExpansion {
+public class PlaceholderAPIExpansionHook extends PlaceholderExpansion {
 
     private final AnalysePlugin plugin;
     private final Map<String, CacheEntry> cache;
 
-    public PlaceholderAPIHook(AnalysePlugin plugin) {
+    public PlaceholderAPIExpansionHook(AnalysePlugin plugin) {
         this.plugin = plugin;
         this.cache = new HashMap<>();
     }

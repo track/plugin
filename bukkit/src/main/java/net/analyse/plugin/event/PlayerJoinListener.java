@@ -1,6 +1,7 @@
 package net.analyse.plugin.event;
 
 import net.analyse.plugin.AnalysePlugin;
+import net.analyse.plugin.hook.PlaceholderAPIStatisticsHook;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.PlatformConfig;
 import net.analyse.sdk.platform.PlayerType;
@@ -39,8 +40,6 @@ public class PlayerJoinListener implements Listener {
             player.setDomain(bukkitPlayer.getAddress().getHostName());
         }
 
-        platform.debug("Tracking " + bukkitPlayer.getName() + " that connected via: " + player.getDomain());
-
         if(analyseConfig.shouldUseServerFirstJoinedAt()) {
             player.setFirstJoinedAt(new Date(bukkitPlayer.getFirstPlayed()));
         }
@@ -50,9 +49,11 @@ public class PlayerJoinListener implements Listener {
             player.setType(PlayerType.BEDROCK);
         }
 
-//        platform.getSDK().getCountryFromIp(player.getIpAddress()).thenAccept(player::setCountry);
+        platform.debug("Tracking " + bukkitPlayer.getName() + " (" + player.getType() + ") that connected via: " + player.getDomain());
 
-        player.setCountry("GB");
+        platform.updatePlaceholderAPIStatistics(bukkitPlayer, player.getStatistics());
+
+        platform.getSDK().getCountryFromIp(player.getIpAddress()).thenAccept(player::setCountry);
 
         platform.getPlayers().put(bukkitPlayer.getUniqueId(), player);
     }

@@ -5,7 +5,8 @@ import net.analyse.plugin.event.PlayerJoinListener;
 import net.analyse.plugin.event.PlayerQuitListener;
 import net.analyse.plugin.event.ProxyMessageListener;
 import net.analyse.plugin.event.ServerLoadListener;
-import net.analyse.plugin.hook.PlaceholderAPIHook;
+import net.analyse.plugin.hook.PlaceholderAPIExpansionHook;
+import net.analyse.plugin.hook.PlaceholderAPIStatisticsHook;
 import net.analyse.plugin.manager.CommandManager;
 import net.analyse.plugin.manager.HeartbeatManager;
 import net.analyse.sdk.Analyse;
@@ -17,6 +18,7 @@ import net.analyse.sdk.platform.*;
 import net.analyse.sdk.util.StringUtil;
 import net.analyse.sdk.util.VersionUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -47,7 +49,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
      */
     @Override
     public void onEnable() {
-        // Initialise SDK.
+        // Bind SDK.
         Analyse.init(this);
 
         try {
@@ -123,7 +125,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
         if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             log("PlaceholderAPI found. Registering placeholders..");
-            new PlaceholderAPIHook(this).register();
+            new PlaceholderAPIExpansionHook(this).register();
         }
 
         // Load modules.
@@ -298,5 +300,15 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     @Override
     public ModuleManager getModuleManager() {
         return moduleManager;
+    }
+
+    public void updatePlaceholderAPIStatistics(Player player, Map<String, Object> stats) {
+        if(! getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) return;
+
+        for (String statistic : getPlatformConfig().getEnabledPapiStatistics()) {
+            String value = PlaceholderAPIStatisticsHook.getStatistic(player, statistic);
+            if(value.isEmpty()) continue;
+            stats.put(statistic, value);
+        }
     }
 }

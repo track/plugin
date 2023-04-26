@@ -1,5 +1,6 @@
 package net.analyse.sdk.obj;
 
+import com.google.common.collect.Maps;
 import net.analyse.sdk.platform.PlayerType;
 
 import java.util.*;
@@ -20,7 +21,7 @@ public class AnalysePlayer {
 
     private String domain;
 
-    private final List<PlayerStatistic> statistics;
+    private final Map<String, Object> statistics;
     private final List<PlayerEvent> events;
 
     /**
@@ -36,7 +37,7 @@ public class AnalysePlayer {
         this.joinedAt = new Date();
         this.quitAt = null;
         this.ipAddress = ipAddress;
-        this.statistics = new ArrayList<>();
+        this.statistics = Maps.newHashMap();
         this.events = new ArrayList<>();
         this.type = PlayerType.JAVA;
     }
@@ -91,7 +92,7 @@ public class AnalysePlayer {
      *
      * @return A list of PlayerStatistic objects.
      */
-    public List<PlayerStatistic> getStatistics() {
+    public Map<String, Object> getStatistics() {
         return statistics;
     }
 
