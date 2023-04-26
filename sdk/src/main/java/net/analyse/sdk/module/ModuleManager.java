@@ -25,6 +25,11 @@ public class ModuleManager {
     private final List<PlatformModule> modules;
     private final File baseDirectory;
 
+    /**
+     * Constructs a new ModuleManager instance.
+     *
+     * @param platform Platform instance
+     */
     public ModuleManager(Platform platform) {
         this.platform = platform;
         this.modules = new ArrayList<>();

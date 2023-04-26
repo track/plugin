@@ -25,7 +25,7 @@ public class PlayerJoinListener {
 
         InetSocketAddress virtualDomain = player.getVirtualHost().orElse(null);
         if (virtualDomain != null) {
-            String hostName = MapperUtil.mapVirtualDomainToPlayer(virtualDomain);
+            String hostName = MapperUtil.sanitiseDomainAddress(virtualDomain);
 
             plugin.log(player.getUsername() + " has connected from domain: " + hostName);
             plugin.getPlayerDomains().put(player.getUniqueId(), hostName);

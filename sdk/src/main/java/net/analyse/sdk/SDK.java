@@ -255,7 +255,7 @@ public class SDK {
      * Get the first page of a specified statistic leaderboard.
      *
      * @param leaderboard The leaderboard identifier
-     * @return CompletableFuture<AnalyseLeaderboard> containing the leaderboard data
+     * @return CompletableFuture containing the leaderboard data
      */
     public CompletableFuture<AnalyseLeaderboard> getLeaderboard(String leaderboard) {
         return getLeaderboard(leaderboard, 1);
@@ -266,7 +266,7 @@ public class SDK {
      *
      * @param leaderboard The leaderboard identifier
      * @param page The requested page number
-     * @return CompletableFuture<AnalyseLeaderboard> containing the leaderboard data
+     * @return CompletableFuture containing the leaderboard data
      */
     public CompletableFuture<AnalyseLeaderboard> getLeaderboard(String leaderboard, int page) {
         if (getServerToken() == null) {
@@ -295,7 +295,7 @@ public class SDK {
      * Get information about a specific player by their name or UUID.
      *
      * @param id The player's name or UUID
-     * @return CompletableFuture<PlayerProfile> containing the player's profile data
+     * @return CompletableFuture containing the player's profile data
      */
     public CompletableFuture<PlayerProfile> getPlayer(String id) {
         if (getServerToken() == null) {
@@ -324,7 +324,7 @@ public class SDK {
      * Get the country code of a specific IP address.
      *
      * @param ip The IP address
-     * @return CompletableFuture<String> containing the country code
+     * @return CompletableFuture containing the country code
      * @deprecated This method is deprecated and may be removed in future versions
      */
     @Deprecated

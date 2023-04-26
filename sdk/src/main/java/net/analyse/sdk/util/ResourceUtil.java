@@ -19,6 +19,7 @@ public final class ResourceUtil {
      * @param platform The platform
      * @param directory The directory
      * @param fileName The file name
+     * @return The file
      */
     public static File getBundledFile(Platform platform, File directory, String fileName) {
         File file = new File(directory, fileName);
