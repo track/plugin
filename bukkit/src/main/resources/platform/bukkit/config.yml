@@ -33,10 +33,17 @@ settings:
   # This also requires you to download our proxy plugin. See https://analy.se/proxy-setup for more information.
   proxy-mode: false
 
+# These settings are exclusive to this server.
+# Do not share these credentials with anyone.
 server:
+  # Server Token
+  # This is used to identify your server.
   token: ''
+
+  # Encryption Key
+  # This is used to encrypt sensitive data such as IP addresses.
   encryption-key: ''
 
-# Which version of the plugin configuration.
+# Configuration Version
 # !! Do not change this value !!
 config-version: 2

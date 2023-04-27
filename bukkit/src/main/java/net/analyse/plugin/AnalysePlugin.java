@@ -1,5 +1,6 @@
 package net.analyse.plugin;
 
+import dev.dejvokep.boostedyaml.YamlDocument;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.analyse.plugin.event.PlayerJoinListener;
 import net.analyse.plugin.event.PlayerQuitListener;
@@ -54,7 +55,53 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
         try {
             // Load the platform config file.
-            config = loadPlatformConfig();
+            YamlDocument configYaml = initPlatformConfig();
+            config = loadPlatformConfig(configYaml);
+
+            if(config.getConfigVersion() == 1) {
+                log("Detected a legacy config file. Attempting to migrate..");
+
+                // Get config values
+                String serverToken = getConfig().getString("server.token");
+                boolean papiEnabled = getConfig().getBoolean("hooks.papi");
+                List<String> papiStatistics = getConfig().getStringList("enabled-stats");
+                int minSessionDuration = getConfig().getInt("minimum-session-duration");
+                boolean useServerFirstJoinDate = getConfig().getBoolean("use-server-first-join-date");
+                String encryptionKey = getConfig().getString("encryption-key");
+                List<String> excludedPlayers = getConfig().getStringList("excluded.players");
+                boolean proxyModeEnabled = getConfig().getBoolean("advanced.enabled");
+
+                // Delete the old config file.
+                File file = new File(getDataFolder(), "config.yml");
+                if(! file.delete()) {
+                    throw new IOException("Please delete the old config file and restart the server.");
+                }
+
+                // Create a new config file.
+                configYaml = initPlatformConfig();
+                config = loadPlatformConfig(configYaml);
+
+                // Set the values.
+                config.getYamlDocument().set("hooks.placeholderapi.enabled", papiEnabled);
+                config.getYamlDocument().set("hooks.placeholderapi.enabled-stats", papiStatistics);
+
+                config.getYamlDocument().set("settings.excluded-players", excludedPlayers);
+                config.getYamlDocument().set("settings.minimum-playtime", minSessionDuration);
+                config.getYamlDocument().set("settings.use-server-playtime", useServerFirstJoinDate);
+                config.getYamlDocument().set("settings.proxy-mode", proxyModeEnabled);
+
+                config.getYamlDocument().set("server.token", serverToken);
+                config.getYamlDocument().set("server.encryption-key", encryptionKey);
+
+                // Save the config file.
+                config.getYamlDocument().save();
+
+                // Reload the platform config file.
+                config = loadPlatformConfig(configYaml);
+
+                log("Successfully migrated your config file.");
+            }
+
         } catch (IOException e) {
             log(Level.WARNING, "Failed to load config: " + e.getMessage());
             getServer().getPluginManager().disablePlugin(this);

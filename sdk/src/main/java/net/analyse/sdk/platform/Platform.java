@@ -156,21 +156,23 @@ public interface Platform {
         log("[DEBUG] " + message);
     }
 
+    default YamlDocument initPlatformConfig() throws IOException {
+        // Create and update the file
+        return YamlDocument.create(getBundledFile(this, getDirectory(), "config.yml"));
+    }
     /**
      * Loads the platform configuration from the file.
      *
      * @return The PlatformConfig instance representing the loaded configuration.
      * @throws IOException If there is an issue reading the configuration file or if the config version is outdated.
      */
-    default PlatformConfig loadPlatformConfig() throws IOException {
+    default PlatformConfig loadPlatformConfig(YamlDocument configFile) throws IOException {
         // Create and update the file
-        YamlDocument configFile = YamlDocument.create(getBundledFile(this, getDirectory(), "config.yml"));
-
         PlatformConfig config = new PlatformConfig(configFile.getInt("config-version", 1));
         config.setYamlDocument(configFile);
 
         if(config.getConfigVersion() < 2) {
-            throw new IOException("Your config is outdated. Please delete it and restart the server.");
+            return config;
         }
 
         config.setExcludedPlayers(configFile.getStringList("settings.excluded-players").stream().map(UUID::fromString).collect(Collectors.toList()));
