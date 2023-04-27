@@ -1,6 +1,0 @@
-rootProject.name = 'AnalysePlugin'
-
-include 'sdk'
-include 'bukkit'
-include 'bungeecord'
-include 'velocity'
