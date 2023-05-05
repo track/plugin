@@ -1,7 +1,6 @@
 package net.analyse.plugin.event;
 
 import net.analyse.plugin.AnalysePlugin;
-import net.analyse.plugin.hook.PlaceholderAPIStatisticsHook;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.PlatformConfig;
 import net.analyse.sdk.platform.PlayerType;

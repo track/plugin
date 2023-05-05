@@ -16,6 +16,9 @@ import net.analyse.sdk.util.StringUtil;
 import okhttp3.OkHttpClient;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -26,7 +29,7 @@ import java.util.concurrent.CompletionException;
 public class SDK {
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
-            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
+            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX")
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .create();
     private final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder().retryOnConnectionFailure(true).build();
