@@ -38,6 +38,11 @@ tasks.withType<JavaCompile> {
     options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
 }
 
+// auto minimize shadowjar
+tasks.withType<ShadowJar> {
+    minimize()
+}
+
 java {
     withSourcesJar()
     withJavadocJar()

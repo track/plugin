@@ -351,6 +351,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
     public void updatePlaceholderAPIStatistics(Player player, Map<String, Object> stats) {
         if(! getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) return;
+        if(getPlatformConfig().getEnabledPapiStatistics() == null) return;
 
         for (String statistic : getPlatformConfig().getEnabledPapiStatistics()) {
             String value = PlaceholderAPIStatisticsHook.getStatistic(player, statistic);

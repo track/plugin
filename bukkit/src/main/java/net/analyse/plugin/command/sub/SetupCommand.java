@@ -52,6 +52,7 @@ public class SetupCommand extends SubCommand {
                 platform.halt();
             } else {
                 sender.sendMessage("§8[Analyse] §cAn error occurred: " + cause.getMessage());
+                cause.printStackTrace();
             }
 
             return null;

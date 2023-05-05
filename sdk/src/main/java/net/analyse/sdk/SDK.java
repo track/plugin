@@ -26,7 +26,7 @@ import java.util.concurrent.CompletionException;
 public class SDK {
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
-            .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .create();
     private final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder().retryOnConnectionFailure(true).build();

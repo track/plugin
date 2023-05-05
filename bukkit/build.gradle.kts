@@ -23,3 +23,11 @@ tasks.named("shadowJar", ShadowJar::class.java) {
     relocate("kotlin", "net.analyse.plugin.libs.kotlin")
     minimize()
 }
+
+tasks.register("copyToServer", Copy::class.java) {
+    from(project.tasks.named("shadowJar").get().outputs)
+    into("/Users/charlie/Documents/LegacyMCServer/plugins")
+
+    // rely on the shadowJar task to build the jar
+    dependsOn("shadowJar")
+}

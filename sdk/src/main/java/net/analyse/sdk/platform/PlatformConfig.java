@@ -2,6 +2,8 @@ package net.analyse.sdk.platform;
 
 import dev.dejvokep.boostedyaml.YamlDocument;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,7 +44,7 @@ public class PlatformConfig {
      * @param excludedPlayers The list of excluded player UUIDs.
      */
     public void setExcludedPlayers(List<UUID> excludedPlayers) {
-        this.excludedPlayers = excludedPlayers;
+        this.excludedPlayers = excludedPlayers != null ? excludedPlayers : Collections.emptyList();
     }
 
     /**
@@ -69,7 +71,7 @@ public class PlatformConfig {
      * @param enabledPapiStatistics The list of enabled PAPI statistics.
      */
     public void setEnabledPapiStatistics(List<String> enabledPapiStatistics) {
-        this.enabledPapiStatistics = enabledPapiStatistics;
+        this.enabledPapiStatistics = enabledPapiStatistics != null ? enabledPapiStatistics : Collections.emptyList();
     }
 
     /**
