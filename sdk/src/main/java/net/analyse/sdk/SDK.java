@@ -131,6 +131,13 @@ public class SDK {
             return future;
         }
 
+        if(platform.isPlayerExcluded(player.getUniqueId())) {
+            platform.debug("Skipped tracking player session for " + player.getName() + " as they are excluded.");
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            future.complete(false);
+            return future;
+        }
+
         player.logout();
         platform.debug("Sending payload: " + GSON.toJson(player));
 

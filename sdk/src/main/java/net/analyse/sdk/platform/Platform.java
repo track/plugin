@@ -7,6 +7,7 @@ import net.analyse.sdk.obj.AnalysePlayer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -167,7 +168,6 @@ public interface Platform {
      * @throws IOException If there is an issue reading the configuration file or if the config version is outdated.
      */
     default PlatformConfig loadPlatformConfig(YamlDocument configFile) throws IOException {
-        // Create and update the file
         PlatformConfig config = new PlatformConfig(configFile.getInt("config-version", 1));
         config.setYamlDocument(configFile);
 
@@ -190,6 +190,44 @@ public interface Platform {
         config.setDebugEnabled(configFile.getBoolean("debug", false));
 
         return config;
+    }
+
+    /**
+     * Exclude a player from being tracked by the plugin.
+     *
+     * @param uuid The UUID of the player to exclude.
+     */
+    default void excludePlayer(UUID uuid) {
+        getExcludedPlayers().add(uuid);
+    }
+
+    /**
+     * Include a player to be tracked by the plugin.
+     *
+     * @param uuid The UUID of the player to include.
+     */
+    default void includePlayer(UUID uuid) {
+        getExcludedPlayers().remove(uuid);
+    }
+
+    /**
+     * Checks if a player is excluded from being tracked by the plugin.
+     *
+     * @param uuid The UUID of the player to check.
+     * @return True if the player is excluded, false otherwise.
+     */
+    default boolean isPlayerExcluded(UUID uuid) {
+        return getExcludedPlayers().contains(uuid);
+    }
+
+    /**
+     * Gets the excluded players list.
+     *
+     * @return The list of excluded players.
+     */
+    default List<UUID> getExcludedPlayers() {
+        PlatformConfig config = getPlatformConfig();
+        return config.getExcludedPlayers();
     }
 
     /**
