@@ -7,6 +7,7 @@ import net.analyse.plugin.bukkit.commands.AnalyseCommand;
 import net.analyse.plugin.bukkit.event.ServerHeartbeatEvent;
 import net.analyse.plugin.bukkit.listener.PlayerActivityListener;
 import net.analyse.plugin.bukkit.util.Config;
+import net.analyse.plugin.bukkit.util.VersionUtil;
 import net.analyse.sdk.AnalyseSDK;
 import net.analyse.sdk.exception.ServerNotFoundException;
 import net.analyse.sdk.request.object.PlayerStatistic;
@@ -109,7 +110,8 @@ public class AnalysePlugin extends JavaPlugin {
             debug("- Advanced Mode: " + Config.ADVANCED_MODE);
 
             GetPluginResponse corePluginVersion = core.getPluginVersion();
-            if(corePluginVersion.getVersionNumber() > incrementalVersion) {
+
+            if(VersionUtil.isNewerVersion(getDescription().getVersion(), corePluginVersion.getVersionName())) {
                 getLogger().warning(String.format("This server is running v%s, an outdated version of Analyse.", getDescription().getVersion()));
                 getLogger().warning(String.format("Download v%s at: %s", corePluginVersion.getVersionName(), corePluginVersion.getBukkitDownload()));
             }
