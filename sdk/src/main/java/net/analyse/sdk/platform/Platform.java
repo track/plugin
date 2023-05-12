@@ -164,6 +164,7 @@ public interface Platform {
     /**
      * Loads the platform configuration from the file.
      *
+     * @param configFile The configuration file.
      * @return The PlatformConfig instance representing the loaded configuration.
      * @throws IOException If there is an issue reading the configuration file or if the config version is outdated.
      */
