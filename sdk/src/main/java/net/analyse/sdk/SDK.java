@@ -35,7 +35,7 @@ public class SDK {
     private final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder().retryOnConnectionFailure(true).build();
 
     private final int API_VERSION = 1;
-    private final String API_URL = String.format("http://analyse.test/api/v%d", API_VERSION);
+    private final String API_URL = String.format("https://app.analyse.net/api/v%d", API_VERSION);
 
     private final Platform platform;
     private String serverToken;
@@ -365,7 +365,7 @@ public class SDK {
             try {
                 JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
                 if(! jsonObject.get("success").getAsBoolean()) return null;
-                return jsonObject.get("country_name").getAsString();
+                return jsonObject.get("country_code").getAsString();
             } catch (IOException e) {
                 throw new CompletionException(new IOException("Unexpected response"));
             }
