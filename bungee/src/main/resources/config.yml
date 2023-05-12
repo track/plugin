@@ -1,9 +1,0 @@
-#
-#      Analyse
-# Version - ${pluginVersion}
-#
-# Use https://docs.analyse.net for plugin documentation.
-
-redis:
-  host: 'localhost'
-  port: 6379

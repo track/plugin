@@ -1,0 +1,49 @@
+# Analyse v${version} - https://analyse.net
+# Check out https://analy.se/docs if you need help.
+
+hooks:
+  # Enable or disable the plugin's hooks.
+  # See https://analyse.net/docs/plugins/bukkit for more information.
+  placeholderapi:
+    enabled: true
+    enabled-stats:
+      - 'enter_placeholder_here'
+
+settings:
+  # Excluded Players (UUID)
+  # Players listed here will not be tracked by Analyse.
+  excluded-players: []
+
+  # Bedrock Username Prefix
+  # The prefix to distinguish between Java and Bedrock players.
+  bedrock-prefix: "."
+
+  # Minimum Playtime (Seconds)
+  # Only track players who have played for at least this amount of time.
+  # Set to 0 to disable.
+  minimum-playtime: 0
+
+  # Use Server Playtime
+  # Use the date the player joined your server as their first session,
+  # instead of when they first joined Analyse.
+  use-server-playtime: true
+
+  # Use Proxy Mode
+  # Enable this if you are running Analyse within a proxy such as BungeeCord, Velocity, etc.
+  # This also requires you to download our proxy plugin. See https://analy.se/proxy-setup for more information.
+  proxy-mode: false
+
+# These settings are exclusive to this server.
+# Do not share these credentials with anyone.
+server:
+  # Server Token
+  # This is used to identify your server.
+  token: ''
+
+  # Encryption Key
+  # This is used to encrypt sensitive data such as IP addresses.
+  encryption-key: ''
+
+# Configuration Version
+# !! Do not change this value !!
+config-version: 2

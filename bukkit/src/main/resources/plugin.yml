@@ -1,12 +1,8 @@
 name: Analyse
-main: net.analyse.plugin.bukkit.AnalysePlugin
-version: ${pluginVersion}
-author: "Analyse"
-website: "https://analyse.net"
-description: "Understand your Minecraft audience and monetise your server better."
-api-version: "1.13"
+version: '${version}'
+main: net.analyse.plugin.AnalysePlugin
 softdepend:
-  - "PlaceholderAPI"
+  - PlaceholderAPI
 commands:
   analyse:
-    description: Main command of the plugin
+    description: The main command

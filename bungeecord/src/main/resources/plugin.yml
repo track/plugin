@@ -1,0 +1,6 @@
+name: Analyse
+version: '${version}'
+main: net.analyse.plugin.AnalysePlugin
+commands:
+  analyse:
+    description: The main command

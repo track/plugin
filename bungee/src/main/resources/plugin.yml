@@ -1,4 +1,0 @@
-name: Analyse
-version: ${pluginVersion}
-main: net.analyse.plugin.bungee.AnalysePlugin
-author: Analyse
