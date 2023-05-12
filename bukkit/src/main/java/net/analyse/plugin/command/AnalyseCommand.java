@@ -21,7 +21,8 @@ public class AnalyseCommand implements TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(args.length == 0) {
-            sender.sendMessage("§8[Analyse] §7Plugin information.");
+            sender.sendMessage("§8[Analyse] §7Welcome to Analyse!");
+            sender.sendMessage("§8[Analyse] §7This server is running version §fv" + commandManager.getPlatform().getDescription().getVersion() + "§7.");
             return true;
         }
 

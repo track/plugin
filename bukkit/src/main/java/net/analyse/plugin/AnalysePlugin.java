@@ -44,6 +44,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     private boolean setup;
     private HeartbeatManager heartbeatManager;
     private ModuleManager moduleManager;
+    private ProxyMessageListener proxyMessageListener;
 
     /**
      * Starts the Bukkit platform.
@@ -101,7 +102,6 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
                 log("Successfully migrated your config file.");
             }
-
         } catch (IOException e) {
             log(Level.WARNING, "Failed to load config: " + e.getMessage());
             getServer().getPluginManager().disablePlugin(this);
@@ -166,8 +166,9 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             return null;
         });
 
+        proxyMessageListener = new ProxyMessageListener(this);
         if(config.hasProxyModeEnabled()) {
-            new ProxyMessageListener(this);
+            proxyMessageListener.register();
         }
 
         if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
@@ -347,6 +348,10 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     @Override
     public ModuleManager getModuleManager() {
         return moduleManager;
+    }
+
+    public ProxyMessageListener getProxyMessageListener() {
+        return proxyMessageListener;
     }
 
     public void updatePlaceholderAPIStatistics(Player player, Map<String, Object> stats) {

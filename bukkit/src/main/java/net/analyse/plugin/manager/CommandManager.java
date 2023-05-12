@@ -5,10 +5,7 @@ import com.google.common.collect.Maps;
 import net.analyse.plugin.AnalysePlugin;
 import net.analyse.plugin.command.AnalyseCommand;
 import net.analyse.plugin.command.SubCommand;
-import net.analyse.plugin.command.sub.DebugCommand;
-import net.analyse.plugin.command.sub.SetupCommand;
-import net.analyse.plugin.command.sub.StatsCommand;
-import net.analyse.plugin.command.sub.TrackCommand;
+import net.analyse.plugin.command.sub.*;
 import org.bukkit.command.PluginCommand;
 
 import java.util.Map;
@@ -27,7 +24,8 @@ public class CommandManager {
                 new SetupCommand(platform),
                 new DebugCommand(platform),
                 new StatsCommand(platform),
-                new TrackCommand(platform)
+                new TrackCommand(platform),
+                new ReloadCommand(platform)
         ).forEach(command -> {
             commands.put(command.getName(), command);
         });
@@ -45,5 +43,9 @@ public class CommandManager {
 
     public Map<String, SubCommand> getCommands() {
         return commands;
+    }
+
+    public AnalysePlugin getPlatform() {
+        return platform;
     }
 }

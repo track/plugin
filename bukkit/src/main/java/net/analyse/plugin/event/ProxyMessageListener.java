@@ -11,8 +11,16 @@ public class ProxyMessageListener implements PluginMessageListener {
 
     public ProxyMessageListener(AnalysePlugin platform) {
         this.platform = platform;
+    }
+
+    public void register() {
         platform.getServer().getMessenger().registerOutgoingPluginChannel(platform, "analyse:proxy");
         platform.getServer().getMessenger().registerIncomingPluginChannel(platform, "analyse:proxy", this);
+    }
+
+    public void unregister() {
+        platform.getServer().getMessenger().unregisterOutgoingPluginChannel(platform, "analyse:proxy");
+        platform.getServer().getMessenger().unregisterIncomingPluginChannel(platform, "analyse:proxy", this);
     }
 
     @Override
