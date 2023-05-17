@@ -2,11 +2,8 @@ package net.analyse.plugin.event;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
-import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.proxy.Player;
 import net.analyse.plugin.AnalysePlugin;
-
-import java.net.InetSocketAddress;
 
 public class PlayerJoinListener {
     private final AnalysePlugin plugin;
