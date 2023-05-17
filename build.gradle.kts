@@ -5,10 +5,10 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-defaultTasks("shadowJar")
+defaultTasks("clean", "shadowJar")
 
 group = "net.analyse"
-version = "2.0.2"
+version = "2.0.3"
 
 subprojects {
     plugins.apply("java")

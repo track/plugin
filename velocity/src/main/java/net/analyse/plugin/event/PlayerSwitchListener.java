@@ -22,6 +22,5 @@ public class PlayerSwitchListener {
         player.getCurrentServer().ifPresent(serverConnection -> {
             serverConnection.sendPluginMessage(plugin.getChannel(), hostName.getBytes());
         });
-        plugin.log(player.getUsername() + " switched servers (connected from: " + hostName + ")");
     }
 }

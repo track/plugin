@@ -2,7 +2,6 @@ package net.analyse.plugin.event;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.proxy.Player;
 import net.analyse.plugin.AnalysePlugin;
 
 public class PlayerQuitListener {
@@ -15,7 +14,6 @@ public class PlayerQuitListener {
 
     @Subscribe
     public void onPlayerDisconnect(DisconnectEvent event) {
-        Player player = event.getPlayer();
-        plugin.getPlayerDomains().remove(player.getUniqueId());
+        plugin.getPlayerDomains().remove(event.getPlayer().getUniqueId());
     }
 }
