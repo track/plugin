@@ -32,8 +32,13 @@ public class StatsCommand extends SubCommand {
         int totalCount = javaCount + bedrockCount;
 
         if (args.length == 0 || (args[0].equalsIgnoreCase("domain") || args[0].equalsIgnoreCase("domains"))) {
+            long amountOfDomains = 5; // Range: 1, 25
+
+            if (args.length >= 2)
+                try { amountOfDomains = Math.max(1, Math.min(Long.parseLong(args[1]), 25));} catch (NumberFormatException ignored) {}
+
             // Show domain stats
-            sender.sendMessage("§b[Analyse] §7Top 5 Domains:");
+            sender.sendMessage("§b[Analyse] §7Top " + amountOfDomains + " Domains:");
             sender.sendMessage("§7");
 
             // Group by domain and show counts
@@ -46,7 +51,7 @@ public class StatsCommand extends SubCommand {
 
             Map<String, Map<PlayerType, Long>> topDomains = domainCounts.entrySet().stream()
                     .sorted(Comparator.comparingLong((Map.Entry<String, Map<PlayerType, Long>> e) -> e.getValue().getOrDefault(PlayerType.JAVA, 0L) + e.getValue().getOrDefault(PlayerType.BEDROCK, 0L)).reversed())
-                    .limit(5)
+                    .limit(amountOfDomains)
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1, LinkedHashMap::new));
 
             if (topDomains.size() > 0) {
@@ -81,9 +86,14 @@ public class StatsCommand extends SubCommand {
             sender.sendMessage("§7");
             sender.sendMessage("§b[Analyse] §7A total of " + totalCount + " players online.");
 
-        } else if (args.length == 1 && (args[0].equalsIgnoreCase("country") || args[0].equalsIgnoreCase("countries"))) {
+        } else if (args[0].equalsIgnoreCase("country") || args[0].equalsIgnoreCase("countries")) {
+            long amountOfCountries = 5; // Range: 1, 25
+
+            if (args.length >= 2)
+                try { amountOfCountries = Math.max(1, Math.min(Long.parseLong(args[1]), 25));} catch (NumberFormatException ignored) {}
+
             // Show country stats
-            sender.sendMessage("§b[Analyse] §7Top 5 Countries:");
+            sender.sendMessage("§b[Analyse] §7Top " + amountOfCountries + " Countries:");
             sender.sendMessage("§7");
 
             // Group by country and show counts
@@ -96,7 +106,7 @@ public class StatsCommand extends SubCommand {
 
             Map<String, Map<PlayerType, Long>> topCountries = countryCounts.entrySet().stream()
                     .sorted(Comparator.comparingLong((Map.Entry<String, Map<PlayerType, Long>> e) -> e.getValue().getOrDefault(PlayerType.JAVA, 0L) + e.getValue().getOrDefault(PlayerType.BEDROCK, 0L)).reversed())
-                    .limit(5)
+                    .limit(amountOfCountries)
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1, LinkedHashMap::new));
 
             if (topCountries.size() > 0) {
