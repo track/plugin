@@ -4,6 +4,7 @@ main: net.analyse.plugin.AnalysePlugin
 api-version: 1.19
 softdepend:
   - PlaceholderAPI
+  - floodgate
 commands:
   analyse:
     description: The main command

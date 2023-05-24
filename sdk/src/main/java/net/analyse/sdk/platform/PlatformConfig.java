@@ -23,6 +23,7 @@ public class PlatformConfig {
     private String serverToken;
     private String encryptionKey;
     private String bedrockPrefix;
+    private boolean bedrockFloodgateHook;
 
     private boolean debug;
     private boolean proxyMode;
@@ -99,6 +100,15 @@ public class PlatformConfig {
      */
     public void setBedrockPrefix(String bedrockPrefix) {
         this.bedrockPrefix = bedrockPrefix;
+    }
+
+    /**
+     * Sets the optional Bedrock Floodgate API hook {@link <a href="https://wiki.geysermc.org/floodgate/api/">floodgate-api</a>}
+     *
+     * @param bedrockFloodgateHook Whether we should use the Floodgate API to detect Bedrock players instead.
+     */
+    public void setBedrockFloodgateHook(boolean bedrockFloodgateHook) {
+        this.bedrockFloodgateHook = bedrockFloodgateHook;
     }
 
     /**
@@ -199,6 +209,15 @@ public class PlatformConfig {
      */
     public String getBedrockPrefix() {
         return bedrockPrefix;
+    }
+
+    /**
+     * Returns whether Analyse should hook into Floodgate.
+     *
+     * @return The {@link Boolean} that represents whether Analyse should hook into Floodgate's API or not.
+     */
+    public boolean isBedrockFloodgateHook() {
+        return bedrockFloodgateHook;
     }
 
     /**
