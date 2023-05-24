@@ -180,12 +180,13 @@ public interface Platform {
         config.setMinimumPlaytime(configFile.getInt("settings.minimum-playtime", 0));
         config.setUseServerFirstJoinedAt(configFile.getBoolean("settings.use-server-playtime", false));
         config.setProxyMode(configFile.getBoolean("settings.proxy-mode", false));
-        config.setBedrockPrefix(configFile.getString("settings.bedrock.prefix"));
-        config.setBedrockFloodgateHook(configFile.getBoolean("settings.bedrock.use-floodgate-instead", false));
+        config.setBedrockPrefix(configFile.getString("settings.bedrock-prefix"));
 
         if(configFile.getBoolean("hooks.placeholderapi.enabled")) {
             config.setEnabledPapiStatistics(configFile.getStringList("hooks.placeholderapi.enabled-stats"));
         }
+
+        config.setBedrockFloodgateHook(configFile.getBoolean("hooks.floodgate.enabled"));
 
         config.setServerToken(configFile.getString("server.token"));
         config.setEncryptionKey(configFile.getString("server.encryption-key"));

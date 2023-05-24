@@ -19,11 +19,11 @@ public class PlatformConfig {
     private boolean useServerFirstJoinedAt;
 
     private List<String> enabledPapiStatistics;
+    private boolean bedrockFloodgateHook;
 
     private String serverToken;
     private String encryptionKey;
     private String bedrockPrefix;
-    private boolean bedrockFloodgateHook;
 
     private boolean debug;
     private boolean proxyMode;
@@ -76,6 +76,15 @@ public class PlatformConfig {
     }
 
     /**
+     * Sets the optional Bedrock Floodgate API hook
+     *
+     * @param bedrockFloodgateHook Whether we should use the Floodgate API to detect Bedrock players instead.
+     */
+    public void setBedrockFloodgateHook(boolean bedrockFloodgateHook) {
+        this.bedrockFloodgateHook = bedrockFloodgateHook;
+    }
+
+    /**
      * Sets the server token.
      *
      * @param serverToken The server token.
@@ -100,15 +109,6 @@ public class PlatformConfig {
      */
     public void setBedrockPrefix(String bedrockPrefix) {
         this.bedrockPrefix = bedrockPrefix;
-    }
-
-    /**
-     * Sets the optional Bedrock Floodgate API hook
-     *
-     * @param bedrockFloodgateHook Whether we should use the Floodgate API to detect Bedrock players instead.
-     */
-    public void setBedrockFloodgateHook(boolean bedrockFloodgateHook) {
-        this.bedrockFloodgateHook = bedrockFloodgateHook;
     }
 
     /**
