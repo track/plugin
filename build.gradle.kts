@@ -25,7 +25,6 @@ subprojects {
     }
 
     tasks {
-
         compileJava {
             options.encoding = "UTF-8"
         }

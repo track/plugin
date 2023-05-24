@@ -103,7 +103,7 @@ public class PlatformConfig {
     }
 
     /**
-     * Sets the optional Bedrock Floodgate API hook {@link <a href="https://wiki.geysermc.org/floodgate/api/">floodgate-api</a>}
+     * Sets the optional Bedrock Floodgate API hook
      *
      * @param bedrockFloodgateHook Whether we should use the Floodgate API to detect Bedrock players instead.
      */
