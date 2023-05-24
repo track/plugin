@@ -8,8 +8,8 @@ group = rootProject.group
 version = rootProject.version
 
 val javaVersion = JavaVersion.current()
-/*val ossrhUsername = System.getenv("OSSRH_USERNAME") ?: properties["ossrhUsername"] as String
-val ossrhPassword = System.getenv("OSSRH_PASSWORD") ?: properties["ossrhPassword"] as String*/
+val ossrhUsername = System.getenv("OSSRH_USERNAME") ?: properties["ossrhUsername"] as String
+val ossrhPassword = System.getenv("OSSRH_PASSWORD") ?: properties["ossrhPassword"] as String
 
 repositories {
     mavenLocal()
@@ -86,7 +86,7 @@ publishing {
             }
         }
     }
-    /*repositories {
+    repositories {
         maven {
             url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
             credentials {
@@ -94,7 +94,7 @@ publishing {
                 password = ossrhPassword
             }
         }
-    }*/
+    }
 }
 
 signing {
