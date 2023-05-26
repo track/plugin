@@ -64,11 +64,11 @@ public class PlayerJoinListener implements Listener {
         }
 
         // Bedrock Tracking
-        if (!analyseConfig.isBedrockFloodgateHook()) {
+        if (! analyseConfig.isBedrockFloodgateHook()) {
             if (analyseConfig.getBedrockPrefix() != null && player.getName().startsWith(analyseConfig.getBedrockPrefix())) {
                 player.setType(PlayerType.BEDROCK);
             }
-        } else if (FloodgateHook.isBedrock(event.getPlayer())) {
+        } else if (platform.getFloodgateHook().isBedrock(event.getPlayer())) {
             player.setType(PlayerType.BEDROCK);
         }
 
