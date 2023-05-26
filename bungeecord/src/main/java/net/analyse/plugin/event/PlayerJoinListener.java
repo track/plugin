@@ -1,12 +1,13 @@
 package net.analyse.plugin.event;
 
 import net.analyse.plugin.AnalysePlugin;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.PostLoginEvent;
+import net.md_5.bungee.api.connection.PendingConnection;
+import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 import java.net.InetSocketAddress;
+import java.util.UUID;
 
 public class PlayerJoinListener implements Listener {
     private final AnalysePlugin plugin;
@@ -17,17 +18,13 @@ public class PlayerJoinListener implements Listener {
     }
 
     @EventHandler
-    public void onPostLogin(PostLoginEvent event) {
-        ProxiedPlayer player = event.getPlayer();
-        String ipAddress = player.getPendingConnection().getVirtualHost().getAddress().getHostAddress();
+    public void onJoin(LoginEvent event) {
+        InetSocketAddress virtualDomain = event.getConnection().getVirtualHost();
+        if(virtualDomain == null) return;
 
-//        plugin.log(player.getName() + " has connected from IP address: " + ipAddress);
+        String hostName = virtualDomain.getHostName();
+        UUID uniqueId = event.getConnection().getUniqueId();
 
-        InetSocketAddress virtualDomain = player.getPendingConnection().getVirtualHost();
-        if (virtualDomain != null) {
-            String hostName = virtualDomain.getAddress().getHostName();
-//            plugin.log(player.getName() + " has connected from domain: " + hostName);
-            plugin.getPlayerDomains().put(player.getUniqueId(), hostName);
-        }
+        plugin.getPlayerDomains().put(uniqueId, hostName);
     }
 }
