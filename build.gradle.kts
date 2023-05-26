@@ -21,7 +21,7 @@ subprojects {
     }
 
     tasks.named("shadowJar", ShadowJar::class.java) {
-        archiveFileName.set("${project.name}-analyse-${rootProject.version}.jar")
+        archiveFileName.set("analyse-${project.name}-${rootProject.version}.jar")
     }
 
     repositories {
