@@ -19,6 +19,7 @@ public class PlatformConfig {
     private boolean useServerFirstJoinedAt;
 
     private List<String> enabledPapiStatistics;
+    private boolean bedrockFloodgateHook;
 
     private String serverToken;
     private String encryptionKey;
@@ -72,6 +73,15 @@ public class PlatformConfig {
      */
     public void setEnabledPapiStatistics(List<String> enabledPapiStatistics) {
         this.enabledPapiStatistics = enabledPapiStatistics != null ? enabledPapiStatistics : Collections.emptyList();
+    }
+
+    /**
+     * Sets the optional Bedrock Floodgate API hook
+     *
+     * @param bedrockFloodgateHook Whether we should use the Floodgate API to detect Bedrock players instead.
+     */
+    public void setBedrockFloodgateHook(boolean bedrockFloodgateHook) {
+        this.bedrockFloodgateHook = bedrockFloodgateHook;
     }
 
     /**
@@ -199,6 +209,15 @@ public class PlatformConfig {
      */
     public String getBedrockPrefix() {
         return bedrockPrefix;
+    }
+
+    /**
+     * Returns whether Analyse should hook into Floodgate.
+     *
+     * @return The {@link Boolean} that represents whether Analyse should hook into Floodgate's API or not.
+     */
+    public boolean isBedrockFloodgateHook() {
+        return bedrockFloodgateHook;
     }
 
     /**

@@ -24,6 +24,12 @@ subprojects {
         archiveFileName.set("${project.name}-analyse-${rootProject.version}.jar")
     }
 
+    tasks {
+        compileJava {
+            options.encoding = "UTF-8"
+        }
+    }
+
     repositories {
         mavenCentral()
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") {

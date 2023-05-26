@@ -6,6 +6,7 @@ import net.analyse.plugin.event.PlayerJoinListener;
 import net.analyse.plugin.event.PlayerQuitListener;
 import net.analyse.plugin.event.ProxyMessageListener;
 import net.analyse.plugin.event.ServerLoadListener;
+import net.analyse.plugin.hook.FloodgateHook;
 import net.analyse.plugin.hook.PlaceholderAPIExpansionHook;
 import net.analyse.plugin.hook.PlaceholderAPIStatisticsHook;
 import net.analyse.plugin.manager.CommandManager;
@@ -45,6 +46,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     private HeartbeatManager heartbeatManager;
     private ModuleManager moduleManager;
     private ProxyMessageListener proxyMessageListener;
+    private FloodgateHook floodgateHook;
 
     /**
      * Starts the Bukkit platform.
@@ -84,6 +86,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
                 // Set the values.
                 config.getYamlDocument().set("hooks.placeholderapi.enabled", papiEnabled);
+                config.getYamlDocument().set("hooks.floodgate.enabled", Bukkit.getPluginManager().isPluginEnabled("floodgate"));
                 config.getYamlDocument().set("hooks.placeholderapi.enabled-stats", papiStatistics);
 
                 config.getYamlDocument().set("settings.excluded-players", excludedPlayers);
@@ -172,8 +175,13 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         }
 
         if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            log("PlaceholderAPI found. Registering placeholders..");
+            log("Hooked into PlaceholderAPI.");
             new PlaceholderAPIExpansionHook(this).register();
+        }
+
+        if(config.isBedrockFloodgateHook() && Bukkit.getPluginManager().isPluginEnabled("floodgate")) {
+            log("Hooked into Floodgate.");
+            floodgateHook = new FloodgateHook();
         }
 
         // Load modules.
@@ -258,6 +266,10 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
 
     public HeartbeatManager getHeartbeatManager() {
         return heartbeatManager;
+    }
+
+    public FloodgateHook getFloodgateHook() {
+        return floodgateHook;
     }
 
     @Override

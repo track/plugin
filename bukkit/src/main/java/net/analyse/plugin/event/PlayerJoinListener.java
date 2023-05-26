@@ -2,6 +2,7 @@ package net.analyse.plugin.event;
 
 import com.google.common.collect.Maps;
 import net.analyse.plugin.AnalysePlugin;
+import net.analyse.plugin.hook.FloodgateHook;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.PlatformConfig;
 import net.analyse.sdk.platform.PlayerType;
@@ -63,7 +64,11 @@ public class PlayerJoinListener implements Listener {
         }
 
         // Bedrock Tracking
-        if(analyseConfig.getBedrockPrefix() != null && player.getName().startsWith(analyseConfig.getBedrockPrefix())) {
+        if (! analyseConfig.isBedrockFloodgateHook()) {
+            if (analyseConfig.getBedrockPrefix() != null && player.getName().startsWith(analyseConfig.getBedrockPrefix())) {
+                player.setType(PlayerType.BEDROCK);
+            }
+        } else if (platform.getFloodgateHook().isBedrock(event.getPlayer())) {
             player.setType(PlayerType.BEDROCK);
         }
 

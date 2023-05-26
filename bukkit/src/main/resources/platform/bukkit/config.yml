@@ -8,6 +8,8 @@ hooks:
     enabled: true
     enabled-stats:
       - 'enter_placeholder_here'
+  floodgate:
+    enabled: true
 
 settings:
   # Excluded Players (UUID)
@@ -16,6 +18,9 @@ settings:
 
   # Bedrock Username Prefix
   # The prefix to distinguish between Java and Bedrock players.
+  #
+  # Note: It will use the prefix from the floodgate plugin
+  # when 'hooks.floodgate.enabled' is set to 'true'.
   bedrock-prefix: "."
 
   # Minimum Playtime (Seconds)

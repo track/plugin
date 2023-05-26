@@ -186,6 +186,8 @@ public interface Platform {
             config.setEnabledPapiStatistics(configFile.getStringList("hooks.placeholderapi.enabled-stats"));
         }
 
+        config.setBedrockFloodgateHook(configFile.getBoolean("hooks.floodgate.enabled"));
+
         config.setServerToken(configFile.getString("server.token"));
         config.setEncryptionKey(configFile.getString("server.encryption-key"));
         config.setDebugEnabled(configFile.getBoolean("debug", false));
