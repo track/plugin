@@ -5,11 +5,11 @@ hooks:
   # Enable or disable the plugin's hooks.
   # See https://analyse.net/docs/plugins/bukkit for more information.
   placeholderapi:
-    enabled: true
+    enabled: false
     enabled-stats:
       - 'enter_placeholder_here'
   floodgate:
-    enabled: true
+    enabled: false
 
 settings:
   # Excluded Players (UUID)

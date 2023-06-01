@@ -68,7 +68,7 @@ public class PlayerJoinListener implements Listener {
             if (analyseConfig.getBedrockPrefix() != null && player.getName().startsWith(analyseConfig.getBedrockPrefix())) {
                 player.setType(PlayerType.BEDROCK);
             }
-        } else if (platform.getFloodgateHook().isBedrock(event.getPlayer())) {
+        } else if (platform.getFloodgateHook() != null && platform.getFloodgateHook().isBedrock(event.getPlayer())) {
             player.setType(PlayerType.BEDROCK);
         }
 
