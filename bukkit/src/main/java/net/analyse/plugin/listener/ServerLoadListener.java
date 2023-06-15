@@ -1,4 +1,4 @@
-package net.analyse.plugin.event;
+package net.analyse.plugin.listener;
 
 import net.analyse.plugin.AnalysePlugin;
 import org.bukkit.event.EventHandler;

@@ -1,7 +1,9 @@
-package net.analyse.plugin.event;
+package net.analyse.plugin.listener;
 
 import com.google.common.collect.Maps;
 import net.analyse.plugin.AnalysePlugin;
+import net.analyse.plugin.event.type.AnalysePlayerJoinEvent;
+import net.analyse.plugin.event.type.AnalysePlayerQuitEvent;
 import net.analyse.plugin.hook.FloodgateHook;
 import net.analyse.sdk.obj.AnalysePlayer;
 import net.analyse.sdk.platform.PlatformConfig;
@@ -41,6 +43,11 @@ public class PlayerJoinListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent event) {
         Player bukkitPlayer = event.getPlayer();
+
+        if (new AnalysePlayerJoinEvent(bukkitPlayer).call()) {
+            platform.debug("Not tracking player session for " + bukkitPlayer.getName() + " as AnalysePlayerJoinEvent was cancelled.");
+            return;
+        }
 
         PlatformConfig analyseConfig = platform.getPlatformConfig();
         if(analyseConfig.isPlayerExcluded(bukkitPlayer.getUniqueId())) {
