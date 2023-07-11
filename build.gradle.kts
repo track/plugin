@@ -8,7 +8,7 @@ plugins {
 defaultTasks("clean", "shadowJar")
 
 group = "net.analyse"
-version = "2.0.7"
+version = "2.0.8"
 
 subprojects {
     plugins.apply("java")

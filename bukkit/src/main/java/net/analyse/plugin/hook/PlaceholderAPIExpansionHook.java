@@ -38,30 +38,45 @@ public class PlaceholderAPIExpansionHook extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, @NotNull String params) {
-        String[] parts = params.split("_");
+        int lastUnderscoreIndex = params.lastIndexOf("_");
 
-        if (parts.length != 3) {
+        if (lastUnderscoreIndex == -1) {
             return null;
         }
 
-        String leaderboardId = parts[0];
+        String leaderboardId = params.substring(0, lastUnderscoreIndex);
+        String field = params.substring(lastUnderscoreIndex + 1);
         int position;
-        String field;
+
+        int secondLastUnderscoreIndex = leaderboardId.lastIndexOf("_");
+        if (secondLastUnderscoreIndex == -1) {
+            return null;
+        }
+
+        String positionString = leaderboardId.substring(secondLastUnderscoreIndex + 1);
+        leaderboardId = leaderboardId.substring(0, secondLastUnderscoreIndex);
 
         try {
-            position = Integer.parseInt(parts[1]) - 1;
-            field = parts[2];
+            position = Integer.parseInt(positionString) - 1;
         } catch (NumberFormatException e) {
-            return null;
+            return "Invalid position";
         }
 
         if (position < 0) {
-            return null;
+            return "Invalid position";
         }
 
         AnalyseLeaderboard leaderboard = getLeaderboard(leaderboardId);
+
         if (leaderboard == null || leaderboard.getData().size() <= position) {
-            return null;
+            switch (field.toLowerCase()) {
+                case "username":
+                    return "?";
+                case "value":
+                    return Integer.toString(0);
+                default:
+                    return null;
+            }
         }
 
         AnalyseLeaderboard.Player lbPlayer = leaderboard.getData().get(position);
