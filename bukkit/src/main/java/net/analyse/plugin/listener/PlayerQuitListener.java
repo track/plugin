@@ -25,13 +25,14 @@ public class PlayerQuitListener implements Listener {
 
         if(player == null) return;
 
-        if (new AnalysePlayerQuitEvent(bukkitPlayer, player).call()) {
-            platform.debug("Not tracking player session for " + player.getName() + " as AnalysePlayerTrackSessionEvent was cancelled.");
-            return;
-        }
-
         platform.updatePlaceholderAPIStatistics(bukkitPlayer, player.getStatistics());
         platform.debug("Preparing to track " + bukkitPlayer.getName() + "..");
+
+        if (new AnalysePlayerQuitEvent(bukkitPlayer, player).call()) {
+            platform.debug("Not tracking player session for " + player.getName() + " as AnalysePlayerTrackSessionEvent was cancelled.");
+            platform.getPlayers().remove(player.getUniqueId());
+            return;
+        }
 
         platform.getSDK().trackPlayerSession(player).thenAccept(successful -> {
             if(! successful) {
