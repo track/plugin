@@ -156,6 +156,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             if (VersionUtil.isNewerVersion(getVersion(), pluginInformation.getVersionName())) {
                 log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", pluginInformation.getVersionName(), getDescription().getVersion()));
                 log(Level.WARNING, "Download the latest version at: " + pluginInformation.getDownloadUrl());
+                log(Level.WARNING, "View the changelog at: https://analy.se/plugin/releases/tag/" + pluginInformation.getVersionName());
             } else {
                 log("You are running the latest version of Analyse.");
             }
