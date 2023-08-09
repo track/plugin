@@ -2,22 +2,21 @@ package net.analyse.plugin.manager;
 
 import net.analyse.plugin.AnalysePlugin;
 import net.analyse.sdk.exception.ServerNotFoundException;
-import net.analyse.sdk.util.StringUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
+import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 import java.util.logging.Level;
 
 public class HeartbeatManager {
     private final AnalysePlugin platform;
-    private BukkitTask task;
+    private ScheduledTask task;
 
     public HeartbeatManager(AnalysePlugin platform) {
         this.platform = platform;
     }
 
     public void start() {
-        task = platform.getServer().getScheduler().runTaskTimer(platform, () -> {
+        task = platform.getScheduler().globalRegionalScheduler().runAtFixedRate(() -> {
             int playerCount = Bukkit.getOnlinePlayers().size();
 
             if(playerCount == 0) {
@@ -44,7 +43,7 @@ public class HeartbeatManager {
 
                 return null;
             });
-        }, 0, 20 * 60);
+        }, 1, 20 * 60);
     }
 
     public void stop() {

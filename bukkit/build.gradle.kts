@@ -7,11 +7,15 @@ repositories {
     maven {
         url = uri("https://repo.opencollab.dev/maven-snapshots/")
     }
+    maven {
+        url = uri("https://mvn-repo.arim.space/lesser-gpl3/")
+    }
 }
 
 dependencies {
     implementation(project(":sdk"))
     implementation("it.unimi.dsi:fastutil:8.5.6")
+    implementation("space.arim.morepaperlib:morepaperlib:0.4.3")
 
     compileOnly("org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
     compileOnly("dev.dejvokep:boosted-yaml:1.3")
@@ -27,6 +31,7 @@ tasks.named("shadowJar", ShadowJar::class.java) {
     relocate("okio", "net.analyse.plugin.libs.okio")
     relocate("dev.dejvokep.boostedyaml", "net.analyse.plugin.libs.boostedyaml")
     relocate("org.jetbrains.annotations", "net.analyse.plugin.libs.jetbrains")
+    relocate("space.arim.morepaperlib", "net.analyse.plugin.libs.paperlib")
     relocate("kotlin", "net.analyse.plugin.libs.kotlin")
     minimize()
 }

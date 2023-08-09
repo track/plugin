@@ -24,6 +24,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import space.arim.morepaperlib.MorePaperLib;
+import space.arim.morepaperlib.scheduling.GracefulScheduling;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +49,7 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
     private ModuleManager moduleManager;
     private ProxyMessageListener proxyMessageListener;
     private FloodgateHook floodgateHook;
+    private MorePaperLib morePaperLib;
 
     /**
      * Starts the Bukkit platform.
@@ -189,8 +192,10 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             Class.forName("org.bukkit.event.server.ServerLoadEvent");
             registerEvents(new ServerLoadListener(this));
         } catch (final ClassNotFoundException ignored) {
-            Bukkit.getScheduler().runTaskLater(this, this::loadModules, 1);
+            getScheduler().globalRegionalScheduler().runDelayed(this::loadModules, 1);
         }
+
+        morePaperLib = new MorePaperLib(this);
 
         if(isSetup()) {
             sdk.sendTelemetry().thenAccept(telemetry -> {
@@ -254,6 +259,10 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             HandlerList.unregisterAll((Listener) module);
         }
         moduleManager.unregister(module);
+    }
+
+    public GracefulScheduling getScheduler() {
+        return morePaperLib.scheduling();
     }
 
     /**
