@@ -188,6 +188,8 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
             floodgateHook = new FloodgateHook();
         }
 
+        morePaperLib = new MorePaperLib(this);
+
         // Load modules.
         try {
             Class.forName("org.bukkit.event.server.ServerLoadEvent");
@@ -195,8 +197,6 @@ public final class AnalysePlugin extends JavaPlugin implements Platform {
         } catch (final ClassNotFoundException ignored) {
             getScheduler().globalRegionalScheduler().runDelayed(this::loadModules, 1);
         }
-
-        morePaperLib = new MorePaperLib(this);
 
         if(isSetup()) {
             sdk.sendTelemetry().thenAccept(telemetry -> {
