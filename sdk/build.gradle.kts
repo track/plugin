@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.12")
     implementation("dev.dejvokep:boosted-yaml:1.3")
     compileOnly("com.google.code.gson:gson:2.10.1")
     compileOnly("com.google.guava:guava:30.1.1-jre")

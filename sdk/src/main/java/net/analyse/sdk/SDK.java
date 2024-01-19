@@ -13,12 +13,20 @@ import net.analyse.sdk.platform.PlatformType;
 import net.analyse.sdk.request.AnalyseRequest;
 import net.analyse.sdk.request.response.*;
 import net.analyse.sdk.util.StringUtil;
+import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
+import sun.net.www.http.HttpClient;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -32,10 +40,10 @@ public class SDK {
             .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX")
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .create();
-    private final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder().retryOnConnectionFailure(true).build();
+    private final OkHttpClient HTTP_CLIENT;
 
     private final int API_VERSION = 1;
-    private final String API_URL = String.format("https://app.analyse.net/api/v%d", API_VERSION);
+    private final String API_URL = String.format("https://tebexanalytics.test/api/v%d", API_VERSION);
 
     private final Platform platform;
     private String serverToken;
@@ -49,6 +57,36 @@ public class SDK {
     public SDK(Platform platform, String serverToken) {
         this.platform = platform;
         this.serverToken = serverToken;
+
+        TrustManager TRUST_ALL_CERTS = new X509TrustManager() {
+            @Override
+            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+            }
+            @Override
+            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+            }
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new java.security.cert.X509Certificate[] {};
+            }
+        };
+
+        OkHttpClient.Builder builder = new OkHttpClient()
+                .newBuilder()
+                .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
+                .retryOnConnectionFailure(true);
+        try {
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+
+            sslContext.init(null, new TrustManager[] { TRUST_ALL_CERTS }, new java.security.SecureRandom());
+            builder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) TRUST_ALL_CERTS);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (KeyManagementException e) {
+            throw new RuntimeException(e);
+        }
+
+        this.HTTP_CLIENT = builder.build();
     }
 
     /**
