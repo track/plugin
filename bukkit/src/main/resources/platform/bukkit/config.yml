@@ -1,4 +1,4 @@
-# Analyse v${version} - https://analyse.net
+# Analytics v${version} - https://analyse.net
 # Check out https://analy.se/docs if you need help.
 
 hooks:
@@ -13,7 +13,7 @@ hooks:
 
 settings:
   # Excluded Players (UUID)
-  # Players listed here will not be tracked by Analyse.
+  # Players listed here will not be tracked by Analytics.
   excluded-players: []
 
   # Bedrock Username Prefix
@@ -30,11 +30,11 @@ settings:
 
   # Use Server Playtime
   # Use the date the player joined your server as their first session,
-  # instead of when they first joined Analyse.
+  # instead of when they first joined Analytics.
   use-server-playtime: true
 
   # Use Proxy Mode
-  # Enable this if you are running Analyse within a proxy such as BungeeCord, Velocity, etc.
+  # Enable this if you are running Analytics within a proxy such as BungeeCord, Velocity, etc.
   # This also requires you to download our proxy plugin. See https://analy.se/proxy-setup for more information.
   proxy-mode: false
 

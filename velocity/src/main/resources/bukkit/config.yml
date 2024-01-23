@@ -1,4 +1,4 @@
-# Analyse v${version} - https://analyse.net
+# Analytics v${version} - https://analyse.net
 # Check out https://analy.se/docs if you need help.
 
 hooks:
@@ -11,7 +11,7 @@ hooks:
 
 settings:
   # Excluded Players (UUID)
-  # Players listed here will not be tracked by Analyse.
+  # Players listed here will not be tracked by Analytics.
   excluded-players: []
 
   # Minimum Playtime (Seconds)
@@ -21,7 +21,7 @@ settings:
 
   # Use Server Playtime
   # Use the date the player joined your server as their first session,
-  # instead of when they first joined Analyse.
+  # instead of when they first joined Analytics.
   use-server-playtime: true
 
 server:

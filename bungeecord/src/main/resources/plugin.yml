@@ -1,6 +1,6 @@
-name: Analyse
+name: Analytics
 version: '${version}'
-main: net.analyse.plugin.AnalysePlugin
+main: io.tebex.analytics.AnalysePlugin
 commands:
   analyse:
     description: The main command
