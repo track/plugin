@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public final class AnalysePlugin extends Plugin implements Platform {
+public final class AnalyticsPlugin extends Plugin implements Platform {
     private final Map<UUID, String> playerDomains = Maps.newConcurrentMap();
 
     @Override

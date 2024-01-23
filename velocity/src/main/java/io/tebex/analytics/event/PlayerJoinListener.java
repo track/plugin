@@ -3,12 +3,12 @@ package io.tebex.analytics.event;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.proxy.Player;
-import io.tebex.analytics.AnalysePlugin;
+import io.tebex.analytics.AnalyticsPlugin;
 
 public class PlayerJoinListener {
-    private final AnalysePlugin plugin;
+    private final AnalyticsPlugin plugin;
 
-    public PlayerJoinListener(AnalysePlugin plugin) {
+    public PlayerJoinListener(AnalyticsPlugin plugin) {
         this.plugin = plugin;
         plugin.getProxy().getEventManager().register(plugin, this);
     }

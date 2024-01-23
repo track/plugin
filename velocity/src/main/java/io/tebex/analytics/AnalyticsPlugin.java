@@ -32,7 +32,7 @@ import java.util.logging.Logger;
         url = "https://tebex.io",
         authors = {"Analytics"}
 )
-public final class AnalysePlugin implements Platform {
+public final class AnalyticsPlugin implements Platform {
     private final Map<UUID, String> playerDomains = Maps.newConcurrentMap();
     private final ProxyServer proxy;
     private final Logger logger;
@@ -40,7 +40,7 @@ public final class AnalysePlugin implements Platform {
     private final ChannelIdentifier channel;
 
     @Inject
-    public AnalysePlugin(ProxyServer proxy, Logger logger, @DataDirectory Path dataDirectory) {
+    public AnalyticsPlugin(ProxyServer proxy, Logger logger, @DataDirectory Path dataDirectory) {
         this.proxy = proxy;
         this.logger = logger;
         this.dataDirectory = dataDirectory;

@@ -1,15 +1,15 @@
 package io.tebex.analytics.event;
 
-import io.tebex.analytics.AnalysePlugin;
+import io.tebex.analytics.AnalyticsPlugin;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 public class PlayerSwitchListener implements Listener {
-    private final AnalysePlugin plugin;
+    private final AnalyticsPlugin plugin;
 
-    public PlayerSwitchListener(AnalysePlugin plugin) {
+    public PlayerSwitchListener(AnalyticsPlugin plugin) {
         this.plugin = plugin;
         plugin.getProxy().getPluginManager().registerListener(plugin, this);
     }

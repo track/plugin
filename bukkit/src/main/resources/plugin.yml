@@ -2,7 +2,7 @@ name: Analyse
 version: '${version}'
 main: io.tebex.analytics.AnalyticsPlugin
 website: "https://tebex.io"
-description: "The official Tebex Analytics plugin."
+description: "The Spigot plugin for Tebex Analytics."
 api-version: 1.13
 folia-supported: true
 softdepend:

@@ -1,6 +1,6 @@
 package io.tebex.analytics.event;
 
-import io.tebex.analytics.AnalysePlugin;
+import io.tebex.analytics.AnalyticsPlugin;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -9,9 +9,9 @@ import java.net.InetSocketAddress;
 import java.util.UUID;
 
 public class PlayerJoinListener implements Listener {
-    private final AnalysePlugin plugin;
+    private final AnalyticsPlugin plugin;
 
-    public PlayerJoinListener(AnalysePlugin plugin) {
+    public PlayerJoinListener(AnalyticsPlugin plugin) {
         this.plugin = plugin;
         plugin.getProxy().getPluginManager().registerListener(plugin, this);
     }
