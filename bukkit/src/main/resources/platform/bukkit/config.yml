@@ -1,9 +1,8 @@
-# Analytics v${version} - https://analyse.net
-# Check out https://analy.se/docs if you need help.
+# Analytics v${version} - https://tebex.io
+# Check out https://docs.tebex.io/analytics if you need help.
 
 hooks:
   # Enable or disable the plugin's hooks.
-  # See https://analyse.net/docs/plugins/bukkit for more information.
   placeholderapi:
     enabled: false
     enabled-stats:
@@ -35,7 +34,7 @@ settings:
 
   # Use Proxy Mode
   # Enable this if you are running Analytics within a proxy such as BungeeCord, Velocity, etc.
-  # This also requires you to download our proxy plugin. See https://analy.se/proxy-setup for more information.
+  # This also requires you to download our proxy plugin.
   proxy-mode: false
 
 # These settings are exclusive to this server.
