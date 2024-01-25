@@ -10,6 +10,7 @@ import io.tebex.analytics.sdk.obj.AnalysePlayer;
 import io.tebex.analytics.sdk.platform.Platform;
 import io.tebex.analytics.sdk.platform.PlatformType;
 import io.tebex.analytics.sdk.request.AnalyseRequest;
+import io.tebex.analytics.sdk.request.exception.RateLimitException;
 import io.tebex.analytics.sdk.request.response.AnalyseLeaderboard;
 import io.tebex.analytics.sdk.request.response.PlayerProfile;
 import io.tebex.analytics.sdk.request.response.PluginInformation;
@@ -96,6 +97,8 @@ public class SDK {
         return request("/plugin").sendAsync().thenApply(response -> {
             if(response.code() == 404) {
                 throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() == 429) {
+                throw new CompletionException(new RateLimitException("You are being rate limited."));
             } else if(response.code() != 200) {
                 throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
             }
@@ -131,6 +134,8 @@ public class SDK {
         return request("/server").withServerToken(serverToken).sendAsync().thenApply(response -> {
             if(response.code() == 404) {
                 throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() == 429) {
+                throw new CompletionException(new RateLimitException("You are being rate limited."));
             } else if(response.code() != 200) {
                 throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
             }
@@ -205,6 +210,8 @@ public class SDK {
         return request("/server/sessions").withServerToken(serverToken).withBody(GSON.toJson(player)).sendAsync().thenApply(response -> {
             if(response.code() == 404) {
                 throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() == 429) {
+                throw new CompletionException(new RateLimitException("You are being rate limited."));
             } else if(response.code() != 200) {
                 throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
             }
@@ -233,6 +240,8 @@ public class SDK {
         return request("/server/setup").withServerToken(serverToken).sendAsync().thenApply(response -> {
             if(response.code() == 404) {
                 throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() == 429) {
+                throw new CompletionException(new RateLimitException("You are being rate limited."));
             } else if(response.code() != 200) {
                 throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
             }
@@ -265,6 +274,8 @@ public class SDK {
         return request("/server/heartbeat").withServerToken(serverToken).withBody(GSON.toJson(body)).sendAsync().thenApply(response -> {
             if(response.code() == 404) {
                 throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() == 429) {
+                throw new CompletionException(new RateLimitException("You are being rate limited."));
             } else if(response.code() != 200) {
                 throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
             }
@@ -293,6 +304,8 @@ public class SDK {
         return request("/server/telemetry").withServerToken(serverToken).withBody(GSON.toJson(platform.getTelemetry())).sendAsync().thenApply(response -> {
             if(response.code() == 404) {
                 throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() == 429) {
+                throw new CompletionException(new RateLimitException("You are being rate limited."));
             } else if(response.code() != 200) {
                 throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
             }
@@ -333,6 +346,8 @@ public class SDK {
         return request("/server/leaderboard/" + leaderboard + "?page=" + page).withServerToken(serverToken).sendAsync().thenApply(response -> {
             if(response.code() == 404) {
                 throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() == 429) {
+                throw new CompletionException(new RateLimitException("You are being rate limited."));
             } else if(response.code() != 200) {
                 throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
             }
@@ -362,6 +377,8 @@ public class SDK {
         return request("/server/player/" + id).withServerToken(serverToken).sendAsync().thenApply(response -> {
             if(response.code() == 404) {
                 throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() == 429) {
+                throw new CompletionException(new RateLimitException("You are being rate limited."));
             } else if(response.code() != 200) {
                 throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
             }
@@ -393,6 +410,8 @@ public class SDK {
         return request("/ip/" + ip).withServerToken(serverToken).sendAsync().thenApply(response -> {
             if(response.code() == 404) {
                 throw new CompletionException(new ServerNotFoundException());
+            } else if(response.code() == 429) {
+                throw new CompletionException(new RateLimitException("You are being rate limited."));
             } else if(response.code() != 200) {
                 throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
             }

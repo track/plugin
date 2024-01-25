@@ -11,6 +11,7 @@ import io.tebex.analytics.hook.PlaceholderAPIStatisticsHook;
 import io.tebex.analytics.manager.CommandManager;
 import io.tebex.analytics.manager.HeartbeatManager;
 import io.tebex.analytics.sdk.platform.*;
+import io.tebex.analytics.sdk.request.exception.RateLimitException;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import io.tebex.analytics.sdk.Analytics;
 import io.tebex.analytics.sdk.SDK;
@@ -197,17 +198,6 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
         } catch (final ClassNotFoundException ignored) {
             getScheduler().globalRegionalScheduler().runDelayed(this::loadModules, 1);
         }
-
-        if(isSetup()) {
-            sdk.sendTelemetry().thenAccept(telemetry -> {
-                debug("Sent telemetry data.");
-            }).exceptionally(ex -> {
-                Throwable cause = ex.getCause();
-                log(Level.WARNING, "Failed to send telemetry: " + cause.getMessage());
-                cause.printStackTrace();
-                return null;
-            });
-        }
     }
 
     @Override
@@ -316,6 +306,24 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
     public void configure() {
         setup = true;
         heartbeatManager.start();
+
+        if(isSetup()) {
+            sdk.sendTelemetry().thenAccept(telemetry -> {
+                debug("Sent telemetry data.");
+            }).exceptionally(ex -> {
+                Throwable cause = ex.getCause();
+
+                log(Level.WARNING, "Failed to send telemetry: " + cause.getMessage());
+
+                if(cause instanceof RateLimitException) {
+                    log(Level.WARNING, "Please wait a few minutes and try again.");
+                } else {
+                    cause.printStackTrace();
+                }
+
+                return null;
+            });
+        }
     }
 
     @Override
