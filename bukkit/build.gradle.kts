@@ -26,13 +26,13 @@ dependencies {
 tasks.named("shadowJar", ShadowJar::class.java) {
     configurations = listOf(project.configurations.runtimeClasspath.get())
 
-    relocate("it.unimi", "net.analyse.plugin.libs.fastutil")
-    relocate("okhttp3", "net.analyse.plugin.libs.okhttp3")
-    relocate("okio", "net.analyse.plugin.libs.okio")
-    relocate("dev.dejvokep.boostedyaml", "net.analyse.plugin.libs.boostedyaml")
-    relocate("org.jetbrains.annotations", "net.analyse.plugin.libs.jetbrains")
-    relocate("space.arim.morepaperlib", "net.analyse.plugin.libs.paperlib")
-    relocate("kotlin", "net.analyse.plugin.libs.kotlin")
+    relocate("it.unimi", "io.tebex.analytics.libs.fastutil")
+    relocate("okhttp3", "io.tebex.analytics.libs.okhttp3")
+    relocate("okio", "io.tebex.analytics.libs.okio")
+    relocate("dev.dejvokep.boostedyaml", "io.tebex.analytics.libs.boostedyaml")
+    relocate("org.jetbrains.annotations", "io.tebex.analytics.libs.jetbrains")
+    relocate("space.arim.morepaperlib", "io.tebex.analytics.libs.paperlib")
+    relocate("kotlin", "io.tebex.analytics.libs.kotlin")
     minimize()
 }
 

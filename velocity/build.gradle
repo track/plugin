@@ -21,11 +21,11 @@ dependencies {
 shadowJar {
     configurations = [project.configurations.runtimeClasspath]
 
-    relocate 'gnu.trove4j', 'net.analyse.plugin.libs.trove4j' // Relocate trove4j
-    relocate 'okhttp3', 'net.analyse.plugin.libs.okhttp3' // Relocate okhttp
-    relocate 'okio', 'net.analyse.plugin.libs.okio' // Relocate okio (okhttp dependency)
-    relocate 'dev.dejvokep.boostedyaml', 'net.analyse.plugin.libs.boostedyaml' // Relocate boostedyaml
-    relocate 'org.jetbrains.annotations', 'net.analyse.plugin.libs.jetbrains' // Relocate jetbrains
-    relocate 'kotlin', 'net.analyse.plugin.libs.kotlin' // Relocate jetbrains
+    relocate 'gnu.trove4j', 'io.tebex.analytics.libs.trove4j' // Relocate trove4j
+    relocate 'okhttp3', 'io.tebex.analytics.libs.okhttp3' // Relocate okhttp
+    relocate 'okio', 'io.tebex.analytics.libs.okio' // Relocate okio (okhttp dependency)
+    relocate 'dev.dejvokep.boostedyaml', 'io.tebex.analytics.libs.boostedyaml' // Relocate boostedyaml
+    relocate 'org.jetbrains.annotations', 'io.tebex.analytics.libs.jetbrains' // Relocate jetbrains
+    relocate 'kotlin', 'io.tebex.analytics.libs.kotlin' // Relocate jetbrains
     minimize()
 }
