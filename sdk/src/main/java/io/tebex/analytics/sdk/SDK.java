@@ -4,28 +4,26 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.intellectualsites.http.EntityMapper;
+import com.intellectualsites.http.HttpClient;
+import com.intellectualsites.http.HttpResponse;
+import com.intellectualsites.http.external.GsonMapper;
 import io.tebex.analytics.sdk.exception.ServerNotFoundException;
 import io.tebex.analytics.sdk.exception.ServerNotSetupException;
 import io.tebex.analytics.sdk.obj.AnalysePlayer;
 import io.tebex.analytics.sdk.platform.Platform;
 import io.tebex.analytics.sdk.platform.PlatformType;
-import io.tebex.analytics.sdk.request.AnalyseRequest;
 import io.tebex.analytics.sdk.request.exception.RateLimitException;
 import io.tebex.analytics.sdk.request.response.AnalyseLeaderboard;
 import io.tebex.analytics.sdk.request.response.PlayerProfile;
 import io.tebex.analytics.sdk.request.response.PluginInformation;
 import io.tebex.analytics.sdk.request.response.ServerInformation;
 import io.tebex.analytics.sdk.util.StringUtil;
-import okhttp3.ConnectionSpec;
-import okhttp3.OkHttpClient;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -38,10 +36,10 @@ public class SDK {
             .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX")
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .create();
-    private final OkHttpClient HTTP_CLIENT;
+    private final HttpClient HTTP_CLIENT;
 
     private final int API_VERSION = 1;
-    private final String API_URL = String.format("https://analytics.tebex.io/api/v%d", API_VERSION);
+    private final String API_URL = String.format("https://tebexanalytics.test/api/v%d", API_VERSION);
 
     private final Platform platform;
     private String serverToken;
@@ -69,22 +67,14 @@ public class SDK {
             }
         };
 
-        OkHttpClient.Builder builder = new OkHttpClient()
-                .newBuilder()
-                .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
-                .retryOnConnectionFailure(true);
-        try {
-            SSLContext sslContext = SSLContext.getInstance("SSL");
+        final EntityMapper mapper = EntityMapper.newInstance()
+                .registerSerializer(JsonObject.class, GsonMapper.serializer(JsonObject.class, GSON))
+                .registerDeserializer(JsonObject.class, GsonMapper.deserializer(JsonObject.class, GSON));
 
-            sslContext.init(null, new TrustManager[] { TRUST_ALL_CERTS }, new java.security.SecureRandom());
-            builder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) TRUST_ALL_CERTS);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (KeyManagementException e) {
-            throw new RuntimeException(e);
-        }
-
-        this.HTTP_CLIENT = builder.build();
+        this.HTTP_CLIENT = HttpClient.newBuilder()
+                .withBaseURL(API_URL)
+                .withEntityMapper(mapper)
+                .build();
     }
 
     /**
@@ -94,28 +84,33 @@ public class SDK {
      * @return A CompletableFuture that contains the PluginInformation object.
      */
     public CompletableFuture<PluginInformation> getPluginVersion(PlatformType platformType) {
-        return request("/plugin").sendAsync().thenApply(response -> {
-            if(response.code() == 404) {
-                throw new CompletionException(new ServerNotFoundException());
-            } else if(response.code() == 429) {
-                throw new CompletionException(new RateLimitException("You are being rate limited."));
-            } else if(response.code() != 200) {
-                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+        return CompletableFuture.supplyAsync(() -> {
+            final HttpResponse response = this.HTTP_CLIENT.get("/plugin")
+                    .onStatus(200, req -> {})
+                    .onRemaining(req -> {
+                        if(req.getStatusCode() == 404) {
+                            throw new CompletionException(new ServerNotFoundException());
+                        } else if(req.getStatusCode() == 429) {
+                            throw new CompletionException(new RateLimitException("You are being rate limited."));
+                        } else if(req.getStatusCode() != 200) {
+                            throw new CompletionException(new IOException("Unexpected status code (" + req.getStatusCode() + ")"));
+                        }
+                    })
+                    .execute();
+
+            if(response == null) {
+                throw new CompletionException(new IOException("Failed to retrieve plugin information"));
             }
 
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                JsonObject versionData = jsonObject.get("version").getAsJsonObject();
-                JsonObject assetData = jsonObject.get("assets").getAsJsonObject();
+            JsonObject body = response.getResponseEntity(JsonObject.class);
+            JsonObject versionData = body.get("version").getAsJsonObject();
+            JsonObject assetData = body.get("assets").getAsJsonObject();
 
-                return new PluginInformation(
-                        versionData.get("name").getAsString(),
-                        versionData.get("incremental").getAsInt(),
-                        assetData.get(platformType.name().toLowerCase()).getAsString()
-                );
-            } catch (IOException e) {
-                throw new CompletionException(new IOException("Unexpected response"));
-            }
+            return new PluginInformation(
+                    versionData.get("name").getAsString(),
+                    versionData.get("incremental").getAsInt(),
+                    assetData.get(platformType.name().toLowerCase()).getAsString()
+            );
         });
     }
 
@@ -131,21 +126,27 @@ public class SDK {
             return future;
         }
 
-        return request("/server").withServerToken(serverToken).sendAsync().thenApply(response -> {
-            if(response.code() == 404) {
-                throw new CompletionException(new ServerNotFoundException());
-            } else if(response.code() == 429) {
-                throw new CompletionException(new RateLimitException("You are being rate limited."));
-            } else if(response.code() != 200) {
-                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+        return CompletableFuture.supplyAsync(() -> {
+            final HttpResponse response = this.HTTP_CLIENT.get("/server")
+                    .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .onStatus(200, req -> {})
+                    .onRemaining(req -> {
+                        if(req.getStatusCode() == 404) {
+                            throw new CompletionException(new ServerNotFoundException());
+                        } else if(req.getStatusCode() == 429) {
+                            throw new CompletionException(new RateLimitException("You are being rate limited."));
+                        } else if(req.getStatusCode() != 200) {
+                            throw new CompletionException(new IOException("Unexpected status code (" + req.getStatusCode() + ")"));
+                        }
+                    })
+                    .execute();
+
+            if(response == null) {
+                throw new CompletionException(new IOException("Failed to retrieve server information"));
             }
 
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                return GSON.fromJson(jsonObject.get("data"), ServerInformation.class);
-            } catch (IOException e) {
-                throw new CompletionException(new IOException("Unexpected response"));
-            }
+            JsonObject body = response.getResponseEntity(JsonObject.class);
+            return GSON.fromJson(body.get("data"), ServerInformation.class);
         });
     }
 
@@ -207,21 +208,28 @@ public class SDK {
             platform.debug(" - No statistics to track.");
         }
 
-        return request("/server/sessions").withServerToken(serverToken).withBody(GSON.toJson(player)).sendAsync().thenApply(response -> {
-            if(response.code() == 404) {
-                throw new CompletionException(new ServerNotFoundException());
-            } else if(response.code() == 429) {
-                throw new CompletionException(new RateLimitException("You are being rate limited."));
-            } else if(response.code() != 200) {
-                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+        return CompletableFuture.supplyAsync(() -> {
+            final HttpResponse response = this.HTTP_CLIENT.get("/server/sessions")
+                    .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .withInput(() -> GSON.toJson(player))
+                    .onStatus(200, req -> {})
+                    .onRemaining(req -> {
+                        if(req.getStatusCode() == 404) {
+                            throw new CompletionException(new ServerNotFoundException());
+                        } else if(req.getStatusCode() == 429) {
+                            throw new CompletionException(new RateLimitException("You are being rate limited."));
+                        } else if(req.getStatusCode() != 200) {
+                            throw new CompletionException(new IOException("Unexpected status code (" + req.getStatusCode() + ")"));
+                        }
+                    })
+                    .execute();
+
+            if(response == null) {
+                throw new CompletionException(new IOException("Failed to track player session"));
             }
 
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                return jsonObject.get("success").getAsBoolean();
-            } catch (IOException e) {
-                throw new CompletionException(new IOException("Unexpected response"));
-            }
+            JsonObject body = response.getResponseEntity(JsonObject.class);
+            return body.get("success").getAsBoolean();
         });
     }
 
@@ -237,21 +245,27 @@ public class SDK {
             return future;
         }
 
-        return request("/server/setup").withServerToken(serverToken).sendAsync().thenApply(response -> {
-            if(response.code() == 404) {
-                throw new CompletionException(new ServerNotFoundException());
-            } else if(response.code() == 429) {
-                throw new CompletionException(new RateLimitException("You are being rate limited."));
-            } else if(response.code() != 200) {
-                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+        return CompletableFuture.supplyAsync(() -> {
+            final HttpResponse response = this.HTTP_CLIENT.post("/server/setup")
+                    .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .onStatus(200, req -> {})
+                    .onRemaining(req -> {
+                        if(req.getStatusCode() == 404) {
+                            throw new CompletionException(new ServerNotFoundException());
+                        } else if(req.getStatusCode() == 429) {
+                            throw new CompletionException(new RateLimitException("You are being rate limited."));
+                        } else if(req.getStatusCode() != 200) {
+                            throw new CompletionException(new IOException("Unexpected status code (" + req.getStatusCode() + ")"));
+                        }
+                    })
+                    .execute();
+
+            if(response == null) {
+                throw new CompletionException(new IOException("Failed to complete server setup"));
             }
 
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                return jsonObject.get("success").getAsBoolean();
-            } catch (IOException e) {
-                throw new CompletionException(new IOException("Unexpected response"));
-            }
+            JsonObject body = response.getResponseEntity(JsonObject.class);
+            return body.get("success").getAsBoolean();
         });
     }
 
@@ -271,21 +285,28 @@ public class SDK {
         JsonObject body = new JsonObject();
         body.addProperty("players", playerCount);
 
-        return request("/server/heartbeat").withServerToken(serverToken).withBody(GSON.toJson(body)).sendAsync().thenApply(response -> {
-            if(response.code() == 404) {
-                throw new CompletionException(new ServerNotFoundException());
-            } else if(response.code() == 429) {
-                throw new CompletionException(new RateLimitException("You are being rate limited."));
-            } else if(response.code() != 200) {
-                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+        return CompletableFuture.supplyAsync(() -> {
+            final HttpResponse response = this.HTTP_CLIENT.post("/server/heartbeat")
+                    .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .withInput(() -> GSON.toJson(body))
+                    .onStatus(200, req -> {})
+                    .onRemaining(req -> {
+                        if(req.getStatusCode() == 404) {
+                            throw new CompletionException(new ServerNotFoundException());
+                        } else if(req.getStatusCode() == 429) {
+                            throw new CompletionException(new RateLimitException("You are being rate limited."));
+                        } else if(req.getStatusCode() != 200) {
+                            throw new CompletionException(new IOException("Unexpected status code (" + req.getStatusCode() + ")"));
+                        }
+                    })
+                    .execute();
+
+            if(response == null) {
+                throw new CompletionException(new IOException("Failed to track heartbeat"));
             }
 
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                return jsonObject.get("success").getAsBoolean();
-            } catch (IOException e) {
-                throw new CompletionException(new IOException("Unexpected response"));
-            }
+            JsonObject responseBody = response.getResponseEntity(JsonObject.class);
+            return responseBody.get("success").getAsBoolean();
         });
     }
 
@@ -301,21 +322,33 @@ public class SDK {
             return future;
         }
 
-        return request("/server/telemetry").withServerToken(serverToken).withBody(GSON.toJson(platform.getTelemetry())).sendAsync().thenApply(response -> {
-            if(response.code() == 404) {
-                throw new CompletionException(new ServerNotFoundException());
-            } else if(response.code() == 429) {
-                throw new CompletionException(new RateLimitException("You are being rate limited."));
-            } else if(response.code() != 200) {
-                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+        return CompletableFuture.supplyAsync(() -> {
+            final HttpResponse response = this.HTTP_CLIENT.post("/server/telemetry")
+                    .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .withInput(() -> GSON.toJson(platform.getTelemetry()))
+                    .onStatus(200, req -> {})
+                    .onRemaining(req -> {
+                        if(req.getStatusCode() == 404) {
+                            throw new CompletionException(new ServerNotFoundException());
+                        } else if(req.getStatusCode() == 429) {
+                            throw new CompletionException(new RateLimitException("You are being rate limited."));
+                        } else if(req.getStatusCode() != 200) {
+                            throw new CompletionException(new IOException("Unexpected status code (" + req.getStatusCode() + ")"));
+                        }
+                    })
+                    .execute();
+
+            if(response == null) {
+                throw new CompletionException(new IOException("Failed to send telemetry"));
             }
 
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                return jsonObject.get("success").getAsBoolean();
-            } catch (IOException e) {
-                throw new CompletionException(new IOException("Unexpected response"));
-            }
+            System.out.println("Status Code: " + response.getStatusCode());
+            byte[] rawResponse = response.getRawResponse();
+            String responseString = new String(rawResponse, StandardCharsets.UTF_8);
+            System.out.println(responseString);
+
+            JsonObject responseBody = response.getResponseEntity(JsonObject.class);
+            return responseBody.get("success").getAsBoolean();
         });
     }
 
@@ -343,21 +376,27 @@ public class SDK {
             return future;
         }
 
-        return request("/server/leaderboard/" + leaderboard + "?page=" + page).withServerToken(serverToken).sendAsync().thenApply(response -> {
-            if(response.code() == 404) {
-                throw new CompletionException(new ServerNotFoundException());
-            } else if(response.code() == 429) {
-                throw new CompletionException(new RateLimitException("You are being rate limited."));
-            } else if(response.code() != 200) {
-                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+        return CompletableFuture.supplyAsync(() -> {
+            final HttpResponse response = this.HTTP_CLIENT.get("/server/leaderboard/" + leaderboard + "?page=" + page)
+                    .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .onStatus(200, req -> {})
+                    .onRemaining(req -> {
+                        if(req.getStatusCode() == 404) {
+                            throw new CompletionException(new ServerNotFoundException());
+                        } else if(req.getStatusCode() == 429) {
+                            throw new CompletionException(new RateLimitException("You are being rate limited."));
+                        } else if(req.getStatusCode() != 200) {
+                            throw new CompletionException(new IOException("Unexpected status code (" + req.getStatusCode() + ")"));
+                        }
+                    })
+                    .execute();
+
+            if(response == null) {
+                throw new CompletionException(new IOException("Failed to retrieve leaderboard"));
             }
 
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                return GSON.fromJson(jsonObject.get("leaderboard"), AnalyseLeaderboard.class);
-            } catch (IOException e) {
-                throw new CompletionException(new IOException("Unexpected response"));
-            }
+            JsonObject body = response.getResponseEntity(JsonObject.class);
+            return GSON.fromJson(body.get("leaderboard"), AnalyseLeaderboard.class);
         });
     }
 
@@ -374,21 +413,27 @@ public class SDK {
             return future;
         }
 
-        return request("/server/player/" + id).withServerToken(serverToken).sendAsync().thenApply(response -> {
-            if(response.code() == 404) {
-                throw new CompletionException(new ServerNotFoundException());
-            } else if(response.code() == 429) {
-                throw new CompletionException(new RateLimitException("You are being rate limited."));
-            } else if(response.code() != 200) {
-                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+        return CompletableFuture.supplyAsync(() -> {
+            final HttpResponse response = this.HTTP_CLIENT.get("/server/player/" + id)
+                    .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .onStatus(200, req -> {})
+                    .onRemaining(req -> {
+                        if(req.getStatusCode() == 404) {
+                            throw new CompletionException(new ServerNotFoundException());
+                        } else if(req.getStatusCode() == 429) {
+                            throw new CompletionException(new RateLimitException("You are being rate limited."));
+                        } else if(req.getStatusCode() != 200) {
+                            throw new CompletionException(new IOException("Unexpected status code (" + req.getStatusCode() + ")"));
+                        }
+                    })
+                    .execute();
+
+            if(response == null) {
+                throw new CompletionException(new IOException("Failed to retrieve player"));
             }
 
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                return GSON.fromJson(jsonObject.get("player"), PlayerProfile.class);
-            } catch (IOException e) {
-                throw new CompletionException(new IOException("Unexpected response"));
-            }
+            JsonObject body = response.getResponseEntity(JsonObject.class);
+            return GSON.fromJson(body.get("player"), PlayerProfile.class);
         });
     }
 
@@ -407,22 +452,28 @@ public class SDK {
             return future;
         }
 
-        return request("/ip/" + ip).withServerToken(serverToken).sendAsync().thenApply(response -> {
-            if(response.code() == 404) {
-                throw new CompletionException(new ServerNotFoundException());
-            } else if(response.code() == 429) {
-                throw new CompletionException(new RateLimitException("You are being rate limited."));
-            } else if(response.code() != 200) {
-                throw new CompletionException(new IOException("Unexpected status code (" + response.code() + ")"));
+        return CompletableFuture.supplyAsync(() -> {
+            final HttpResponse response = this.HTTP_CLIENT.get("/ip/" + ip)
+                    .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .onStatus(200, req -> {})
+                    .onRemaining(req -> {
+                        if(req.getStatusCode() == 404) {
+                            throw new CompletionException(new ServerNotFoundException());
+                        } else if(req.getStatusCode() == 429) {
+                            throw new CompletionException(new RateLimitException("You are being rate limited."));
+                        } else if(req.getStatusCode() != 200) {
+                            throw new CompletionException(new IOException("Unexpected status code (" + req.getStatusCode() + ")"));
+                        }
+                    })
+                    .execute();
+
+            if(response == null) {
+                throw new CompletionException(new IOException("Failed to retrieve country from IP"));
             }
 
-            try {
-                JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
-                if(! jsonObject.get("success").getAsBoolean()) return null;
-                return jsonObject.get("country_code").getAsString();
-            } catch (IOException e) {
-                throw new CompletionException(new IOException("Unexpected response"));
-            }
+            JsonObject jsonObject = response.getResponseEntity(JsonObject.class);
+            if(! jsonObject.get("success").getAsBoolean()) return null;
+            return jsonObject.get("country_code").getAsString();
         });
     }
 
@@ -448,9 +499,8 @@ public class SDK {
      * Create a new AnalyseRequest with the specified URL.
      *
      * @param url The URL to send the request to
-     * @return An AnalyseRequest instance
      */
-    public AnalyseRequest request(String url) {
-        return new AnalyseRequest(API_URL + url, HTTP_CLIENT);
+    public void request(String url) {
+//        return new AnalyseRequest(API_URL + url, HTTP_CLIENT);
     }
 }
