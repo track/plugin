@@ -20,10 +20,7 @@ import io.tebex.analytics.sdk.request.response.PluginInformation;
 import io.tebex.analytics.sdk.request.response.ServerInformation;
 import io.tebex.analytics.sdk.util.StringUtil;
 
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -54,19 +51,6 @@ public class SDK {
         this.platform = platform;
         this.serverToken = serverToken;
 
-        TrustManager TRUST_ALL_CERTS = new X509TrustManager() {
-            @Override
-            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-            }
-            @Override
-            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-            }
-            @Override
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return new java.security.cert.X509Certificate[] {};
-            }
-        };
-
         final EntityMapper mapper = EntityMapper.newInstance()
                 .registerSerializer(JsonObject.class, GsonMapper.serializer(JsonObject.class, GSON))
                 .registerDeserializer(JsonObject.class, GsonMapper.deserializer(JsonObject.class, GSON));
@@ -86,6 +70,9 @@ public class SDK {
     public CompletableFuture<PluginInformation> getPluginVersion(PlatformType platformType) {
         return CompletableFuture.supplyAsync(() -> {
             final HttpResponse response = this.HTTP_CLIENT.get("/plugin")
+                    .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .withHeader("User-Agent", "Tebex-SDK")
+                    .withHeader("Content-Type", "application/json")
                     .onStatus(200, req -> {})
                     .onRemaining(req -> {
                         if(req.getStatusCode() == 404) {
@@ -129,6 +116,8 @@ public class SDK {
         return CompletableFuture.supplyAsync(() -> {
             final HttpResponse response = this.HTTP_CLIENT.get("/server")
                     .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .withHeader("User-Agent", "Tebex-SDK")
+                    .withHeader("Content-Type", "application/json")
                     .onStatus(200, req -> {})
                     .onRemaining(req -> {
                         if(req.getStatusCode() == 404) {
@@ -211,6 +200,8 @@ public class SDK {
         return CompletableFuture.supplyAsync(() -> {
             final HttpResponse response = this.HTTP_CLIENT.get("/server/sessions")
                     .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .withHeader("User-Agent", "Tebex-SDK")
+                    .withHeader("Content-Type", "application/json")
                     .withInput(() -> GSON.toJson(player))
                     .onStatus(200, req -> {})
                     .onRemaining(req -> {
@@ -246,8 +237,10 @@ public class SDK {
         }
 
         return CompletableFuture.supplyAsync(() -> {
-            final HttpResponse response = this.HTTP_CLIENT.post("/server/setup")
+            final HttpResponse response = this.HTTP_CLIENT.get("/server/setup")
                     .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .withHeader("User-Agent", "Tebex-SDK")
+                    .withHeader("Content-Type", "application/json")
                     .onStatus(200, req -> {})
                     .onRemaining(req -> {
                         if(req.getStatusCode() == 404) {
@@ -288,6 +281,8 @@ public class SDK {
         return CompletableFuture.supplyAsync(() -> {
             final HttpResponse response = this.HTTP_CLIENT.post("/server/heartbeat")
                     .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .withHeader("User-Agent", "Tebex-SDK")
+                    .withHeader("Content-Type", "application/json")
                     .withInput(() -> GSON.toJson(body))
                     .onStatus(200, req -> {})
                     .onRemaining(req -> {
@@ -325,6 +320,8 @@ public class SDK {
         return CompletableFuture.supplyAsync(() -> {
             final HttpResponse response = this.HTTP_CLIENT.post("/server/telemetry")
                     .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .withHeader("User-Agent", "Tebex-SDK")
+                    .withHeader("Content-Type", "application/json")
                     .withInput(() -> GSON.toJson(platform.getTelemetry()))
                     .onStatus(200, req -> {})
                     .onRemaining(req -> {
@@ -341,11 +338,6 @@ public class SDK {
             if(response == null) {
                 throw new CompletionException(new IOException("Failed to send telemetry"));
             }
-
-            System.out.println("Status Code: " + response.getStatusCode());
-            byte[] rawResponse = response.getRawResponse();
-            String responseString = new String(rawResponse, StandardCharsets.UTF_8);
-            System.out.println(responseString);
 
             JsonObject responseBody = response.getResponseEntity(JsonObject.class);
             return responseBody.get("success").getAsBoolean();
@@ -379,6 +371,8 @@ public class SDK {
         return CompletableFuture.supplyAsync(() -> {
             final HttpResponse response = this.HTTP_CLIENT.get("/server/leaderboard/" + leaderboard + "?page=" + page)
                     .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .withHeader("User-Agent", "Tebex-SDK")
+                    .withHeader("Content-Type", "application/json")
                     .onStatus(200, req -> {})
                     .onRemaining(req -> {
                         if(req.getStatusCode() == 404) {
@@ -416,6 +410,8 @@ public class SDK {
         return CompletableFuture.supplyAsync(() -> {
             final HttpResponse response = this.HTTP_CLIENT.get("/server/player/" + id)
                     .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .withHeader("User-Agent", "Tebex-SDK")
+                    .withHeader("Content-Type", "application/json")
                     .onStatus(200, req -> {})
                     .onRemaining(req -> {
                         if(req.getStatusCode() == 404) {
@@ -455,6 +451,8 @@ public class SDK {
         return CompletableFuture.supplyAsync(() -> {
             final HttpResponse response = this.HTTP_CLIENT.get("/ip/" + ip)
                     .withHeader("X-SERVER-TOKEN", getServerToken())
+                    .withHeader("User-Agent", "Tebex-SDK")
+                    .withHeader("Content-Type", "application/json")
                     .onStatus(200, req -> {})
                     .onRemaining(req -> {
                         if(req.getStatusCode() == 404) {
@@ -493,14 +491,5 @@ public class SDK {
      */
     public void setServerToken(String serverToken) {
         this.serverToken = serverToken;
-    }
-
-    /**
-     * Create a new AnalyseRequest with the specified URL.
-     *
-     * @param url The URL to send the request to
-     */
-    public void request(String url) {
-//        return new AnalyseRequest(API_URL + url, HTTP_CLIENT);
     }
 }

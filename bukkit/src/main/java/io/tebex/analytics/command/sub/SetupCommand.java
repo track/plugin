@@ -43,18 +43,24 @@ public class SetupCommand extends SubCommand {
 
             sender.sendMessage("§8[Analytics] §7Connected to §b" + serverInformation.getName() + "§7.");
             platform.configure();
-            platform.getSDK().completeServerSetup();
+            platform.getSDK().completeServerSetup().thenAccept(v -> {
+                sender.sendMessage("§8[Analytics] §7Setup complete.");
+            }).exceptionally(ex -> {
+                sender.sendMessage("§8[Analytics] §cAn error occurred: " + ex.getMessage());
+                ex.printStackTrace();
+                return null;
+            });
         }).exceptionally(ex -> {
             Throwable cause = ex.getCause();
 
             if(cause instanceof ServerNotFoundException) {
                 sender.sendMessage("§8[Analytics] §7Server not found. Please check your server token.");
                 platform.halt();
-            } else {
-                sender.sendMessage("§8[Analytics] §cAn error occurred: " + cause.getMessage());
-                cause.printStackTrace();
+                return null;
             }
 
+            sender.sendMessage("§8[Analytics] §cAn error occurred: " + cause.getMessage());
+            cause.printStackTrace();
             return null;
         });
     }
