@@ -12,22 +12,10 @@ val ossrhUsername = System.getenv("OSSRH_USERNAME") ?: properties["ossrhUsername
 val ossrhPassword = System.getenv("OSSRH_PASSWORD") ?: properties["ossrhPassword"] as String?
 
 dependencies {
-    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.12")
-    compileOnly("com.intellectualsites.http:HTTP4J:1.4")
+    implementation("com.intellectualsites.http:HTTP4J:1.4")
     implementation("dev.dejvokep:boosted-yaml:1.3")
     compileOnly("com.google.code.gson:gson:2.10.1")
-    compileOnly("com.google.guava:guava:30.1.1-jre")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-}
-
-tasks.named<Test>("test") {
-    useJUnitPlatform()
-
-    maxHeapSize = "1G"
-
-    testLogging {
-        events("passed")
-    }
+    compileOnly("com.google.guava:guava:33.0.0-jre")
 }
 
 tasks.withType<JavaCompile> {

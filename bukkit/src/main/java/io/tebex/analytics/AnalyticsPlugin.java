@@ -1,5 +1,6 @@
 package io.tebex.analytics;
 
+import com.google.common.collect.Maps;
 import dev.dejvokep.boostedyaml.YamlDocument;
 import io.tebex.analytics.event.PlayerJoinListener;
 import io.tebex.analytics.event.PlayerQuitListener;
@@ -12,7 +13,6 @@ import io.tebex.analytics.manager.CommandManager;
 import io.tebex.analytics.manager.HeartbeatManager;
 import io.tebex.analytics.sdk.platform.*;
 import io.tebex.analytics.sdk.request.exception.RateLimitException;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import io.tebex.analytics.sdk.Analytics;
 import io.tebex.analytics.sdk.SDK;
 import io.tebex.analytics.sdk.exception.ServerNotFoundException;
@@ -30,10 +30,8 @@ import space.arim.morepaperlib.scheduling.GracefulScheduling;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,7 +42,7 @@ import java.util.regex.Pattern;
 public final class AnalyticsPlugin extends JavaPlugin implements Platform {
     private SDK sdk;
     private PlatformConfig config;
-    private Object2ObjectOpenHashMap<UUID, AnalysePlayer> players;
+    private ConcurrentMap<UUID, AnalysePlayer> players;
     private boolean setup;
     private HeartbeatManager heartbeatManager;
     private ModuleManager moduleManager;
@@ -115,7 +113,7 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
             return;
         }
 
-        players = new Object2ObjectOpenHashMap<>();
+        players = Maps.newConcurrentMap();
 
         // Initialise Managers.
         heartbeatManager = new HeartbeatManager(this);
@@ -283,7 +281,7 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
     }
 
     @Override
-    public Object2ObjectOpenHashMap<UUID, AnalysePlayer> getPlayers() {
+    public ConcurrentMap<UUID, AnalysePlayer> getPlayers() {
         return players;
     }
 

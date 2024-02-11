@@ -39,7 +39,7 @@ public class SDK {
     private final HttpClient HTTP_CLIENT;
 
     private final int API_VERSION = 1;
-    private final String API_URL = String.format("https://tebexanalytics.test/api/v%d", API_VERSION);
+    private final String API_URL = String.format("https://analytics.tebex.io/api/v%d", API_VERSION);
 
     private final Platform platform;
     private String serverToken;
