@@ -20,7 +20,11 @@ public class DebugCommand extends SubCommand {
 
         boolean debugEnabled = args.length > 0 ? Boolean.parseBoolean(args[0]) : !analyseConfig.hasDebugEnabled();
 
-        sender.sendMessage("§8[Analytics] §7Debug Mode: §f" + (debugEnabled ? "Enabled" : "Disabled") + "§7.");
+        if(debugEnabled) {
+            getPlatform().sendMessage(sender, "You have enabled debug mode. This can be disabled by running &f/analytics debug &7again.");
+        } else {
+            getPlatform().sendMessage(sender, "You have disabled debug mode.");
+        }
 
         YamlDocument configFile = analyseConfig.getYamlDocument();
         configFile.set("debug", debugEnabled);
@@ -29,7 +33,8 @@ public class DebugCommand extends SubCommand {
         try {
             configFile.save();
         } catch (IOException e) {
-            sender.sendMessage("§8[Analytics] §7Failed to save config: " + e.getMessage());
+            getPlatform().sendMessage(sender, "&cFailed to toggle debug mode. Check console for more information.");
+            e.printStackTrace();
         }
     }
 }

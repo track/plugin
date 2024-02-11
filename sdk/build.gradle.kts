@@ -43,8 +43,8 @@ publishing {
             from(components["java"])
 
             pom {
-                name.set("Analyse SDK")
-                description.set("The official Java SDK for Analyse.")
+                name.set("Analytics SDK")
+                description.set("The official Java SDK for Tebex Analytics.")
                 url.set("https://github.com/track/plugin")
 
                 licenses {

@@ -22,16 +22,15 @@ public class ReloadCommand extends SubCommand {
 
             if(config.hasProxyModeEnabled()) {
                 platform.getProxyMessageListener().register();
-            } else {
+            } else if(getPlatform().isProxyModeEnabled()) {
                 platform.getProxyMessageListener().unregister();
             }
 
-            sender.sendMessage("§8[Analytics] §7Successfully reloaded.");
+            platform.setProxyModeEnabled(config.hasProxyModeEnabled());
+            getPlatform().sendMessage(sender, "The plugin has been reloaded.");
         } catch (IOException e) {
-            sender.sendMessage("§8[Analytics] §cFailed to reload the plugin: Check Console.");
-            throw new RuntimeException(e);
+            getPlatform().sendMessage(sender, "&cFailed to reload the plugin. Check console for more information.");
+            e.printStackTrace();
         }
-
-
     }
 }

@@ -21,6 +21,8 @@ import io.tebex.analytics.sdk.obj.AnalysePlayer;
 import io.tebex.analytics.sdk.util.StringUtil;
 import io.tebex.analytics.sdk.util.VersionUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -44,6 +46,7 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
     private PlatformConfig config;
     private ConcurrentMap<UUID, AnalysePlayer> players;
     private boolean setup;
+    private boolean proxyModeEnabled;
     private HeartbeatManager heartbeatManager;
     private ModuleManager moduleManager;
     private ProxyMessageListener proxyMessageListener;
@@ -125,7 +128,7 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
         // Check if the server has been set up.
         if (config.getServerToken() != null && !config.getServerToken().isEmpty()) {
             sdk.getServerInformation().thenAccept(serverInformation -> {
-                log("Connected to '" + serverInformation.getName() + "'.");
+                log("Connected to " + serverInformation.getName() + ".");
                 configure();
             }).exceptionally(ex -> {
                 Throwable cause = ex.getCause();
@@ -142,14 +145,14 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
             });
         } else {
             log(Level.WARNING, "Welcome to Tebex Analytics! It seems like this is a new setup.");
-            log(Level.WARNING, "To get started, please use the 'analyse setup <key>' command in the console.");
+            log(Level.WARNING, "To get started, please use the 'analytics setup <key>' command in the console.");
         }
 
         // Register events.
         registerEvents(new PlayerJoinListener(this));
         registerEvents(new PlayerQuitListener(this));
 
-        debug("Debug mode enabled. Type 'analyse debug' to disable.");
+        debug("Debug mode enabled. Type 'analytics debug' to disable.");
 
         sdk.getPluginVersion(getType()).thenAccept(pluginInformation -> {
             if (VersionUtil.isNewerVersion(getVersion(), pluginInformation.getVersionName())) {
@@ -173,13 +176,10 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
         });
 
         proxyMessageListener = new ProxyMessageListener(this);
-        if(config.hasProxyModeEnabled()) {
-            proxyMessageListener.register();
-        }
+        proxyModeEnabled = config.hasProxyModeEnabled();
 
-        if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            log("Hooked into PlaceholderAPI.");
-            new PlaceholderAPIExpansionHook(this).register();
+        if(proxyModeEnabled) {
+            proxyMessageListener.register();
         }
 
         if(config.isBedrockFloodgateHook() && Bukkit.getPluginManager().isPluginEnabled("floodgate")) {
@@ -206,13 +206,15 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
     @Override
     public void loadModules() {
         try {
-            log("Loading modules..");
             moduleManager = new ModuleManager(this);
             List<PlatformModule> modules = moduleManager.load();
 
-            modules.forEach(this::loadModule);
+            if(! modules.isEmpty()) {
+                log("Loading modules..");
+                modules.forEach(this::loadModule);
 
-            log(modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + " loaded.");
+                log(modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + " loaded.");
+            }
         } catch (Exception e) {
             log(Level.WARNING, "Failed to load modules: " + e.getMessage());
             e.printStackTrace();
@@ -378,6 +380,14 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
         return moduleManager;
     }
 
+    public boolean isProxyModeEnabled() {
+        return proxyModeEnabled;
+    }
+
+    public void setProxyModeEnabled(boolean proxyModeEnabled) {
+        this.proxyModeEnabled = proxyModeEnabled;
+    }
+
     public ProxyMessageListener getProxyMessageListener() {
         return proxyMessageListener;
     }
@@ -391,5 +401,16 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
             if(value.isEmpty()) continue;
             stats.put(statistic, value);
         }
+    }
+
+    public void sendMessage(CommandSender sender, String message) {
+        String str = ChatColor.translateAlternateColorCodes('&', "&b[Analytics] &7" + message);
+
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(ChatColor.stripColor(str));
+            return;
+        }
+
+        sender.sendMessage(str);
     }
 }

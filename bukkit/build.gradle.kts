@@ -14,7 +14,6 @@ repositories {
 
 dependencies {
     implementation(project(":sdk"))
-//    implementation("it.unimi.dsi:fastutil:8.5.6")
     implementation("space.arim.morepaperlib:morepaperlib:0.4.3")
 
     compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")

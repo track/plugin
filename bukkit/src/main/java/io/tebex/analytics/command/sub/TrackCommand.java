@@ -11,32 +11,30 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class TrackCommand extends SubCommand {
-
     public TrackCommand(AnalyticsPlugin platform) {
         super(platform, "track", "analyse.admin");
     }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        // /analyse track <player> <event> <json metadata>
         if (args.length < 3) {
-            sender.sendMessage("§8[Analytics] §7Usage: /analyse track <player> <event> <json metadata>");
+            getPlatform().sendMessage(sender, "Usage: /analytics track <player> <event> <metadata>");
             return;
         }
 
         Player bukkitPlayer = Bukkit.getServer().getPlayer(args[0]);
         if (bukkitPlayer == null) {
-            sender.sendMessage("§8[Analytics] §7Player not found.");
+            getPlatform().sendMessage(sender, "&cPlayer not found.");
             return;
         }
 
         AnalysePlayer player = getPlatform().getPlayer(bukkitPlayer.getUniqueId());
         if (player == null) {
-            sender.sendMessage("§8[Analytics] §7Player not tracked.");
+            getPlatform().sendMessage(sender, "&cPlayer not found.");
             return;
         }
 
@@ -56,6 +54,6 @@ public class TrackCommand extends SubCommand {
         }
 
         player.track(event);
-        sender.sendMessage("§8[Analytics] §7Event tracked.");
+        getPlatform().sendMessage(sender, "Event tracked.");
     }
 }

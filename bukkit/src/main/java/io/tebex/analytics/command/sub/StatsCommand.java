@@ -1,21 +1,19 @@
 package io.tebex.analytics.command.sub;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import io.tebex.analytics.AnalyticsPlugin;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
 import io.tebex.analytics.command.SubCommand;
 import io.tebex.analytics.sdk.obj.AnalysePlayer;
 import io.tebex.analytics.sdk.platform.PlayerType;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class StatsCommand extends SubCommand {
-
     public StatsCommand(AnalyticsPlugin platform) {
         super(platform, "stats", "analyse.admin");
     }
@@ -38,8 +36,8 @@ public class StatsCommand extends SubCommand {
                 try { amountOfDomains = Math.max(1, Math.min(Long.parseLong(args[1]), 25));} catch (NumberFormatException ignored) {}
 
             // Show domain stats
-            sender.sendMessage("§b[Analytics] §7Top " + amountOfDomains + " Domains:");
-            sender.sendMessage("§7");
+            getPlatform().sendMessage(sender, "&7Top " + amountOfDomains + " Domains:");
+            getPlatform().sendMessage(sender, "&7");
 
             // Group by domain and show counts
             Map<String, Map<PlayerType, Long>> domainCounts = players.stream()
@@ -80,11 +78,11 @@ public class StatsCommand extends SubCommand {
                     }
                 }
             } else {
-                sender.sendMessage("§7⚡ §7No domains found.");
+                getPlatform().sendMessage(sender, "&7⚡ &7No domains found.");
             }
 
-            sender.sendMessage("§7");
-            sender.sendMessage("§b[Analytics] §7A total of " + totalCount + " players online.");
+            getPlatform().sendMessage(sender, "&7");
+            getPlatform().sendMessage(sender, "&7A total of " + totalCount + " players online.");
 
         } else if (args[0].equalsIgnoreCase("country") || args[0].equalsIgnoreCase("countries")) {
             long amountOfCountries = 5; // Range: 1, 25
@@ -93,8 +91,8 @@ public class StatsCommand extends SubCommand {
                 try { amountOfCountries = Math.max(1, Math.min(Long.parseLong(args[1]), 25));} catch (NumberFormatException ignored) {}
 
             // Show country stats
-            sender.sendMessage("§b[Analytics] §7Top " + amountOfCountries + " Countries:");
-            sender.sendMessage("§7");
+            getPlatform().sendMessage(sender, "&7Top " + amountOfCountries + " Countries:");
+            getPlatform().sendMessage(sender, "&7");
 
             // Group by country and show counts
             Map<String, Map<PlayerType, Long>> countryCounts = players.stream()
@@ -122,29 +120,29 @@ public class StatsCommand extends SubCommand {
 
                     // Create a tooltip with the country stats using chatcomponents
                     HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new net.md_5.bungee.api.chat.BaseComponent[]{
-                            new net.md_5.bungee.api.chat.TextComponent("§b" + countryName + "\n"),
+                            new net.md_5.bungee.api.chat.TextComponent("&b" + countryName + "\n"),
 
-                            new net.md_5.bungee.api.chat.TextComponent("\n§7⚡ §7Java: §f" + javaCountryCount),
-                            new net.md_5.bungee.api.chat.TextComponent("\n§7⚡ §7Bedrock: §f" + bedrockCountryCount),
-                            new net.md_5.bungee.api.chat.TextComponent("\n\n§7Click for more information"),
+                            new net.md_5.bungee.api.chat.TextComponent("\n&7⚡ &7Java: &f" + javaCountryCount),
+                            new net.md_5.bungee.api.chat.TextComponent("\n&7⚡ &7Bedrock: &f" + bedrockCountryCount),
+                            new net.md_5.bungee.api.chat.TextComponent("\n\n&7Click for more information"),
                     });
 
                     if (sender instanceof Player) {
-                        TextComponent component = new TextComponent("§7⚡ §b" + countryName + ": §f" + countryTotal + " §7online §8§o(Hover for details)");
+                        TextComponent component = new TextComponent("&7⚡ &b" + countryName + ": &f" + countryTotal + " &7online &8&o(Hover for details)");
                         component.setHoverEvent(hoverEvent);
 
                         ((Player) sender).spigot().sendMessage(component);
                     }
                 }
             } else {
-                sender.sendMessage("§7⚡ §7No countries found.");
+                getPlatform().sendMessage(sender, "&7⚡ &7No countries found.");
             }
 
-            sender.sendMessage("§7");
-            sender.sendMessage("§b[Analytics] §7A total of " + totalCount + " players online.");
+            getPlatform().sendMessage(sender, "&7");
+            getPlatform().sendMessage(sender, "&7A total of " + totalCount + " players online.");
 
         } else {
-            sender.sendMessage("§cUsage: /analyse stats [domain|country]");
+            getPlatform().sendMessage(sender, "&cUsage: /analytics stats [domain|country]");
         }
     }
 }

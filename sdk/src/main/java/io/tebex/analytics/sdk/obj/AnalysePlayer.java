@@ -6,8 +6,8 @@ import io.tebex.analytics.sdk.platform.PlayerType;
 import java.util.*;
 
 /**
- * The AnalysePlayer class represents a player on the server platform and holds information and
- * statistics about the player.
+ * The AnalysePlayer class represents a player on the server platform
+ * and holds information and statistics about the player.
  */
 public class AnalysePlayer {
     private final String name;

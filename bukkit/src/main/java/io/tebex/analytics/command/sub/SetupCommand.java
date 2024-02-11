@@ -4,8 +4,8 @@ import dev.dejvokep.boostedyaml.YamlDocument;
 import io.tebex.analytics.AnalyticsPlugin;
 import io.tebex.analytics.command.SubCommand;
 import io.tebex.analytics.sdk.SDK;
-import io.tebex.analytics.sdk.platform.PlatformConfig;
 import io.tebex.analytics.sdk.exception.ServerNotFoundException;
+import io.tebex.analytics.sdk.platform.PlatformConfig;
 import org.bukkit.command.CommandSender;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ public class SetupCommand extends SubCommand {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if(args.length == 0) {
-            sender.sendMessage("§8[Analytics] §7Usage: /analyse setup <serverToken>");
+            getPlatform().sendMessage(sender, "Invalid usage. Usage: &f/analytics setup <serverToken>");
             return;
         }
 
@@ -38,15 +38,15 @@ public class SetupCommand extends SubCommand {
             try {
                 configFile.save();
             } catch (IOException e) {
-                sender.sendMessage("§8[Analytics] §7Failed to save config: " + e.getMessage());
+                getPlatform().sendMessage(sender, "&cFailed to setup the plugin. Check console for more information.");
+                e.printStackTrace();
             }
 
-            sender.sendMessage("§8[Analytics] §7Connected to §b" + serverInformation.getName() + "§7.");
-            platform.configure();
             platform.getSDK().completeServerSetup().thenAccept(v -> {
-                sender.sendMessage("§8[Analytics] §7Setup complete.");
+                getPlatform().sendMessage(sender, "Connected to &b" + serverInformation.getName() + "&7.");
+                platform.configure();
             }).exceptionally(ex -> {
-                sender.sendMessage("§8[Analytics] §cAn error occurred: " + ex.getMessage());
+                getPlatform().sendMessage(sender, "&cFailed to setup the plugin. Check console for more information.");
                 ex.printStackTrace();
                 return null;
             });
@@ -54,12 +54,12 @@ public class SetupCommand extends SubCommand {
             Throwable cause = ex.getCause();
 
             if(cause instanceof ServerNotFoundException) {
-                sender.sendMessage("§8[Analytics] §7Server not found. Please check your server token.");
+                getPlatform().sendMessage(sender, "&cNo server was found with the provided token. Please check the token and try again.");
                 platform.halt();
                 return null;
             }
 
-            sender.sendMessage("§8[Analytics] §cAn error occurred: " + cause.getMessage());
+            getPlatform().sendMessage(sender, "&cFailed to setup the plugin. Check console for more information.");
             cause.printStackTrace();
             return null;
         });
