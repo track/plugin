@@ -24,7 +24,6 @@ dependencies {
 tasks.named("shadowJar", ShadowJar::class.java) {
     configurations = listOf(project.configurations.runtimeClasspath.get())
 
-    relocate("it.unimi", "io.tebex.analytics.libs.fastutil")
     relocate("dev.dejvokep.boostedyaml", "io.tebex.analytics.libs.boostedyaml")
     relocate("org.jetbrains.annotations", "io.tebex.analytics.libs.jetbrains")
     relocate("space.arim.morepaperlib", "io.tebex.analytics.libs.paperlib")
