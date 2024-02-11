@@ -32,6 +32,7 @@ subprojects {
 
     repositories {
         mavenCentral()
+        maven("https://s01.oss.sonatype.org/content/groups/staging/")
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") {
             name = "spigotmc-repo"
         }

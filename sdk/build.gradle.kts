@@ -11,14 +11,9 @@ val javaVersion = JavaVersion.current()
 val ossrhUsername = System.getenv("OSSRH_USERNAME") ?: properties["ossrhUsername"] as String?
 val ossrhPassword = System.getenv("OSSRH_PASSWORD") ?: properties["ossrhPassword"] as String?
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
 dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.12")
-    compileOnly("com.intellectualsites.http:HTTP4J:1.3")
+    compileOnly("com.intellectualsites.http:HTTP4J:1.4")
     implementation("dev.dejvokep:boosted-yaml:1.3")
     compileOnly("com.google.code.gson:gson:2.10.1")
     compileOnly("com.google.guava:guava:30.1.1-jre")
