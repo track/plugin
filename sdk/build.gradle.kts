@@ -13,7 +13,7 @@ val ossrhPassword = System.getenv("OSSRH_PASSWORD") ?: properties["ossrhPassword
 
 dependencies {
     implementation("com.intellectualsites.http:HTTP4J:1.4")
-    implementation("dev.dejvokep:boosted-yaml:1.3")
+    compileOnly("dev.dejvokep:boosted-yaml:1.3.2")
     compileOnly("com.google.code.gson:gson:2.10.1")
     compileOnly("com.google.guava:guava:33.0.0-jre")
 }

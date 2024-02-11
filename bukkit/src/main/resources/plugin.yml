@@ -7,7 +7,6 @@ description: "The Minecraft plugin for Tebex Analytics."
 api-version: 1.13
 folia-supported: true
 softdepend:
-  - PlaceholderAPI
   - floodgate
 commands:
   analytics:

@@ -17,7 +17,7 @@ dependencies {
     implementation("space.arim.morepaperlib:morepaperlib:0.4.3")
 
     compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
-    compileOnly("dev.dejvokep:boosted-yaml:1.3")
+    implementation("dev.dejvokep:boosted-yaml:1.3.2")
     compileOnly("org.geysermc.floodgate:api:2.2.0-SNAPSHOT")
 }
 
