@@ -73,8 +73,6 @@ public class PlayerJoinListener implements Listener {
 
         platform.debug("Tracking " + bukkitPlayer.getName() + " (" + player.getType() + ") that connected via: " + player.getDomain());
 
-        platform.updatePlaceholderAPIStatistics(bukkitPlayer, player.getStatistics());
-
         platform.getSDK().getCountryFromIp(player.getIpAddress()).thenAccept(player::setCountry);
 
         platform.getPlayers().put(bukkitPlayer.getUniqueId(), player);

@@ -7,17 +7,15 @@ import io.tebex.analytics.event.PlayerQuitListener;
 import io.tebex.analytics.event.ProxyMessageListener;
 import io.tebex.analytics.event.ServerLoadListener;
 import io.tebex.analytics.hook.FloodgateHook;
-import io.tebex.analytics.hook.PlaceholderAPIExpansionHook;
-import io.tebex.analytics.hook.PlaceholderAPIStatisticsHook;
 import io.tebex.analytics.manager.CommandManager;
 import io.tebex.analytics.manager.HeartbeatManager;
-import io.tebex.analytics.sdk.platform.*;
-import io.tebex.analytics.sdk.request.exception.RateLimitException;
 import io.tebex.analytics.sdk.Analytics;
 import io.tebex.analytics.sdk.SDK;
 import io.tebex.analytics.sdk.exception.ServerNotFoundException;
 import io.tebex.analytics.sdk.module.ModuleManager;
 import io.tebex.analytics.sdk.obj.AnalysePlayer;
+import io.tebex.analytics.sdk.platform.*;
+import io.tebex.analytics.sdk.request.exception.RateLimitException;
 import io.tebex.analytics.sdk.util.StringUtil;
 import io.tebex.analytics.sdk.util.VersionUtil;
 import org.bukkit.Bukkit;
@@ -32,7 +30,9 @@ import space.arim.morepaperlib.scheduling.GracefulScheduling;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -390,17 +390,6 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
 
     public ProxyMessageListener getProxyMessageListener() {
         return proxyMessageListener;
-    }
-
-    public void updatePlaceholderAPIStatistics(Player player, Map<String, Object> stats) {
-        if(! getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) return;
-        if(getPlatformConfig().getEnabledPapiStatistics() == null) return;
-
-        for (String statistic : getPlatformConfig().getEnabledPapiStatistics()) {
-            String value = PlaceholderAPIStatisticsHook.getStatistic(player, statistic);
-            if(value.isEmpty()) continue;
-            stats.put(statistic, value);
-        }
     }
 
     public void sendMessage(CommandSender sender, String message) {
