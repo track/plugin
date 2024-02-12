@@ -2,12 +2,45 @@ name: Analyse
 version: '${version}'
 main: io.tebex.analytics.AnalyticsPlugin
 website: "https://tebex.io"
-description: "The Spigot plugin for Tebex Analytics."
+prefix: "Analytics"
+description: "The Minecraft plugin for Tebex Analytics."
 api-version: 1.13
 folia-supported: true
 softdepend:
-  - PlaceholderAPI
   - floodgate
 commands:
-  analyse:
+  analytics:
     description: The main command
+    permission: analytics.admin
+    aliases:
+      - analyse
+      - tebexanalytics
+permissions:
+  analytics.admin:
+    description: Allows debug command
+    default: op
+  analytics.debug:
+    description: Allows debug command
+    default: op
+  analytics.reload:
+    description: Allows reload command
+    default: op
+  analytics.setup:
+    description: Allows setup command
+    default: op
+  analytics.stats:
+    description: Allows stats command
+    default: op
+  analytics.track:
+    description: Allows track command
+    default: op
+  analytics.*:
+    description: Wildcard permission
+    default: op
+    children:
+      analytics.admin: true
+      analytics.debug: true
+      analytics.reload: true
+      analytics.setup: true
+      analytics.stats: true
+      analytics.track: true

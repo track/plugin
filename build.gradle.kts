@@ -8,7 +8,7 @@ plugins {
 defaultTasks("clean", "shadowJar")
 
 group = "io.tebex.analytics"
-version = "2.1.0"
+version = "2.2.0"
 
 subprojects {
     plugins.apply("java")
@@ -32,6 +32,9 @@ subprojects {
 
     repositories {
         mavenCentral()
+        maven("https://s01.oss.sonatype.org/content/groups/staging/") {
+            name = "sonatype-staging-repo"
+        }
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") {
             name = "spigotmc-repo"
         }

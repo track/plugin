@@ -1,26 +1,26 @@
 package io.tebex.analytics;
 
+import com.google.common.collect.Maps;
 import dev.dejvokep.boostedyaml.YamlDocument;
 import io.tebex.analytics.event.PlayerJoinListener;
 import io.tebex.analytics.event.PlayerQuitListener;
 import io.tebex.analytics.event.ProxyMessageListener;
 import io.tebex.analytics.event.ServerLoadListener;
 import io.tebex.analytics.hook.FloodgateHook;
-import io.tebex.analytics.hook.PlaceholderAPIExpansionHook;
-import io.tebex.analytics.hook.PlaceholderAPIStatisticsHook;
 import io.tebex.analytics.manager.CommandManager;
 import io.tebex.analytics.manager.HeartbeatManager;
-import io.tebex.analytics.sdk.platform.*;
-import io.tebex.analytics.sdk.request.exception.RateLimitException;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import io.tebex.analytics.sdk.Analytics;
 import io.tebex.analytics.sdk.SDK;
 import io.tebex.analytics.sdk.exception.ServerNotFoundException;
 import io.tebex.analytics.sdk.module.ModuleManager;
 import io.tebex.analytics.sdk.obj.AnalysePlayer;
+import io.tebex.analytics.sdk.platform.*;
+import io.tebex.analytics.sdk.request.exception.RateLimitException;
 import io.tebex.analytics.sdk.util.StringUtil;
 import io.tebex.analytics.sdk.util.VersionUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -30,10 +30,11 @@ import space.arim.morepaperlib.scheduling.GracefulScheduling;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,8 +45,9 @@ import java.util.regex.Pattern;
 public final class AnalyticsPlugin extends JavaPlugin implements Platform {
     private SDK sdk;
     private PlatformConfig config;
-    private Object2ObjectOpenHashMap<UUID, AnalysePlayer> players;
+    private ConcurrentMap<UUID, AnalysePlayer> players;
     private boolean setup;
+    private boolean proxyModeEnabled;
     private HeartbeatManager heartbeatManager;
     private ModuleManager moduleManager;
     private ProxyMessageListener proxyMessageListener;
@@ -115,7 +117,7 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
             return;
         }
 
-        players = new Object2ObjectOpenHashMap<>();
+        players = Maps.newConcurrentMap();
 
         // Initialise Managers.
         heartbeatManager = new HeartbeatManager(this);
@@ -127,7 +129,7 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
         // Check if the server has been set up.
         if (config.getServerToken() != null && !config.getServerToken().isEmpty()) {
             sdk.getServerInformation().thenAccept(serverInformation -> {
-                log("Connected to '" + serverInformation.getName() + "'.");
+                log("Connected to " + serverInformation.getName() + ".");
                 configure();
             }).exceptionally(ex -> {
                 Throwable cause = ex.getCause();
@@ -144,44 +146,20 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
             });
         } else {
             log(Level.WARNING, "Welcome to Tebex Analytics! It seems like this is a new setup.");
-            log(Level.WARNING, "To get started, please use the 'analyse setup <key>' command in the console.");
+            log(Level.WARNING, "To get started, please use the 'analytics setup <secret-key>' command in the console.");
         }
 
         // Register events.
         registerEvents(new PlayerJoinListener(this));
         registerEvents(new PlayerQuitListener(this));
 
-        debug("Debug mode enabled. Type 'analyse debug' to disable.");
-
-        sdk.getPluginVersion(getType()).thenAccept(pluginInformation -> {
-            if (VersionUtil.isNewerVersion(getVersion(), pluginInformation.getVersionName())) {
-                log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", pluginInformation.getVersionName(), getDescription().getVersion()));
-                log(Level.WARNING, "Download the latest version at: " + pluginInformation.getDownloadUrl());
-                log(Level.WARNING, "View the changelog at: https://analy.se/plugin/releases/tag/" + pluginInformation.getVersionName());
-            } else {
-                log("You are running the latest version of Analytics.");
-            }
-        }).exceptionally(ex -> {
-            Throwable cause = ex.getCause();
-            log(Level.WARNING, "Failed to get plugin version: " + cause.getMessage());
-
-            if(cause instanceof ServerNotFoundException) {
-                this.halt();
-            } else {
-                cause.printStackTrace();
-            }
-
-            return null;
-        });
+        debug("Debug mode enabled. Type 'analytics debug' to disable.");
 
         proxyMessageListener = new ProxyMessageListener(this);
-        if(config.hasProxyModeEnabled()) {
-            proxyMessageListener.register();
-        }
+        proxyModeEnabled = config.hasProxyModeEnabled();
 
-        if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            log("Hooked into PlaceholderAPI.");
-            new PlaceholderAPIExpansionHook(this).register();
+        if(proxyModeEnabled) {
+            proxyMessageListener.register();
         }
 
         if(config.isBedrockFloodgateHook() && Bukkit.getPluginManager().isPluginEnabled("floodgate")) {
@@ -198,6 +176,9 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
         } catch (final ClassNotFoundException ignored) {
             getScheduler().globalRegionalScheduler().runDelayed(this::loadModules, 1);
         }
+
+        getScheduler().asyncScheduler().runAtFixedRate(this::sendTelemetry, Duration.ZERO, Duration.ofDays(1));
+        getScheduler().asyncScheduler().runAtFixedRate(this::checkForUpdates, Duration.ZERO, Duration.ofDays(1));
     }
 
     @Override
@@ -205,16 +186,41 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
         unloadModules();
     }
 
+    private void checkForUpdates() {
+        sdk.getPluginVersion(getType()).thenAccept(pluginInformation -> {
+            if (!VersionUtil.isNewerVersion(getVersion(), pluginInformation.getVersionName())) {
+                return;
+            }
+
+            log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", pluginInformation.getVersionName(), getDescription().getVersion()));
+            log(Level.WARNING, "Download the latest version at: " + pluginInformation.getDownloadUrl());
+            log(Level.WARNING, "View the changelog at: https://analy.se/plugin/releases/tag/" + pluginInformation.getVersionName());
+        }).exceptionally(ex -> {
+            Throwable cause = ex.getCause();
+            log(Level.WARNING, "Failed to get plugin version: " + cause.getMessage());
+
+            if(cause instanceof ServerNotFoundException) {
+                this.halt();
+            } else {
+                cause.printStackTrace();
+            }
+
+            return null;
+        });
+    }
+
     @Override
     public void loadModules() {
         try {
-            log("Loading modules..");
             moduleManager = new ModuleManager(this);
             List<PlatformModule> modules = moduleManager.load();
 
-            modules.forEach(this::loadModule);
+            if(! modules.isEmpty()) {
+                log("Loading modules..");
+                modules.forEach(this::loadModule);
 
-            log(modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + " loaded.");
+                log(modules.size() + " " + StringUtil.pluralise(modules.size(), "module", "modules") + " loaded.");
+            }
         } catch (Exception e) {
             log(Level.WARNING, "Failed to load modules: " + e.getMessage());
             e.printStackTrace();
@@ -283,7 +289,7 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
     }
 
     @Override
-    public Object2ObjectOpenHashMap<UUID, AnalysePlayer> getPlayers() {
+    public ConcurrentMap<UUID, AnalysePlayer> getPlayers() {
         return players;
     }
 
@@ -306,24 +312,26 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
     public void configure() {
         setup = true;
         heartbeatManager.start();
+    }
 
-        if(isSetup()) {
-            sdk.sendTelemetry().thenAccept(telemetry -> {
-                debug("Sent telemetry data.");
-            }).exceptionally(ex -> {
-                Throwable cause = ex.getCause();
+    private void sendTelemetry() {
+        if(! isSetup()) return;
 
-                log(Level.WARNING, "Failed to send telemetry: " + cause.getMessage());
+        sdk.sendTelemetry().thenAccept(telemetry -> {
+            debug("Sent telemetry data.");
+        }).exceptionally(ex -> {
+            Throwable cause = ex.getCause();
 
-                if(cause instanceof RateLimitException) {
-                    log(Level.WARNING, "Please wait a few minutes and try again.");
-                } else {
-                    cause.printStackTrace();
-                }
+            log(Level.WARNING, "Failed to send telemetry: " + cause.getMessage());
 
+            if(cause instanceof RateLimitException) {
+                log(Level.WARNING, "Please wait a few minutes and try again.");
                 return null;
-            });
-        }
+            }
+
+            cause.printStackTrace();
+            return null;
+        });
     }
 
     @Override
@@ -380,18 +388,26 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
         return moduleManager;
     }
 
+    public boolean isProxyModeEnabled() {
+        return proxyModeEnabled;
+    }
+
+    public void setProxyModeEnabled(boolean proxyModeEnabled) {
+        this.proxyModeEnabled = proxyModeEnabled;
+    }
+
     public ProxyMessageListener getProxyMessageListener() {
         return proxyMessageListener;
     }
 
-    public void updatePlaceholderAPIStatistics(Player player, Map<String, Object> stats) {
-        if(! getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) return;
-        if(getPlatformConfig().getEnabledPapiStatistics() == null) return;
+    public void sendMessage(CommandSender sender, String message) {
+        String str = ChatColor.translateAlternateColorCodes('&', "&b[Analytics] &7" + message);
 
-        for (String statistic : getPlatformConfig().getEnabledPapiStatistics()) {
-            String value = PlaceholderAPIStatisticsHook.getStatistic(player, statistic);
-            if(value.isEmpty()) continue;
-            stats.put(statistic, value);
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(ChatColor.stripColor(str));
+            return;
         }
+
+        sender.sendMessage(str);
     }
 }

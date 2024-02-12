@@ -1,12 +1,8 @@
 # Analytics v${version} - https://tebex.io
 # Check out https://docs.tebex.io/analytics if you need help.
 
+# Enable or disable the plugin's hooks.
 hooks:
-  # Enable or disable the plugin's hooks.
-  placeholderapi:
-    enabled: false
-    enabled-stats:
-      - 'enter_placeholder_here'
   floodgate:
     enabled: false
 

@@ -24,7 +24,6 @@ public class PlayerQuitListener implements Listener {
 
         if(player == null) return;
 
-        platform.updatePlaceholderAPIStatistics(bukkitPlayer, player.getStatistics());
         platform.debug("Preparing to track " + bukkitPlayer.getName() + "..");
 
         platform.getSDK().trackPlayerSession(player).thenAccept(successful -> {
