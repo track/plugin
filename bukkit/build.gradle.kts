@@ -32,7 +32,7 @@ tasks.named("shadowJar", ShadowJar::class.java) {
 
 tasks.register("copyToServer", Copy::class.java) {
     from(project.tasks.named("shadowJar").get().outputs)
-    into("/Users/charlie/Documents/LegacyMCServer/plugins")
+    into("${project.rootDir}/MCServer/plugins")
 
     // rely on the shadowJar task to build the jar
     dependsOn("shadowJar")
