@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class ReloadCommand extends SubCommand {
     public ReloadCommand(AnalyticsPlugin platform) {
-        super(platform, "reload", "analytics.admin");
+        super(platform, "reload", "analytics.reload");
     }
 
     @Override

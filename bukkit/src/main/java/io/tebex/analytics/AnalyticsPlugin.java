@@ -30,6 +30,7 @@ import space.arim.morepaperlib.scheduling.GracefulScheduling;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -145,7 +146,7 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
             });
         } else {
             log(Level.WARNING, "Welcome to Tebex Analytics! It seems like this is a new setup.");
-            log(Level.WARNING, "To get started, please use the 'analytics setup <key>' command in the console.");
+            log(Level.WARNING, "To get started, please use the 'analytics setup <secret-key>' command in the console.");
         }
 
         // Register events.
@@ -153,27 +154,6 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
         registerEvents(new PlayerQuitListener(this));
 
         debug("Debug mode enabled. Type 'analytics debug' to disable.");
-
-        sdk.getPluginVersion(getType()).thenAccept(pluginInformation -> {
-            if (VersionUtil.isNewerVersion(getVersion(), pluginInformation.getVersionName())) {
-                log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", pluginInformation.getVersionName(), getDescription().getVersion()));
-                log(Level.WARNING, "Download the latest version at: " + pluginInformation.getDownloadUrl());
-                log(Level.WARNING, "View the changelog at: https://analy.se/plugin/releases/tag/" + pluginInformation.getVersionName());
-            } else {
-                log("You are running the latest version of Analytics.");
-            }
-        }).exceptionally(ex -> {
-            Throwable cause = ex.getCause();
-            log(Level.WARNING, "Failed to get plugin version: " + cause.getMessage());
-
-            if(cause instanceof ServerNotFoundException) {
-                this.halt();
-            } else {
-                cause.printStackTrace();
-            }
-
-            return null;
-        });
 
         proxyMessageListener = new ProxyMessageListener(this);
         proxyModeEnabled = config.hasProxyModeEnabled();
@@ -196,11 +176,37 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
         } catch (final ClassNotFoundException ignored) {
             getScheduler().globalRegionalScheduler().runDelayed(this::loadModules, 1);
         }
+
+        getScheduler().asyncScheduler().runAtFixedRate(this::sendTelemetry, Duration.ZERO, Duration.ofDays(1));
+        getScheduler().asyncScheduler().runAtFixedRate(this::checkForUpdates, Duration.ZERO, Duration.ofDays(1));
     }
 
     @Override
     public void onDisable() {
         unloadModules();
+    }
+
+    private void checkForUpdates() {
+        sdk.getPluginVersion(getType()).thenAccept(pluginInformation -> {
+            if (!VersionUtil.isNewerVersion(getVersion(), pluginInformation.getVersionName())) {
+                return;
+            }
+
+            log(Level.WARNING, String.format("New version available (v%s). You are currently running v%s.", pluginInformation.getVersionName(), getDescription().getVersion()));
+            log(Level.WARNING, "Download the latest version at: " + pluginInformation.getDownloadUrl());
+            log(Level.WARNING, "View the changelog at: https://analy.se/plugin/releases/tag/" + pluginInformation.getVersionName());
+        }).exceptionally(ex -> {
+            Throwable cause = ex.getCause();
+            log(Level.WARNING, "Failed to get plugin version: " + cause.getMessage());
+
+            if(cause instanceof ServerNotFoundException) {
+                this.halt();
+            } else {
+                cause.printStackTrace();
+            }
+
+            return null;
+        });
     }
 
     @Override
@@ -306,24 +312,26 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
     public void configure() {
         setup = true;
         heartbeatManager.start();
+    }
 
-        if(isSetup()) {
-            sdk.sendTelemetry().thenAccept(telemetry -> {
-                debug("Sent telemetry data.");
-            }).exceptionally(ex -> {
-                Throwable cause = ex.getCause();
+    private void sendTelemetry() {
+        if(! isSetup()) return;
 
-                log(Level.WARNING, "Failed to send telemetry: " + cause.getMessage());
+        sdk.sendTelemetry().thenAccept(telemetry -> {
+            debug("Sent telemetry data.");
+        }).exceptionally(ex -> {
+            Throwable cause = ex.getCause();
 
-                if(cause instanceof RateLimitException) {
-                    log(Level.WARNING, "Please wait a few minutes and try again.");
-                } else {
-                    cause.printStackTrace();
-                }
+            log(Level.WARNING, "Failed to send telemetry: " + cause.getMessage());
 
+            if(cause instanceof RateLimitException) {
+                log(Level.WARNING, "Please wait a few minutes and try again.");
                 return null;
-            });
-        }
+            }
+
+            cause.printStackTrace();
+            return null;
+        });
     }
 
     @Override
