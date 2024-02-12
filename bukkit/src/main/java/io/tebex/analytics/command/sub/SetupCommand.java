@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public class SetupCommand extends SubCommand {
     public SetupCommand(AnalyticsPlugin platform) {
-        super(platform, "setup", "analyse.setup");
+        super(platform, "setup", "analytics.admin");
     }
 
     @Override

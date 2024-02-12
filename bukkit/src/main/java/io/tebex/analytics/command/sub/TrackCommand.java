@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public class TrackCommand extends SubCommand {
     public TrackCommand(AnalyticsPlugin platform) {
-        super(platform, "track", "analyse.admin");
+        super(platform, "track", "analytics.track");
     }
 
     @Override

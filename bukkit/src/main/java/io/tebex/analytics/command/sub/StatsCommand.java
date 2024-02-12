@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 public class StatsCommand extends SubCommand {
     public StatsCommand(AnalyticsPlugin platform) {
-        super(platform, "stats", "analyse.admin");
+        super(platform, "stats", "analytics.stats");
     }
 
     @Override

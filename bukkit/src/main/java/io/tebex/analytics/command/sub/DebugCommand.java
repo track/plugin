@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class DebugCommand extends SubCommand {
     public DebugCommand(AnalyticsPlugin platform) {
-        super(platform, "debug", "analyse.admin");
+        super(platform, "debug", "analytics.admin");
     }
 
     @Override
