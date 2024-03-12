@@ -129,10 +129,16 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
         // Check if the server has been set up.
         if (config.getServerToken() != null && !config.getServerToken().isEmpty()) {
             sdk.getServerInformation().thenAccept(serverInformation -> {
+                if(! isSetup()) return;
+
                 log("Connected to " + serverInformation.getName() + ".");
                 configure();
             }).exceptionally(ex -> {
                 Throwable cause = ex.getCause();
+
+                if (cause.getMessage().contains("zip file closed")) {
+                    return null;
+                }
 
                 if(cause instanceof ServerNotFoundException) {
                     warning("Failed to connect. Please double-check your server key or run the setup command again.");
@@ -184,6 +190,7 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
     @Override
     public void onDisable() {
         unloadModules();
+        setup = false;
     }
 
     private void checkForUpdates() {
