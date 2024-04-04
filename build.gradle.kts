@@ -8,7 +8,7 @@ plugins {
 defaultTasks("clean", "shadowJar")
 
 group = "io.tebex.analytics"
-version = "2.2.1"
+version = "2.2.2"
 
 subprojects {
     plugins.apply("java")

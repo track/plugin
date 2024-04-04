@@ -129,8 +129,6 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
         // Check if the server has been set up.
         if (config.getServerToken() != null && !config.getServerToken().isEmpty()) {
             sdk.getServerInformation().thenAccept(serverInformation -> {
-                if(! isSetup()) return;
-
                 log("Connected to " + serverInformation.getName() + ".");
                 configure();
             }).exceptionally(ex -> {
