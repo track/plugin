@@ -12,7 +12,7 @@ val ossrhUsername = System.getenv("OSSRH_USERNAME") ?: properties["ossrhUsername
 val ossrhPassword = System.getenv("OSSRH_PASSWORD") ?: properties["ossrhPassword"] as String?
 
 dependencies {
-    implementation("com.intellectualsites.http:HTTP4J:1.4")
+    implementation("com.intellectualsites.http:HTTP4J:1.6-SNAPSHOT")
     compileOnly("dev.dejvokep:boosted-yaml:1.3.2")
     compileOnly("com.google.code.gson:gson:2.10.1")
     compileOnly("com.google.guava:guava:33.0.0-jre")
