@@ -16,8 +16,11 @@ import io.tebex.analytics.sdk.module.ModuleManager;
 import io.tebex.analytics.sdk.obj.AnalysePlayer;
 import io.tebex.analytics.sdk.platform.*;
 import io.tebex.analytics.sdk.request.exception.RateLimitException;
+import io.tebex.analytics.sdk.service.PlayerCountService;
 import io.tebex.analytics.sdk.util.StringUtil;
 import io.tebex.analytics.sdk.util.VersionUtil;
+import io.tebex.analytics.service.RedisPlayerCountService;
+import io.tebex.analytics.service.SimplePlayerCountService;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -54,6 +57,8 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
     private FloodgateHook floodgateHook;
     private MorePaperLib morePaperLib;
 
+    private PlayerCountService playerCountService = new SimplePlayerCountService();
+
     /**
      * Starts the Bukkit platform.
      */
@@ -66,6 +71,15 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
             // Load the platform config file.
             YamlDocument configYaml = initPlatformConfig();
             config = loadPlatformConfig(configYaml);
+
+            if (!this.config.getYamlDocument().contains("redis")) {
+                this.config.getYamlDocument().set("redis.enabled", this.config.isRedisEnabled());
+                this.config.getYamlDocument().set("redis.port", this.config.getRedisPort());
+                this.config.getYamlDocument().set("redis.host", this.config.getRedisHost());
+                this.config.getYamlDocument().set("redis.password", this.config.getRedisPassword());
+
+                this.config.getYamlDocument().save();
+            }
 
             if(config.getConfigVersion() == 1) {
                 log("Detected a legacy config file. Attempting to migrate..");
@@ -115,6 +129,10 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
             log(Level.WARNING, "Failed to load config: " + e.getMessage());
             getServer().getPluginManager().disablePlugin(this);
             return;
+        }
+
+        if (this.config.isRedisEnabled()) {
+            this.playerCountService = new RedisPlayerCountService(this);
         }
 
         players = Maps.newConcurrentMap();
@@ -187,6 +205,11 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
 
     @Override
     public void onDisable() {
+
+        if (this.playerCountService instanceof RedisPlayerCountService) {
+            ((RedisPlayerCountService) this.playerCountService).terminate();
+        }
+
         unloadModules();
         setup = false;
     }
@@ -366,6 +389,11 @@ public final class AnalyticsPlugin extends JavaPlugin implements Platform {
     @Override
     public String getVersion() {
         return getDescription().getVersion();
+    }
+
+    @Override
+    public PlayerCountService getPlayerCountService() {
+        return this.playerCountService;
     }
 
     @Override

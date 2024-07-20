@@ -44,6 +44,14 @@ server:
   # This is used to encrypt sensitive data such as IP addresses.
   encryption-key: ''
 
+# Use this if you want cross-server
+# player count synchronization
+redis:
+  enabled: false
+  port: 6379
+  host: '127.0.0.1'
+  password: ''
+
 # Configuration Version
 # !! Do not change this value !!
 config-version: 2

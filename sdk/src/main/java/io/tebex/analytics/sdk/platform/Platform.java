@@ -4,6 +4,7 @@ import dev.dejvokep.boostedyaml.YamlDocument;
 import io.tebex.analytics.sdk.SDK;
 import io.tebex.analytics.sdk.module.ModuleManager;
 import io.tebex.analytics.sdk.obj.AnalysePlayer;
+import io.tebex.analytics.sdk.service.PlayerCountService;
 
 import java.io.File;
 import java.io.IOException;
@@ -122,6 +123,13 @@ public interface Platform {
     }
 
     /**
+     * Gets the {@link PlayerCountService} implementation for this platform.
+     *
+     * @return The {@link PlayerCountService} implementation.
+     */
+    PlayerCountService getPlayerCountService();
+
+    /**
      * Logs a message to the console with the specified level.
      *
      * @param level   The level of the message.
@@ -191,6 +199,11 @@ public interface Platform {
         config.setServerToken(configFile.getString("server.token"));
         config.setEncryptionKey(configFile.getString("server.encryption-key"));
         config.setDebugEnabled(configFile.getBoolean("debug", false));
+
+        config.setRedisEnabled(configFile.getBoolean("redis.enabled", false));
+        config.setRedisPort(configFile.getInt("redis.port", 6379));
+        config.setRedisHost(configFile.getString("redis.host", "127.0.0.1"));
+        config.setRedisPassword(configFile.getString("redis.password", ""));
 
         return config;
     }

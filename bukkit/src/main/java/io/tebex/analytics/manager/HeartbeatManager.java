@@ -19,7 +19,7 @@ public class HeartbeatManager {
         task = platform.getScheduler().globalRegionalScheduler().runAtFixedRate(() -> {
             if(! platform.isSetup()) return;
 
-            int playerCount = Bukkit.getOnlinePlayers().size();
+            int playerCount = this.platform.getPlayerCountService().getPlayerCount();
 
             if(playerCount == 0) {
                 platform.debug("Not sending heartbeat as there are no players online.");

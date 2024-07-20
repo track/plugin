@@ -25,6 +25,11 @@ public class PlatformConfig {
     private String encryptionKey;
     private String bedrockPrefix;
 
+    private boolean redisEnabled;
+    private int redisPort;
+    private String redisHost;
+    private String redisPassword;
+
     private boolean debug;
     private boolean proxyMode;
 
@@ -245,6 +250,78 @@ public class PlatformConfig {
      */
     public List<String> getEnabledPapiStatistics() {
         return enabledPapiStatistics;
+    }
+
+    /**
+     * Checks if Redis integration is enabled.
+     *
+     * @return true if Redis integration is enabled, false otherwise.
+     */
+    public boolean isRedisEnabled() {
+        return redisEnabled;
+    }
+
+    /**
+     * Enables or disables Redis integration.
+     *
+     * @param enabled true to enable Redis integration, false to disable.
+     */
+    public void setRedisEnabled(final boolean enabled) {
+        this.redisEnabled = enabled;
+    }
+
+    /**
+     * Retrieves the Redis server port.
+     *
+     * @return The port number as an int.
+     */
+    public int getRedisPort() {
+        return redisPort;
+    }
+
+    /**
+     * Sets the Redis server port.
+     *
+     * @param port The port number as an int.
+     */
+    public void setRedisPort(final int port) {
+        this.redisPort = port;
+    }
+
+    /**
+     * Retrieves the Redis server host address.
+     *
+     * @return The host address as a String.
+     */
+    public String getRedisHost() {
+        return redisHost;
+    }
+
+    /**
+     * Sets the Redis server host address.
+     *
+     * @param host The host address as a String.
+     */
+    public void setRedisHost(final String host) {
+        this.redisHost = host;
+    }
+
+    /**
+     * Retrieves the Redis server authentication password.
+     *
+     * @return The password as a String.
+     */
+    public String getRedisPassword() {
+        return redisPassword;
+    }
+
+    /**
+     * Sets the Redis server authentication password.
+     *
+     * @param password The password as a String.
+     */
+    public void setRedisPassword(final String password) {
+        this.redisPassword = password;
     }
 
     /**
