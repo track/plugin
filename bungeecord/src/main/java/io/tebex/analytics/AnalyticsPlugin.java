@@ -8,6 +8,7 @@ import io.tebex.analytics.sdk.SDK;
 import io.tebex.analytics.sdk.module.ModuleManager;
 import io.tebex.analytics.sdk.obj.AnalysePlayer;
 import io.tebex.analytics.sdk.platform.*;
+import io.tebex.analytics.sdk.service.PlayerCountService;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.File;
@@ -97,6 +98,11 @@ public final class AnalyticsPlugin extends Plugin implements Platform {
 
     @Override
     public String getVersion() {
+        return null;
+    }
+
+    @Override
+    public PlayerCountService getPlayerCountService() {
         return null;
     }
 
